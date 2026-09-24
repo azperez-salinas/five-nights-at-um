@@ -1,4 +1,4 @@
-package uy.edu.um.librosbuysan.auth;
+package librosbuysan.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,4 +1,4 @@
-package uy.edu.um.librosbuysan.auth;
+package librosbuysan.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

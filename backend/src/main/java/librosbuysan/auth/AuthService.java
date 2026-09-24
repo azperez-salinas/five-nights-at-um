@@ -1,4 +1,4 @@
-package uy.edu.um.librosbuysan.auth;
+package librosbuysan.auth;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;

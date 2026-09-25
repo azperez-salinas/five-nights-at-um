@@ -12,10 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import librosbuysan.auth.AuthDtos.AuthResponse;
 import librosbuysan.auth.AuthDtos.LoginRequest;
+import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.AuthDtos.RegisterRequest;
+import librosbuysan.libreria.Libreria;
+import librosbuysan.libreria.LibreriaRepository;
 import librosbuysan.user.User;
 import librosbuysan.user.UserRepository;
 
@@ -44,6 +48,7 @@ public class AuthService {
     private static final String INVALID_CREDENTIALS = "Credenciales invalidas";
 
     private final UserRepository userRepository;
+    private final LibreriaRepository libreriaRepository;
     private final JwtService jwtService;
     private final Validator validator;
     private final SecureRandom secureRandom = new SecureRandom();
@@ -52,8 +57,10 @@ public class AuthService {
     // tiempo de respuesta no permita enumerar usuarios
     private final String dummyHash;
 
-    public AuthService(UserRepository userRepository, JwtService jwtService, Validator validator) {
+    public AuthService(UserRepository userRepository, LibreriaRepository libreriaRepository,
+                       JwtService jwtService, Validator validator) {
         this.userRepository = userRepository;
+        this.libreriaRepository = libreriaRepository;
         this.jwtService = jwtService;
         this.validator = validator;
         this.dummyHash = createDummyHash();
@@ -63,23 +70,11 @@ public class AuthService {
         char[] password = request == null ? null : request.password();
         try {
             validate(request, request == null ? null : request.username(), "Registro");
-
             String username = normalize(request.username());
             String email = normalize(request.email());
 
-            if (userRepository.existsByUsername(username) || userRepository.existsByEmail(email)) {
-                log.warn("Registro fallido: username={} motivo=duplicado", username);
-                throw new ResponseStatusException(HttpStatus.CONFLICT, ALREADY_REGISTERED);
-            }
-
-            User user = new User(username, email, hashPassword(password));
-            try {
-                user = userRepository.saveAndFlush(user);
-            } catch (DataIntegrityViolationException e) {
-                // Otro registro con el mismo username/email se guardo entre el chequeo y el insert
-                log.warn("Registro fallido: username={} motivo=duplicado_concurrente", username);
-                throw new ResponseStatusException(HttpStatus.CONFLICT, ALREADY_REGISTERED);
-            }
+            User user = createAndSaveUser(username, email, password,
+                    (u, e, hash) -> new User(u, e, hash));
 
             log.info("Registro exitoso: username={}", username);
             // R8: auto-login, el token va en la misma respuesta del registro
@@ -89,6 +84,61 @@ public class AuthService {
                 Arrays.fill(password, '\0');
             }
         }
+    }
+
+    /**
+     * Alta de un dueno de libreria. Va en su propio metodo (y no como una
+     * rama de register()) porque ademas de crear el User necesita crear la
+     * Libreria asociada: @Transactional asegura que si el insert de la
+     * libreria falla, el insert del usuario tambien se revierte, evitando un
+     * dueno "huerfano" sin libreria.
+     */
+    @Transactional
+    public AuthResponse registerDueno(RegisterDuenoRequest request) {
+        char[] password = request == null ? null : request.password();
+        try {
+            validate(request, request == null ? null : request.username(), "Registro de dueno");
+            String username = normalize(request.username());
+            String email = normalize(request.email());
+            String nombreLibreria = request.nombreLibreria().trim();
+
+            User user = createAndSaveUser(username, email, password,
+                    (u, e, hash) -> User.dueno(u, e, hash));
+            libreriaRepository.saveAndFlush(new Libreria(user, nombreLibreria));
+
+            log.info("Registro de dueno exitoso: username={}", username);
+            return buildResponse(user);
+        } finally {
+            if (password != null) {
+                Arrays.fill(password, '\0');
+            }
+        }
+    }
+
+    /**
+     * Chequea duplicados y guarda el User. Se parametriza con la forma de
+     * construirlo (comprador vs. dueno) para no duplicar la logica de
+     * duplicado/hash/manejo de la carrera entre register() y registerDueno().
+     */
+    private User createAndSaveUser(String username, String email, char[] password, UserFactory factory) {
+        if (userRepository.existsByUsername(username) || userRepository.existsByEmail(email)) {
+            log.warn("Registro fallido: username={} motivo=duplicado", username);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, ALREADY_REGISTERED);
+        }
+
+        User user = factory.create(username, email, hashPassword(password));
+        try {
+            return userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException e) {
+            // Otro registro con el mismo username/email se guardo entre el chequeo y el insert
+            log.warn("Registro fallido: username={} motivo=duplicado_concurrente", username);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, ALREADY_REGISTERED);
+        }
+    }
+
+    @FunctionalInterface
+    private interface UserFactory {
+        User create(String username, String email, String passwordHash);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -134,7 +184,12 @@ public class AuthService {
             log.warn("{} fallido: username={} motivo=request_invalido", operation, safeForLog(rawUsername));
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
         }
-        char[] password = request instanceof RegisterRequest r ? r.password() : ((LoginRequest) request).password();
+        char[] password = switch (request) {
+            case RegisterRequest r -> r.password();
+            case RegisterDuenoRequest r -> r.password();
+            case LoginRequest r -> r.password();
+            default -> throw new IllegalArgumentException("Tipo de request no soportado: " + request.getClass());
+        };
         int utf8Bytes = utf8Length(password);
         if (utf8Bytes < 0 || utf8Bytes > BCRYPT_MAX_PASSWORD_BYTES) {
             log.warn("{} fallido: username={} motivo=password_invalida", operation, safeForLog(rawUsername));

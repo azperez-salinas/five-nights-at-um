@@ -1,4 +1,4 @@
-package librosbuysan.libreria;
+package librosbuysan.library;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,8 +23,8 @@ import librosbuysan.user.User;
  * ademas dejaria esas columnas siempre en null para los usuarios COMPRADOR.
  */
 @Entity
-@Table(name = "librerias")
-public class Libreria {
+@Table(name = "librarys")
+public class Library {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,11 +40,11 @@ public class Libreria {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    protected Libreria() {
+    protected Library() {
         // requerido por JPA
     }
 
-    public Libreria(User dueno, String nombre) {
+    public Library(User dueno, String nombre) {
         this.dueno = dueno;
         this.nombre = nombre;
         this.createdAt = Instant.now();

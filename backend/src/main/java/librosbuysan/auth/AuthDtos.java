@@ -54,12 +54,12 @@ public final class AuthDtos {
 
             @NotBlank
             @Size(min = 2, max = 150)
-            String nombreLibreria) {
+            String nombreLibrary) {
 
         @Override
         public String toString() {
             return "RegisterDuenoRequest[username=" + username + ", email=" + email
-                    + ", password=[PROTECTED], nombreLibreria=" + nombreLibreria + "]";
+                    + ", password=[PROTECTED], nombreLibrary=" + nombreLibrary + "]";
         }
     }
 

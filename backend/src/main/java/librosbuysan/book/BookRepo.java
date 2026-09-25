@@ -1,8 +1,8 @@
 package librosbuysan.book;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaRepo;
 
-public interface BookRepository extends JpaRepository<Book, Long> {
+public interface BookRepo extends JpaRepo<Book, Long> {
 
     boolean existsByIsbn(String isbn);
 }

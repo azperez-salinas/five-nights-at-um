@@ -18,10 +18,10 @@ import librosbuysan.auth.AuthDtos.AuthResponse;
 import librosbuysan.auth.AuthDtos.LoginRequest;
 import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.AuthDtos.RegisterRequest;
-import librosbuysan.libreria.Libreria;
-import librosbuysan.libreria.LibreriaRepository;
+import librosbuysan.library.Library;
+import librosbuysan.library.LibraryRepo;
 import librosbuysan.user.User;
-import librosbuysan.user.UserRepository;
+import librosbuysan.user.UserRepo;
 
 /**
  * Registro (R1 + R8) y login (R2).
@@ -47,8 +47,8 @@ public class AuthService {
     private static final String ALREADY_REGISTERED = "El usuario o el email ya estan registrados";
     private static final String INVALID_CREDENTIALS = "Credenciales invalidas";
 
-    private final UserRepository userRepository;
-    private final LibreriaRepository libreriaRepository;
+    private final UserRepo userRepo;
+    private final LibraryRepo libraryRepo;
     private final JwtService jwtService;
     private final Validator validator;
     private final SecureRandom secureRandom = new SecureRandom();
@@ -57,10 +57,10 @@ public class AuthService {
     // tiempo de respuesta no permita enumerar usuarios
     private final String dummyHash;
 
-    public AuthService(UserRepository userRepository, LibreriaRepository libreriaRepository,
+    public AuthService(UserRepo userRepo, LibraryRepo libraryRepo,
                        JwtService jwtService, Validator validator) {
-        this.userRepository = userRepository;
-        this.libreriaRepository = libreriaRepository;
+        this.userRepo = userRepo;
+        this.libraryRepo = libraryRepo;
         this.jwtService = jwtService;
         this.validator = validator;
         this.dummyHash = createDummyHash();
@@ -100,11 +100,11 @@ public class AuthService {
             validate(request, request == null ? null : request.username(), "Registro de dueno");
             String username = normalize(request.username());
             String email = normalize(request.email());
-            String nombreLibreria = request.nombreLibreria().trim();
+            String nombreLibrary = request.nombreLibrary().trim();
 
             User user = createAndSaveUser(username, email, password,
                     (u, e, hash) -> User.dueno(u, e, hash));
-            libreriaRepository.saveAndFlush(new Libreria(user, nombreLibreria));
+            libraryRepo.saveAndFlush(new Library(user, nombreLibrary));
 
             log.info("Registro de dueno exitoso: username={}", username);
             return buildResponse(user);
@@ -121,14 +121,14 @@ public class AuthService {
      * duplicado/hash/manejo de la carrera entre register() y registerDueno().
      */
     private User createAndSaveUser(String username, String email, char[] password, UserFactory factory) {
-        if (userRepository.existsByUsername(username) || userRepository.existsByEmail(email)) {
+        if (userRepo.existsByUsername(username) || userRepo.existsByEmail(email)) {
             log.warn("Registro fallido: username={} motivo=duplicado", username);
             throw new ResponseStatusException(HttpStatus.CONFLICT, ALREADY_REGISTERED);
         }
 
         User user = factory.create(username, email, hashPassword(password));
         try {
-            return userRepository.saveAndFlush(user);
+            return userRepo.saveAndFlush(user);
         } catch (DataIntegrityViolationException e) {
             // Otro registro con el mismo username/email se guardo entre el chequeo y el insert
             log.warn("Registro fallido: username={} motivo=duplicado_concurrente", username);

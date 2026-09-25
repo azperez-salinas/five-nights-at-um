@@ -37,6 +37,32 @@ public final class AuthDtos {
         }
     }
 
+    public record RegisterDuenoRequest(
+            @NotBlank
+            @Size(min = 3, max = 30)
+            @Pattern(regexp = "^[A-Za-z0-9_]+$")
+            String username,
+
+            @NotBlank
+            @Email
+            @Size(max = 254)
+            String email,
+
+            @NotNull
+            @Size(min = 8, max = 64)
+            char[] password,
+
+            @NotBlank
+            @Size(min = 2, max = 150)
+            String nombreLibreria) {
+
+        @Override
+        public String toString() {
+            return "RegisterDuenoRequest[username=" + username + ", email=" + email
+                    + ", password=[PROTECTED], nombreLibreria=" + nombreLibreria + "]";
+        }
+    }
+
     public record LoginRequest(
             @NotBlank
             @Size(max = 30)

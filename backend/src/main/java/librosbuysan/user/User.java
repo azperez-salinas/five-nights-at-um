@@ -53,10 +53,18 @@ public class User {
      * nunca el cliente.
      */
     public User(String username, String email, String passwordHash) {
+        this(username, email, passwordHash, Role.COMPRADOR);
+    }
+
+    public static User dueno(String username, String email, String passwordHash) {
+        return new User(username, email, passwordHash, Role.DUENO);
+    }
+
+    private User(String username, String email, String passwordHash, Role role) {
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.role = Role.COMPRADOR;
+        this.role = role;
         this.enabled = true;
         this.createdAt = Instant.now();
     }

@@ -13,11 +13,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import uy.edu.um.librosbuysan.auth.AuthDtos.AuthResponse;
-import uy.edu.um.librosbuysan.auth.AuthDtos.LoginRequest;
-import uy.edu.um.librosbuysan.auth.AuthDtos.RegisterRequest;
-import uy.edu.um.librosbuysan.user.User;
-import uy.edu.um.librosbuysan.user.UserRepository;
+import librosbuysan.auth.AuthDtos.AuthResponse;
+import librosbuysan.auth.AuthDtos.LoginRequest;
+import librosbuysan.auth.AuthDtos.RegisterRequest;
+import librosbuysan.user.User;
+import librosbuysan.user.UserRepository;
 
 /**
  * Registro (R1 + R8) y login (R2).

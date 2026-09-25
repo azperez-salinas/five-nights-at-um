@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uy.edu.um.librosbuysan.auth.AuthDtos.AuthResponse;
-import uy.edu.um.librosbuysan.auth.AuthDtos.LoginRequest;
-import uy.edu.um.librosbuysan.auth.AuthDtos.RegisterRequest;
+import librosbuysan.auth.AuthDtos.AuthResponse;
+import librosbuysan.auth.AuthDtos.LoginRequest;
+import librosbuysan.auth.AuthDtos.RegisterRequest;
 
 /**
  * Sin @Valid a proposito: la validacion la hace AuthService dentro de su

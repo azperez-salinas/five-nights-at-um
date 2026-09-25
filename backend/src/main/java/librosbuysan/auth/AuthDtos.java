@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import uy.edu.um.librosbuysan.user.User;
+import librosbuysan.user.User;
 
 /**
  * DTOs de autenticacion. Funcionan como allowlist de campos (RS25): cualquier

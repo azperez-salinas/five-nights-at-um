@@ -11,7 +11,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uy.edu.um.librosbuysan.user.User;
+import librosbuysan.user.User;
 
 @Service
 public class JwtService {

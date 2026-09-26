@@ -1,9 +1,9 @@
 package librosbuysan.user;
 
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepo;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepo extends JpaRepo<User, Long> {
+public interface UserRepo extends JpaRepository<User, Long> {
 
     boolean existsByUsername(String username);
 

@@ -147,7 +147,7 @@ public class AuthService {
             validate(request, request == null ? null : request.username(), "Login");
 
             String username = normalize(request.username());
-            User user = userRepository.findByUsername(username).orElse(null);
+            User user = userRepo.findByUsername(username).orElse(null);
 
             // Siempre se ejecuta un checkPassword, exista o no el usuario
             String hash = user != null ? user.getPasswordHash() : dummyHash;

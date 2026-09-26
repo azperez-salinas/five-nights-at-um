@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/books")
 public class BookController {
 
-    private final BookRepository bookRepository;
+    private final BookRepo bookRepo;
 
-    public BookController(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
+    public BookController(BookRepo bookRepo) {
+        this.bookRepo = bookRepo;
     }
 
     @GetMapping
     public Page<Book> list(Pageable pageable) {
-        return bookRepository.findAll(pageable);
+        return bookRepo.findAll(pageable);
     }
 }

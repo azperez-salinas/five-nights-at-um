@@ -41,6 +41,17 @@ public class SecurityConfig {
                 .formLogin(formLogin -> formLogin.disable())
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                        // Spring reenvia internamente a /error para armar
+                        // cualquier respuesta de error del servlet container
+                        // (404, 405, 400 por JSON mal formado, etc.). Ese
+                        // reenvio interno vuelve a pasar por esta cadena de
+                        // filtros, pero JwtAuthenticationFilter (OncePerRequestFilter)
+                        // no corre en dispatches de tipo ERROR por diseño de
+                        // Spring, asi que si /error no esta permitAll,
+                        // anyRequest().authenticated() lo rechaza con 401 y
+                        // tapa el codigo de error real (ej. un 405 real
+                        // terminaba devolviendo 401 "No autenticado").
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         // RF9/RS1/RS5/RS9/RS19: la busqueda es la una
                         // operacion de books restringida por rol, y su regla
@@ -52,6 +63,13 @@ public class SecurityConfig {
                         // el filtro de RS34 (libreria deshabilitada) se
                         // aplica en la query, no en la autorizacion.
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
+                        // RF12/RS1/RS5/RS9/RS19: favoritos es una
+                        // funcionalidad exclusiva del COMPRADOR en sus tres
+                        // operaciones (listar, agregar, quitar) — no hay
+                        // metodo publico ni accesible para DUENO, por eso se
+                        // restringe el prefijo completo sin distinguir por
+                        // verbo HTTP.
+                        .requestMatchers("/api/favorites/**").hasRole("COMPRADOR")
                         // RS9/RS19: deny-by-default. Cualquier otra ruta o
                         // metodo (incluyendo POST/PUT/DELETE sobre /api/books,
                         // que ademas ya reciben 405 de Spring MVC por no

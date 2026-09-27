@@ -21,7 +21,12 @@ public final class BookDtos {
             LocalDate fechaPublicacion,
             int cantidadPaginas,
             String descripcion,
-            String portadaUrl) {
+            String portadaUrl,
+            // R11/F11: nombre de la libreria a la que pertenece el libro.
+            // RS2/RS7: solo el nombre, nunca el objeto Library completo (que
+            // expondria el dueno/User, fechas internas, etc. — campos que un
+            // Comprador no deberia ver).
+            String nombreLibreria) {
 
         public static BookSummary from(Book book) {
             return new BookSummary(
@@ -32,7 +37,8 @@ public final class BookDtos {
                     book.getFechaPublicacion(),
                     book.getCantidadPaginas(),
                     book.getDescripcion(),
-                    book.getPortadaUrl());
+                    book.getPortadaUrl(),
+                    book.getLibrary().getNombre());
         }
     }
 

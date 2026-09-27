@@ -1,6 +1,7 @@
 package librosbuysan.book;
 
 import java.time.LocalDate;
+import librosbuysan.library.Library;
 
 /**
  * Representa una fila del archivo de datos resources/data/books-seed.json.
@@ -17,7 +18,10 @@ public record BookSeedRecord(
         String descripcion,
         String portadaUrl) {
 
-    Book toEntity() {
-        return new Book(isbn, titulo, autor, fechaPublicacion, cantidadPaginas, descripcion, portadaUrl);
+    // La libreria se asigna desde el seeder (no viene en el JSON): el JSON
+    // solo describe el libro, la distribucion entre librerias de prueba es
+    // un detalle de como se arma el dato de ejemplo.
+    Book toEntity(Library library) {
+        return new Book(library, isbn, titulo, autor, fechaPublicacion, cantidadPaginas, descripcion, portadaUrl);
     }
 }

@@ -1,29 +1,52 @@
 package librosbuysan.book;
 
-import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import librosbuysan.book.BookDtos.BookSummary;
+import librosbuysan.book.BookDtos.CatalogPage;
 
 /**
- * Endpoint de solo lectura, pensado para verificar la carga masiva.
- * Las funcionalidades de negocio (busqueda, alta por el dueno, etc.) se
- * suman despues sobre este mismo paquete.
+ * Endpoints de solo lectura sobre el catalogo de libros: listado paginado
+ * (R7), busqueda por texto libre (RF9) y detalle por id. Las tres
+ * operaciones respetan RS34 (libros de librerias deshabilitadas no se ven).
+ *
+ * Todos los metodos son @GetMapping: si se llama a estas rutas con otro
+ * verbo HTTP (POST, PUT, DELETE, etc.), Spring responde 405 Method Not
+ * Allowed automaticamente porque no existe ningun handler mapeado para esa
+ * combinacion de ruta + metodo (RS33), sin que la peticion llegue al
+ * BookService.
  */
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
 
-    private final BookRepo bookRepo;
+    private final BookService bookService;
 
-    public BookController(BookRepo bookRepo) {
-        this.bookRepo = bookRepo;
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
     }
 
     @GetMapping
-    public Page<Book> list(Pageable pageable) {
-        return bookRepo.findAll(pageable);
+    public CatalogPage list(@RequestParam(defaultValue = "1") int page) {
+        return bookService.getCatalog(page);
+    }
+
+    // RF9: busqueda por texto libre (titulo, autor o ISBN). Restringido a
+    // rol COMPRADOR: la regla vive centralizada en SecurityConfig (RS1/RS9),
+    // no aca, para que toda la autorizacion de la app se pueda auditar en un
+    // solo lugar.
+    @GetMapping("/search")
+    public CatalogPage search(@RequestParam String q, @RequestParam(defaultValue = "1") int page) {
+        return bookService.search(q, page);
+    }
+
+    // RS34: detalle publico de un libro. Devuelve 404 si no existe o si su
+    // libreria esta deshabilitada (BookService no distingue el motivo).
+    @GetMapping("/{id}")
+    public BookSummary detail(@PathVariable Long id) {
+        return bookService.getDetail(id);
     }
 }

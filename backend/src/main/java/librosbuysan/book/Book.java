@@ -2,11 +2,15 @@ package librosbuysan.book;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import librosbuysan.library.Library;
 
 /**
  * Catalogo de libros disponibles en la plataforma.
@@ -22,6 +26,13 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // RS34: todo libro pertenece a una libreria. Las consultas de catalogo,
+    // busqueda y detalle usan library.enabled para decidir si el libro sigue
+    // siendo visible, aunque el registro del libro nunca se borre.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "library_id", nullable = false)
+    private Library library;
 
     @Column(nullable = false, unique = true, length = 20)
     private String isbn;
@@ -50,8 +61,9 @@ public class Book {
         // requerido por JPA
     }
 
-    public Book(String isbn, String titulo, String autor, LocalDate fechaPublicacion,
+    public Book(Library library, String isbn, String titulo, String autor, LocalDate fechaPublicacion,
                 int cantidadPaginas, String descripcion, String portadaUrl) {
+        this.library = library;
         this.isbn = isbn;
         this.titulo = titulo;
         this.autor = autor;
@@ -63,6 +75,10 @@ public class Book {
 
     public Long getId() {
         return id;
+    }
+
+    public Library getLibrary() {
+        return library;
     }
 
     public String getIsbn() {

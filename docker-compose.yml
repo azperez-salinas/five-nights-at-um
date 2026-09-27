@@ -12,7 +12,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    # Sin "ports": la base solo es accesible desde la red interna de compose.
+    # Puerto expuesto solo para desarrollo local (poder conectarse con
+    # DBeaver/psql desde el host). En un ambiente real esto no deberia
+    # exponerse: la base solo tendria que ser alcanzable desde la red
+    # interna de compose.
+    ports:
+      - "5432:5432"
 
   backend:
     build: ./backend

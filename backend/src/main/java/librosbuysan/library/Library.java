@@ -11,6 +11,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import librosbuysan.user.User;
+import org.hibernate.annotations.ColumnDefault;
 
 /**
  * Una libreria pertenece a un unico dueno (relacion 1 a 1).
@@ -37,6 +38,14 @@ public class Library {
     @Column(nullable = false, length = 150)
     private String nombre;
 
+    // RS34: cuando una libreria se da de baja, sus libros deben dejar de
+    // verse en catalogo/busqueda/detalle sin borrar ningun registro. Este
+    // flag es lo que las consultas de Book van a chequear para decidir si
+    // un libro sigue siendo visible.
+    @ColumnDefault("true")
+    @Column(nullable = false)
+    private boolean enabled = true;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -47,6 +56,7 @@ public class Library {
     public Library(User dueno, String nombre) {
         this.dueno = dueno;
         this.nombre = nombre;
+        this.enabled = true;
         this.createdAt = Instant.now();
     }
 
@@ -60,6 +70,16 @@ public class Library {
 
     public String getNombre() {
         return nombre;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    // RS34: dar de baja una libreria. No borra el registro ni el de sus
+    // libros: solo hace que dejen de ser visibles via catalogo/busqueda/detalle.
+    public void disable() {
+        this.enabled = false;
     }
 
     public Instant getCreatedAt() {

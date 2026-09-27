@@ -33,11 +33,11 @@ public class BookDataSeeder implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(BookDataSeeder.class);
     private static final String SEED_FILE = "data/Bookseed.json";
 
-    private final BookRepository bookRepository;
+    private final BookRepo bookRepo;
     private final ObjectMapper objectMapper;
 
-    public BookDataSeeder(BookRepository bookRepository, ObjectMapper objectMapper) {
-        this.bookRepository = bookRepository;
+    public BookDataSeeder(BookRepo bookRepo, ObjectMapper objectMapper) {
+        this.bookRepo = bookRepo;
         this.objectMapper = objectMapper;
     }
 
@@ -45,7 +45,7 @@ public class BookDataSeeder implements CommandLineRunner {
     public void run(String... args) throws IOException {
         // Idempotencia: si ya hay libros cargados, no repetimos el trabajo
         // ni corremos el riesgo de violar la restriccion unique del ISBN.
-        if (bookRepository.count() > 0) {
+        if (bookRepo.count() > 0) {
             log.info("Catalogo de libros ya inicializado, se omite la carga inicial.");
             return;
         }
@@ -56,7 +56,7 @@ public class BookDataSeeder implements CommandLineRunner {
         }
 
         List<Book> books = seedRecords.stream().map(BookSeedRecord::toEntity).toList();
-        bookRepository.saveAll(books);
+        bookRepo.saveAll(books);
         log.info("Catalogo de libros inicializado con {} registros.", books.size());
     }
 }

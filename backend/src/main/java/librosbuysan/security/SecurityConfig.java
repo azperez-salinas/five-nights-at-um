@@ -42,7 +42,21 @@ public class SecurityConfig {
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        // RF9/RS1/RS5/RS9/RS19: la busqueda es la una
+                        // operacion de books restringida por rol, y su regla
+                        // tiene que evaluarse ANTES que el permitAll general
+                        // de /api/books/** (Spring Security aplica la
+                        // primera regla que matchea la ruta+metodo).
+                        .requestMatchers(HttpMethod.GET, "/api/books/search").hasRole("COMPRADOR")
+                        // Catalogo (R7) y detalle de libro siguen publicos;
+                        // el filtro de RS34 (libreria deshabilitada) se
+                        // aplica en la query, no en la autorizacion.
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
+                        // RS9/RS19: deny-by-default. Cualquier otra ruta o
+                        // metodo (incluyendo POST/PUT/DELETE sobre /api/books,
+                        // que ademas ya reciben 405 de Spring MVC por no
+                        // tener handler mapeado) exige estar autenticado como
+                        // minimo; no hay reglas implicitas de permiso.
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
         return http.build();

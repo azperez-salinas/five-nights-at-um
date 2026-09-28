@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import BookDetail from './BookDetail';
 import Catalog from './Catalog';
+import Favorites from './Favorites';
+import Login from './Login';
 import Profile from './Profile';
 import Register from './Register';
 
@@ -8,6 +10,10 @@ import Register from './Register';
 const parseCatalogPage = (hash) => {
   const match = hash.match(/^#catalogo(?:\/([1-9]\d{0,5}))?$/);
   return match ? Number(match[1] ?? 1) : null;
+};
+
+const goTo = (hash) => {
+  window.location.hash = hash;
 };
 
 // ponytail: hand-rolled hash routes, switch to react-router when routes multiply
@@ -22,6 +28,12 @@ function App() {
   useEffect(() => {
     const onHashChange = () => {
       const newHash = window.location.hash;
+      // RS18: logging out drops the token from the client
+      if (newHash === '#logout') {
+        setSession(null);
+        window.location.replace('#login');
+        return;
+      }
       setHash(newHash);
       const catalogPage = parseCatalogPage(newHash);
       if (catalogPage) setLastCatalogPage(catalogPage);
@@ -33,11 +45,19 @@ function App() {
 
   const handleAuthenticated = (auth) => {
     setSession(auth);
-    window.location.hash = '#catalogo';
+    goTo('#catalogo');
+  };
+
+  // Logging in from #favoritos keeps the user there; otherwise go to the catalog
+  const handleLoginSuccess = (token, username) => {
+    setSession({ token, username });
+    if (hash !== '#favoritos') goTo('#catalogo');
   };
 
   // Stable reference: Profile uses it as an effect dependency
   const handleUnauthorized = useCallback(() => setSession(null), []);
+
+  const handleLogout = () => goTo('#logout');
 
   const catalogPage = parseCatalogPage(hash);
   if (catalogPage) return <Catalog page={catalogPage} session={session} />;
@@ -60,6 +80,25 @@ function App() {
       />
     );
   }
+  if (hash === '#login' || (hash === '#favoritos' && !session)) {
+    return (
+      <Login
+        onLoginSuccess={handleLoginSuccess}
+        onNavigateToRegister={() => goTo('#registro')}
+      />
+    );
+  }
+  if (hash === '#favoritos') {
+    return (
+      <Favorites
+        token={session.token}
+        currentUser={session.username}
+        onLogout={handleLogout}
+        onNavigate={(dest) => goTo(`#${dest}`)}
+      />
+    );
+  }
+  if (session) return <Catalog page={1} session={session} />;
   return <Register onAuthenticated={handleAuthenticated} />;
 }
 

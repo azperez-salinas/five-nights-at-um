@@ -13,10 +13,16 @@ export default function Nav({ active, session }) {
                 <nav className="booksaw-menu">
                     <a href="#inicio" className={itemClass('inicio')}>INICIO</a>
                     <a href="#catalogo" className={itemClass('catalogo')}>CATÁLOGO</a>
-                    {session && (
-                        <a href="#perfil" className={itemClass('perfil')}>
-                            {session.username.toUpperCase()}
-                        </a>
+                    {session ? (
+                        <>
+                            <a href="#favoritos" className={itemClass('favoritos')}>FAVORITOS</a>
+                            <a href="#perfil" className={itemClass('perfil')}>
+                                {session.username.toUpperCase()}
+                            </a>
+                            <a href="#logout" className="nav-item">CERRAR SESIÓN</a>
+                        </>
+                    ) : (
+                        <a href="#login" className="nav-item">INICIAR SESIÓN</a>
                     )}
                 </nav>
             </div>

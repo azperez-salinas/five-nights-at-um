@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import './Register.css';
 import './Catalog.css';
 
-export default function Catalog() {
+export default function Catalog({ session }) {
     const [page, setPage] = useState(1);
     const [data, setData] = useState(null);
     // Page number whose request failed; the error only shows for that page
@@ -41,6 +41,7 @@ export default function Catalog() {
                     <nav className="booksaw-menu">
                         <a href="#inicio" className="nav-item">INICIO</a>
                         <a href="#catalogo" className="nav-item active">CATÁLOGO</a>
+                        {session && <span className="nav-item">HOLA, {session.username.toUpperCase()}</span>}
                     </nav>
                 </div>
             </header>

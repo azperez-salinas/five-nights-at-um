@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Register.css';
 
-export default function Register() {
+export default function Register({ onAuthenticated }) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -60,11 +60,11 @@ export default function Register() {
             });
 
             if (response.ok) {
-                setSuccessMsg('¡Cuenta creada con éxito! Ya podés iniciar sesión.');
-                setUsername('');
-                setEmail('');
+                // R8: the register response already carries the session token
+                const { token, username: registeredUsername, role } = await response.json();
                 setPassword('');
                 setConfirmPassword('');
+                onAuthenticated({ token, username: registeredUsername, role });
             } else if (response.status === 409) {
                 setErrorMsg('El nombre de usuario o correo ya se encuentra registrado.');
             } else if (response.status === 400) {
@@ -72,7 +72,7 @@ export default function Register() {
             } else {
                 setErrorMsg('Ocurrió un error al procesar el registro. Intentalo de nuevo.');
             }
-        } catch (err) {
+        } catch {
             setErrorMsg('No pudimos conectar con el servicio. Por favor, intentá nuevamente en unos momentos.');
         } finally {
             setLoading(false);

@@ -4,12 +4,11 @@ import './Register.css';
 
 const API_URL = 'http://localhost:8080/api/users/me';
 
-export default function Profile({ session, onUsernameChanged, onUnauthorized }) {
+export default function Profile({ session, onUnauthorized }) {
     const [profile, setProfile] = useState(null);
     const [loadFailed, setLoadFailed] = useState(false);
     const [editing, setEditing] = useState(false);
 
-    const [username, setUsername] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -50,7 +49,6 @@ export default function Profile({ session, onUsernameChanged, onUnauthorized }) 
     };
 
     const startEditing = () => {
-        setUsername(profile.username);
         clearPasswords();
         setErrorMsg('');
         setSuccessMsg('');
@@ -68,42 +66,21 @@ export default function Profile({ session, onUsernameChanged, onUnauthorized }) 
         setErrorMsg('');
         setSuccessMsg('');
 
-        const trimmedUsername = username.trim();
-        const usernameChanged = trimmedUsername.toLowerCase() !== profile.username;
-        const passwordChanged = newPassword.length > 0;
-
-        if (!usernameChanged && !passwordChanged) {
-            setErrorMsg('No hay cambios para guardar.');
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            setErrorMsg('Por favor, completá todos los campos.');
+            return;
+        }
+        if (newPassword.length < 8) {
+            setErrorMsg('La nueva contraseña debe tener al menos 8 caracteres.');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setErrorMsg('Las contraseñas nuevas no coinciden.');
             return;
         }
 
-        if (usernameChanged && !/^[A-Za-z0-9_]{3,30}$/.test(trimmedUsername)) {
-            setErrorMsg('El usuario debe tener entre 3 y 30 caracteres (solo letras, números o guión bajo).');
-            return;
-        }
-
-        if (passwordChanged) {
-            if (!currentPassword) {
-                setErrorMsg('Para cambiar la contraseña tenés que ingresar la contraseña actual.');
-                return;
-            }
-            if (newPassword.length < 8) {
-                setErrorMsg('La nueva contraseña debe tener al menos 8 caracteres.');
-                return;
-            }
-            if (newPassword !== confirmPassword) {
-                setErrorMsg('Las contraseñas nuevas no coinciden.');
-                return;
-            }
-        }
-
-        // Only the fields being changed are sent
-        const body = {};
-        if (usernameChanged) body.username = trimmedUsername;
-        if (passwordChanged) {
-            body.currentPassword = currentPassword;
-            body.newPassword = newPassword;
-        }
+        // Username is not editable: only the password fields are sent
+        const body = { currentPassword, newPassword };
 
         setSaving(true);
         try {
@@ -119,17 +96,14 @@ export default function Profile({ session, onUsernameChanged, onUnauthorized }) 
             if (response.ok) {
                 const updated = await response.json();
                 setProfile(updated);
-                onUsernameChanged(updated.username);
                 clearPasswords();
                 setEditing(false);
-                setSuccessMsg('Tus datos se actualizaron correctamente.');
+                setSuccessMsg('Tu contraseña se actualizó correctamente.');
             } else if (response.status === 401) {
                 onUnauthorized();
-            } else if (response.status === 409) {
-                setErrorMsg('Ese nombre de usuario ya está en uso.');
             } else if (response.status === 400) {
                 // The backend does not say which field failed (RS31)
-                setErrorMsg('No pudimos guardar los cambios. Revisá los datos y, si cambiaste la contraseña, que la actual sea correcta.');
+                setErrorMsg('No pudimos cambiar la contraseña. Verificá que la contraseña actual sea correcta.');
             } else {
                 setErrorMsg('Ocurrió un error al guardar los cambios. Intentalo de nuevo.');
             }
@@ -182,24 +156,13 @@ export default function Profile({ session, onUsernameChanged, onUnauthorized }) 
                             <p><strong>Usuario:</strong> {profile.username}</p>
                             <p><strong>Correo electrónico:</strong> {profile.email}</p>
                             <button type="button" className="btn-submit-pill" onClick={startEditing}>
-                                EDITAR PERFIL
+                                CAMBIAR CONTRASEÑA
                             </button>
                         </div>
                     )}
 
                     {profile && editing && (
                         <form onSubmit={handleSubmit} className="register-form" noValidate>
-                            <div className="input-group">
-                                <label htmlFor="username">Nombre de usuario</label>
-                                <input
-                                    id="username"
-                                    type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    autoComplete="username"
-                                />
-                            </div>
-
                             <div className="input-group">
                                 <label htmlFor="currentPassword">Contraseña actual</label>
                                 <input

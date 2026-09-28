@@ -24,14 +24,11 @@ function App() {
   // Stable reference: Profile uses it as an effect dependency
   const handleUnauthorized = useCallback(() => setSession(null), []);
 
-  const handleUsernameChanged = (username) => setSession((s) => ({ ...s, username }));
-
   if (hash === '#catalogo') return <Catalog session={session} />;
   if (hash === '#perfil') {
     return (
       <Profile
         session={session}
-        onUsernameChanged={handleUsernameChanged}
         onUnauthorized={handleUnauthorized}
       />
     );

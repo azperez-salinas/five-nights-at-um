@@ -14,10 +14,10 @@ import librosbuysan.book.BookDtos.CatalogPage;
  * operaciones respetan RS34 (libros de librerias deshabilitadas no se ven).
  *
  * Todos los metodos son @GetMapping: si se llama a estas rutas con otro
- * verbo HTTP (POST, PUT, DELETE, etc.), Spring responde 405 Method Not
- * Allowed automaticamente porque no existe ningun handler mapeado para esa
- * combinacion de ruta + metodo (RS33), sin que la peticion llegue al
- * BookService.
+ * verbo HTTP (POST, PUT, DELETE, etc.) la peticion se rechaza (RS33) sin
+ * llegar al BookService. SecurityConfig solo permite GET sobre /api/books,
+ * asi que el deny-by-default responde 401/403 antes de que Spring MVC
+ * llegue a devolver 405 por falta de handler.
  */
 @RestController
 @RequestMapping("/api/books")

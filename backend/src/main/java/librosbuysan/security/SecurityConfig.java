@@ -70,12 +70,17 @@ public class SecurityConfig {
                         // restringe el prefijo completo sin distinguir por
                         // verbo HTTP.
                         .requestMatchers("/api/favorites/**").hasRole("COMPRADOR")
-                        // RS9/RS19: deny-by-default. Cualquier otra ruta o
-                        // metodo (incluyendo POST/PUT/DELETE sobre /api/books,
-                        // que ademas ya reciben 405 de Spring MVC por no
-                        // tener handler mapeado) exige estar autenticado como
-                        // minimo; no hay reglas implicitas de permiso.
-                        .anyRequest().authenticated())
+                        // RS5: el perfil propio es la unica funcionalidad
+                        // compartida por ambos roles; se declara con los
+                        // roles explicitos en lugar de "cualquier autenticado".
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
+                        // RS5/RS19/RS27: deny-by-default real. Cualquier ruta
+                        // o metodo sin regla explicita arriba se rechaza,
+                        // aunque el usuario este autenticado: un endpoint
+                        // nuevo queda inaccesible hasta que se le asigne un
+                        // rol aca. Sin token responde 401; con token, 403.
+                        .anyRequest().denyAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

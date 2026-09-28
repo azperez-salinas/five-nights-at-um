@@ -1,0 +1,551 @@
+/* Google Fonts: Playfair Display (Serif Editorial) + Plus Jakarta Sans (Moderna y limpia) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* Variables de Color e Identidad BookSaw */
+:root {
+    --booksaw-bg: #FAF8F5;
+    --booksaw-card-bg: #FFFFFF;
+    --booksaw-input-bg: #F4F1EC;
+    --booksaw-input-border: #E5DFC5;
+    --booksaw-dark: #1E1B18;
+    --booksaw-gold: #C5A980;
+    --booksaw-gold-dark: #A68658;
+    --booksaw-muted: #7E7870;
+    --booksaw-border: #EAE6DE;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Contenedor general */
+.booksaw-page {
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--booksaw-bg);
+    color: var(--booksaw-dark);
+    font-family: var(--font-sans);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 1. Header / Navbar */
+.booksaw-nav {
+    background-color: var(--booksaw-bg);
+    border-bottom: 1px solid var(--booksaw-border);
+    padding: 22px 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.booksaw-nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.booksaw-logo {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-title {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--booksaw-dark);
+}
+
+.logo-tagline {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: var(--booksaw-gold);
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.booksaw-menu {
+    display: flex;
+    gap: 28px;
+}
+
+.nav-item {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--booksaw-muted);
+    transition: color 0.2s ease;
+    position: relative;
+    padding-bottom: 4px;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    color: var(--booksaw-gold-dark);
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--booksaw-gold);
+}
+
+/* 2. Main Content Wrapper */
+.booksaw-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 32px;
+}
+
+.booksaw-content-wrapper {
+    max-width: 1120px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 64px;
+    align-items: center;
+}
+
+/* Columna Izquierda: Showcase Editorial */
+.booksaw-hero-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px 24px;
+}
+
+/* Portada de libro */
+.book-card-featured {
+    perspective: 1000px;
+    margin-bottom: 32px;
+}
+
+.book-cover-3d {
+    width: 200px;
+    height: 290px;
+    background: linear-gradient(135deg, #F0EAD8 0%, #E8DFCC 100%);
+    border-radius: 4px 10px 10px 4px;
+    box-shadow:
+        -8px 8px 18px rgba(0, 0, 0, 0.12),
+        0 2px 4px rgba(0, 0, 0, 0.06),
+        inset 4px 0 6px rgba(0, 0, 0, 0.15);
+    position: relative;
+    display: flex;
+    transform: rotate(-3deg) translateY(-4px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.book-cover-3d:hover {
+    transform: rotate(0deg) translateY(-8px);
+    box-shadow:
+        -12px 16px 28px rgba(0, 0, 0, 0.16),
+        0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.book-spine {
+    width: 14px;
+    height: 100%;
+    background: linear-gradient(90deg, #3A3228 0%, #54493B 60%, #3A3228 100%);
+    border-radius: 4px 0 0 4px;
+}
+
+.book-front {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.book-gold-border {
+    border: 1px solid rgba(166, 134, 88, 0.45);
+    width: 100%;
+    height: 100%;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: inset 0 0 10px rgba(197, 169, 128, 0.15);
+}
+
+.book-tag {
+    font-size: 8px;
+    letter-spacing: 1.8px;
+    color: var(--booksaw-gold-dark);
+    font-weight: 700;
+}
+
+.book-front-title {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.25;
+    color: #352B20;
+    text-align: center;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+}
+
+.book-ornament {
+    color: var(--booksaw-gold);
+    font-size: 14px;
+    letter-spacing: 4px;
+}
+
+.book-front-sub {
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: #6C5D4B;
+    font-weight: 600;
+}
+
+.hero-headline {
+    font-family: var(--font-serif);
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--booksaw-dark);
+    line-height: 1.2;
+    margin-bottom: 16px;
+}
+
+.hero-desc {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--booksaw-muted);
+    max-width: 420px;
+    margin-bottom: 24px;
+}
+
+.hero-cta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--booksaw-dark);
+    text-decoration: none;
+    border-bottom: 2px solid var(--booksaw-gold);
+    padding-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.hero-cta-link:hover {
+    color: var(--booksaw-gold-dark);
+    border-bottom-color: var(--booksaw-gold-dark);
+    gap: 12px;
+}
+
+.cta-arrow {
+    transition: transform 0.2s ease;
+}
+
+.hero-cta-link:hover .cta-arrow {
+    transform: translateX(4px);
+}
+
+/* Columna Derecha: Tarjeta de Registro */
+.booksaw-form-col {
+    display: flex;
+    justify-content: center;
+}
+
+.register-card {
+    background-color: var(--booksaw-card-bg);
+    border: 1px solid var(--booksaw-border);
+    border-radius: 12px;
+    padding: 44px 40px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 480px;
+}
+
+.card-header {
+    margin-bottom: 26px;
+}
+
+.card-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--booksaw-gold-dark);
+    background-color: #FAF4EB;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.card-title {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--booksaw-dark);
+    margin-bottom: 8px;
+}
+
+.card-subtitle {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--booksaw-muted);
+}
+
+/* Formulario e Inputs */
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-group label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #4A443D;
+}
+
+.input-group input {
+    background-color: var(--booksaw-input-bg);
+    border: 1px solid var(--booksaw-input-border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: var(--font-sans);
+    color: var(--booksaw-dark);
+    transition: all 0.2s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    background-color: #FFFFFF;
+    border-color: var(--booksaw-gold-dark);
+    box-shadow: 0 0 0 3px rgba(197, 169, 128, 0.2);
+}
+
+.input-group input::placeholder {
+    color: #A39D94;
+    font-size: 13px;
+}
+
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper input {
+    width: 100%;
+    padding-right: 76px;
+}
+
+.btn-toggle-pass {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--booksaw-gold-dark);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.btn-toggle-pass:hover {
+    color: var(--booksaw-dark);
+}
+
+/* Checkbox Términos */
+.terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--booksaw-muted);
+    line-height: 1.4;
+}
+
+.terms-checkbox input[type="checkbox"] {
+    margin-top: 2px;
+    accent-color: var(--booksaw-dark);
+    cursor: pointer;
+}
+
+.terms-checkbox a {
+    color: var(--booksaw-dark);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* Botón estilo BookSaw */
+.btn-submit-pill {
+    margin-top: 8px;
+    background-color: var(--booksaw-dark);
+    color: #FAF8F5;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(30, 27, 24, 0.18);
+}
+
+.btn-submit-pill:hover:not(:disabled) {
+    background-color: #36312B;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(30, 27, 24, 0.25);
+}
+
+.btn-submit-pill:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-submit-pill:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Alertas de error y éxito */
+.alert-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.alert-error {
+    background-color: #FDF2F2;
+    color: #9B2121;
+    border: 1px solid #F9D7D7;
+}
+
+.alert-success {
+    background-color: #F0FBF4;
+    color: #196C38;
+    border: 1px solid #CEECD6;
+}
+
+.alert-icon {
+    font-size: 14px;
+}
+
+/* Footer de la tarjeta */
+.card-footer {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--booksaw-muted);
+}
+
+.login-link {
+    color: var(--booksaw-dark);
+    font-weight: 700;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.login-link:hover {
+    color: var(--booksaw-gold-dark);
+}
+
+/* 3. Footer de la Página */
+.booksaw-footer {
+    border-top: 1px solid var(--booksaw-border);
+    background-color: var(--booksaw-bg);
+    padding: 24px 0;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-links a {
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--booksaw-muted);
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: var(--booksaw-dark);
+}
+
+.footer-links .dot {
+    color: var(--booksaw-gold);
+    font-size: 12px;
+}
+
+.footer-copy {
+    font-size: 12px;
+    color: #9E978E;
+}
+
+/* Adaptación Responsive */
+@media (max-width: 960px) {
+    .booksaw-content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 48px;
+    }
+
+    .booksaw-hero-col {
+        order: 2;
+    }
+
+    .booksaw-form-col {
+        order: 1;
+    }
+
+    .hero-headline {
+        font-size: 30px;
+    }
+
+    .register-card {
+        padding: 32px 24px;
+    }
+
+    .booksaw-menu {
+        display: none;
+    }
+}

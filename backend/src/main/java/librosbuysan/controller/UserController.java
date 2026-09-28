@@ -1,4 +1,4 @@
-package librosbuysan.user;
+package librosbuysan.controller;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import librosbuysan.security.AuthenticatedUser;
 import librosbuysan.user.UserDtos.ProfileResponse;
 import librosbuysan.user.UserDtos.UpdateProfileRequest;
+import librosbuysan.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
@@ -31,7 +32,7 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<ProfileResponse> updateMe(@AuthenticationPrincipal AuthenticatedUser principal,
-                                                    @RequestBody UpdateProfileRequest request) {
+            @RequestBody UpdateProfileRequest request) {
         return withNoStore(HttpStatus.OK, userService.updateProfile(principal.id(), request));
     }
 

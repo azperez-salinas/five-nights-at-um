@@ -1,6 +1,5 @@
 package librosbuysan.user;
 
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 
@@ -22,11 +21,12 @@ public final class UserDtos {
         }
     }
 
+    /**
+     * RS7/RS36: el unico campo modificable del perfil es la contrasena. El
+     * username no es editable, asi que no forma parte del DTO: si el JSON lo
+     * trae (o trae role, email, id, etc.) se ignora.
+     */
     public record UpdateProfileRequest(
-            @Size(min = 3, max = 30)
-            @Pattern(regexp = "^[A-Za-z0-9_]+$")
-            String username,
-
             @Size(max = 64)
             char[] currentPassword,
 
@@ -35,8 +35,7 @@ public final class UserDtos {
 
         @Override
         public String toString() {
-            return "UpdateProfileRequest[username=" + username
-                    + ", currentPassword=[PROTECTED], newPassword=[PROTECTED]]";
+            return "UpdateProfileRequest[currentPassword=[PROTECTED], newPassword=[PROTECTED]]";
         }
     }
 }

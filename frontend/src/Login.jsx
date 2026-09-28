@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './Register.css';
 
 export default function Login({ onLoginSuccess, onNavigateToRegister }) {
-    const [username, setUsername] = useState('belen');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -107,7 +107,7 @@ export default function Login({ onLoginSuccess, onNavigateToRegister }) {
                                     <input
                                         id="login-username"
                                         type="text"
-                                        placeholder="Ej. belen"
+                                        placeholder="Ej. JuanPerez123"
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
                                         autoComplete="username"

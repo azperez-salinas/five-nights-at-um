@@ -1,4 +1,4 @@
-package librosbuysan.user;
+package librosbuysan.service;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -15,6 +15,8 @@ import org.springframework.web.server.ResponseStatusException;
 import librosbuysan.auth.PasswordHasher;
 import librosbuysan.user.UserDtos.ProfileResponse;
 import librosbuysan.user.UserDtos.UpdateProfileRequest;
+import librosbuysan.user.User;
+import librosbuysan.user.UserRepo;
 
 @Service
 public class UserService {

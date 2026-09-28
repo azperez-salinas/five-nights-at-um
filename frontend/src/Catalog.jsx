@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import Nav from './Nav';
 import './Catalog.css';
 
-export default function Catalog({ session }) {
-    const [page, setPage] = useState(1);
+// The page lives in the URL (#catalogo/N) so returning from a book detail keeps it
+export default function Catalog({ page, session }) {
     const [data, setData] = useState(null);
     // Page number whose request failed; the error only shows for that page
     const [failedPage, setFailedPage] = useState(null);
@@ -53,15 +53,17 @@ export default function Catalog({ session }) {
                     <ul className="catalog-grid" aria-busy={loading}>
                         {data.items.map((book) => (
                             <li key={book.id} className="catalog-card">
-                                <img
-                                    src={book.portadaUrl}
-                                    alt={`Portada de ${book.titulo}`}
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer"
-                                />
-                                <h2 className="catalog-card-title">{book.titulo}</h2>
-                                <p className="catalog-card-author">{book.autor}</p>
-                                <p className="catalog-card-library">{book.nombreLibreria}</p>
+                                <a href={`#libro/${book.id}`} className="catalog-card-link">
+                                    <img
+                                        src={book.portadaUrl}
+                                        alt={`Portada de ${book.titulo}`}
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer"
+                                    />
+                                    <h2 className="catalog-card-title">{book.titulo}</h2>
+                                    <p className="catalog-card-author">{book.autor}</p>
+                                    <p className="catalog-card-library">{book.nombreLibreria}</p>
+                                </a>
                             </li>
                         ))}
                     </ul>
@@ -72,7 +74,7 @@ export default function Catalog({ session }) {
                         <button
                             type="button"
                             className="btn-submit-pill"
-                            onClick={() => setPage((p) => p - 1)}
+                            onClick={() => { window.location.hash = `#catalogo/${page - 1}`; }}
                             disabled={loading || page <= 1}
                         >
                             ANTERIOR
@@ -81,7 +83,7 @@ export default function Catalog({ session }) {
                         <button
                             type="button"
                             className="btn-submit-pill"
-                            onClick={() => setPage((p) => p + 1)}
+                            onClick={() => { window.location.hash = `#catalogo/${page + 1}`; }}
                             disabled={loading || page >= totalPages}
                         >
                             SIGUIENTE

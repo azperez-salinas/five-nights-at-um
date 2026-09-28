@@ -3,11 +3,9 @@ package librosbuysan.service;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +24,6 @@ public class UserService {
     private static final String INVALID_REQUEST = "Solicitud invalida";
     private static final String NOTHING_TO_UPDATE = "No hay cambios para aplicar";
     private static final String WRONG_CURRENT_PASSWORD = "La contrasena actual es incorrecta";
-    private static final String USERNAME_TAKEN = "El nombre de usuario ya esta en uso";
     private static final String UNAUTHORIZED = "No autenticado";
 
     private final UserRepo userRepo;
@@ -52,14 +49,10 @@ public class UserService {
 
             User user = loadActiveUser(userId);
 
-            if (newPassword != null) {
-                applyPasswordChange(user, currentPassword, newPassword);
-            }
-            if (request.username() != null) {
-                applyUsernameChange(user, request.username());
-            }
+            // RS7: la contrasena es el unico campo modificable del perfil
+            applyPasswordChange(user, currentPassword, newPassword);
 
-            User saved = save(user);
+            User saved = userRepo.saveAndFlush(user);
             log.info("Perfil actualizado: userId={}", userId);
             return ProfileResponse.from(saved);
         } finally {
@@ -88,27 +81,6 @@ public class UserService {
         user.changePasswordHash(passwordHasher.hash(newPassword));
     }
 
-    private void applyUsernameChange(User user, String rawUsername) {
-        String username = normalize(rawUsername);
-        if (username.equals(user.getUsername())) {
-            return;
-        }
-        if (userRepo.existsByUsername(username)) {
-            log.warn("Actualizacion de perfil fallida: userId={} motivo=username_duplicado", user.getId());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, USERNAME_TAKEN);
-        }
-        user.changeUsername(username);
-    }
-
-    private User save(User user) {
-        try {
-            return userRepo.saveAndFlush(user);
-        } catch (DataIntegrityViolationException e) {
-            log.warn("Actualizacion de perfil fallida: userId={} motivo=username_duplicado_concurrente", user.getId());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, USERNAME_TAKEN);
-        }
-    }
-
     private User loadActiveUser(Long userId) {
         User user = userRepo.findById(userId).orElse(null);
         if (user == null || !user.isEnabled()) {
@@ -122,16 +94,12 @@ public class UserService {
         if (request == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
         }
-        if (request.username() == null && request.newPassword() == null) {
+        if (request.newPassword() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NOTHING_TO_UPDATE);
         }
         Set<ConstraintViolation<UpdateProfileRequest>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
         }
-    }
-
-    private static String normalize(String value) {
-        return value.trim().toLowerCase(Locale.ROOT);
     }
 }

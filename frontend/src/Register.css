@@ -549,3 +549,14 @@
         display: none;
     }
 }
+/* Secondary text button (profile cancel) */
+.btn-cancel {
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--booksaw-gold-dark);
+    cursor: pointer;
+    padding: 8px;
+}

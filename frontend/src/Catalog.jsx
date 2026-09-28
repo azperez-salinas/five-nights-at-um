@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './Register.css';
+import Nav from './Nav';
 import './Catalog.css';
 
 export default function Catalog({ session }) {
@@ -32,19 +32,7 @@ export default function Catalog({ session }) {
 
     return (
         <div className="booksaw-page">
-            <header className="booksaw-nav">
-                <div className="booksaw-nav-container">
-                    <div className="booksaw-logo">
-                        <span className="logo-title">LOS LIBROS DE BUYSAN</span>
-                        <span className="logo-tagline">LIBRERÍA & EDITORIAL</span>
-                    </div>
-                    <nav className="booksaw-menu">
-                        <a href="#inicio" className="nav-item">INICIO</a>
-                        <a href="#catalogo" className="nav-item active">CATÁLOGO</a>
-                        {session && <span className="nav-item">HOLA, {session.username.toUpperCase()}</span>}
-                    </nav>
-                </div>
-            </header>
+            <Nav active="catalogo" session={session} />
 
             <main className="catalog-main">
                 <h1 className="catalog-title">Catálogo</h1>

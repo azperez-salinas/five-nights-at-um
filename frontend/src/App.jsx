@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Catalog from './Catalog';
+import Profile from './Profile';
 import Register from './Register';
 
-// ponytail: hash navigation for two screens, switch to react-router when routes need params
+// ponytail: hash navigation for a few screens, switch to react-router when routes need params
 function App() {
   const [hash, setHash] = useState(window.location.hash);
   // Session lives in memory only (not localStorage) so an XSS cannot read the token
@@ -20,9 +21,22 @@ function App() {
     window.location.hash = '#catalogo';
   };
 
-  return hash === '#catalogo'
-    ? <Catalog session={session} />
-    : <Register onAuthenticated={handleAuthenticated} />;
+  // Stable reference: Profile uses it as an effect dependency
+  const handleUnauthorized = useCallback(() => setSession(null), []);
+
+  const handleUsernameChanged = (username) => setSession((s) => ({ ...s, username }));
+
+  if (hash === '#catalogo') return <Catalog session={session} />;
+  if (hash === '#perfil') {
+    return (
+      <Profile
+        session={session}
+        onUsernameChanged={handleUsernameChanged}
+        onUnauthorized={handleUnauthorized}
+      />
+    );
+  }
+  return <Register onAuthenticated={handleAuthenticated} />;
 }
 
 export default App;

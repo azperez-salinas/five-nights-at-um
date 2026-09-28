@@ -200,8 +200,6 @@ export default function Profile({ session, onUsernameChanged, onUnauthorized }) 
                                 />
                             </div>
 
-                            <p className="card-subtitle">Completá estos campos solo si querés cambiar la contraseña.</p>
-
                             <div className="input-group">
                                 <label htmlFor="currentPassword">Contraseña actual</label>
                                 <input

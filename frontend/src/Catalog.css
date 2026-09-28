@@ -1,0 +1,75 @@
+.catalog-main {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 32px;
+    box-sizing: border-box;
+}
+
+.catalog-title {
+    font-family: var(--font-serif);
+    font-size: 36px;
+    margin: 0 0 32px;
+}
+
+.catalog-status {
+    color: var(--booksaw-muted);
+}
+
+.catalog-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 28px;
+}
+
+.catalog-card {
+    background-color: var(--booksaw-card-bg);
+    border: 1px solid var(--booksaw-border);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.catalog-card img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background-color: var(--booksaw-input-bg);
+    border-radius: 4px;
+}
+
+.catalog-card-title {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    margin: 12px 0 4px;
+}
+
+.catalog-card-author {
+    font-size: 13px;
+    margin: 0;
+}
+
+.catalog-card-library {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--booksaw-gold-dark);
+    margin: 8px 0 0;
+}
+
+.catalog-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    font-size: 13px;
+    color: var(--booksaw-muted);
+}
+
+.catalog-pagination .btn-submit-pill {
+    margin-top: 0;
+    padding: 10px 20px;
+}

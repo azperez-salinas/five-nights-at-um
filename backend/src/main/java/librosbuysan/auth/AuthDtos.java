@@ -1,5 +1,6 @@
 package librosbuysan.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,6 +17,7 @@ public final class AuthDtos {
     private AuthDtos() {
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record RegisterRequest(
             @NotBlank
             @Size(min = 3, max = 30)
@@ -37,6 +39,7 @@ public final class AuthDtos {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record RegisterDuenoRequest(
             @NotBlank
             @Size(min = 3, max = 30)

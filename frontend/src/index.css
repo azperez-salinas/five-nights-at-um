@@ -17,3 +17,15 @@ body {
   width: 100%;
   min-height: 100vh;
 }
+
+.nav-search-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.nav-search-item svg {
+  flex-shrink: 0;
+  margin-bottom: 1px;
+}

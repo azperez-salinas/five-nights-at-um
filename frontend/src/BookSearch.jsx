@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import BookCover from './BookCover';
+import Nav from './Nav';
 import './BookSearch.css';
 
-export default function BookSearch({ token, currentUser, onLogout, onNavigate }) {
-    const [searchTerm, setSearchTerm] = useState('');
+export default function BookSearch({ session, onLogout, initialQuery = '', onQueryChange }) {
+    const token = session?.token;
+    const [searchTerm, setSearchTerm] = useState(initialQuery);
     const [books, setBooks] = useState([]);
     const [allCatalog, setAllCatalog] = useState([]);
     const [favorites, setFavorites] = useState([]);
@@ -31,29 +34,6 @@ export default function BookSearch({ token, currentUser, onLogout, onNavigate })
             console.error(err);
         }
     };
-
-    // Carga catálogo inicial
-    const fetchInitialCatalog = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch('http://localhost:8080/api/books?page=1');
-            if (res.ok) {
-                const data = await res.json();
-                const items = data.items || data || [];
-                setAllCatalog(items);
-                setBooks(items);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchInitialCatalog();
-        fetchFavorites();
-    }, [token]);
 
     // Ejecutar búsqueda por texto libre
     const executeSearch = async (queryText) => {
@@ -105,14 +85,41 @@ export default function BookSearch({ token, currentUser, onLogout, onNavigate })
         }
     };
 
+    // Carga catálogo inicial
+    const fetchInitialCatalog = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('http://localhost:8080/api/books?page=1');
+            if (res.ok) {
+                const data = await res.json();
+                const items = data.items || data || [];
+                setAllCatalog(items);
+                // Coming back from a book detail: restore the previous search results
+                if (initialQuery.trim()) executeSearch(initialQuery);
+                else setBooks(items);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchInitialCatalog();
+        fetchFavorites();
+    }, [token]);
+
     const handleInputChange = (e) => {
         const val = e.target.value;
         setSearchTerm(val);
+        onQueryChange?.(val);
         executeSearch(val);
     };
 
     const handleClearSearch = () => {
         setSearchTerm('');
+        onQueryChange?.('');
         setBooks(allCatalog);
     };
 
@@ -135,7 +142,7 @@ export default function BookSearch({ token, currentUser, onLogout, onNavigate })
                     setFavorites((prev) => prev.filter((f) => f.id !== book.id));
                     showToast(`"${book.titulo}" quitado de favoritos`);
                 }
-            } catch (err) {
+            } catch {
                 showToast('Error al quitar de favoritos');
             }
         } else {
@@ -148,7 +155,7 @@ export default function BookSearch({ token, currentUser, onLogout, onNavigate })
                     setFavorites((prev) => [...prev, book]);
                     showToast(`"${book.titulo}" agregado a favoritos`);
                 }
-            } catch (err) {
+            } catch {
                 showToast('Error al agregar a favoritos');
             }
         }
@@ -156,34 +163,7 @@ export default function BookSearch({ token, currentUser, onLogout, onNavigate })
 
     return (
         <div className="booksaw-page">
-            {/* 1. Header / Navbar BookSaw */}
-            <header className="booksaw-nav">
-                <div className="booksaw-nav-container">
-                    <div className="booksaw-logo" onClick={() => onNavigate('inicio')} style={{ cursor: 'pointer' }}>
-                        <span className="logo-title">LOS LIBROS DE BUYSAN</span>
-                        <span className="logo-tagline">LIBRERÍA & EDITORIAL</span>
-                    </div>
-
-                    <nav className="booksaw-menu">
-                        <a href="#inicio" className="nav-item" onClick={() => onNavigate('inicio')}>INICIO</a>
-                        <a href="#buscar" className="nav-item nav-search-item active">
-                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="11" cy="11" r="7.5"></circle>
-                                <line x1="21" y1="21" x2="16.5" y2="16.5"></line>
-                            </svg>
-                            <span>BUSCAR</span>
-                        </a>
-                        <a href="#favoritos" className="nav-item" onClick={() => onNavigate('favoritos')}>
-                            FAVORITOS ({favorites.length})
-                        </a>
-                        {token && (
-                            <button className="nav-item nav-logout-btn" onClick={onLogout}>
-                                CERRAR SESIÓN
-                            </button>
-                        )}
-                    </nav>
-                </div>
-            </header>
+            <Nav active="buscar" session={session} />
 
             {/* Toast flotante */}
             {toastMsg && (
@@ -271,22 +251,15 @@ export default function BookSearch({ token, currentUser, onLogout, onNavigate })
                                 const fav = isFavorite(book.id);
                                 return (
                                     <article key={book.id} className="book-card-item">
-                                        <div className="book-3d-cover">
-                                            <div className="book-3d-spine"></div>
-                                            <div className="book-3d-body">
-                                                <div className="book-3d-border">
-                                                    <span className="book-3d-tag">{book.nombreLibreria || 'EDICIÓN ESPECIAL'}</span>
-                                                    <h4 className="book-3d-title">{book.titulo}</h4>
-                                                    <p className="book-3d-author">{book.autor}</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <a href={`#libro/${book.id}`} className="catalog-card-link">
+                                            <BookCover book={book} />
+                                        </a>
 
                                         <div className="book-card-caption">
-                                            <div className="caption-text">
+                                            <a href={`#libro/${book.id}`} className="caption-text catalog-card-link">
                                                 <h3 className="caption-title">{book.titulo}</h3>
                                                 <p className="caption-author">{book.autor}</p>
-                                            </div>
+                                            </a>
                                             <button
                                                 className="caption-heart-btn"
                                                 onClick={() => handleToggleFavorite(book)}

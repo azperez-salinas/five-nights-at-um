@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import BookCover from './BookCover';
 import Nav from './Nav';
 import './Catalog.css';
 
-export default function BookDetail({ bookId, backHref, session }) {
+export default function BookDetail({ bookId, backHref, backLabel, navActive, session }) {
     const [book, setBook] = useState(null);
     // Id whose request failed, with the reason: 'not-found' or 'error'
     const [failure, setFailure] = useState(null);
@@ -32,10 +33,10 @@ export default function BookDetail({ bookId, backHref, session }) {
 
     return (
         <div className="booksaw-page">
-            <Nav active="catalogo" session={session} />
+            <Nav active={navActive} session={session} />
 
             <main className="catalog-main">
-                <a href={backHref} className="book-detail-back">← VOLVER AL CATÁLOGO</a>
+                <a href={backHref} className="book-detail-back">← VOLVER A {backLabel}</a>
 
                 {failed === 'not-found' && (
                     <p className="catalog-status">El libro que buscás no existe o no está disponible.</p>
@@ -51,23 +52,26 @@ export default function BookDetail({ bookId, backHref, session }) {
 
                 {current && (
                     <article className="book-detail">
-                        <img
-                            src={current.portadaUrl}
-                            alt={`Portada de ${current.titulo}`}
-                            referrerPolicy="no-referrer"
-                        />
+                        <BookCover book={current} />
                         <div>
                             <p className="catalog-card-library">{current.nombreLibreria}</p>
                             <h1 className="catalog-title">{current.titulo}</h1>
                             <p className="book-detail-author">{current.autor}</p>
-                            <p>{current.descripcion}</p>
+                            <p className="book-detail-description">{current.descripcion}</p>
                             <dl className="book-detail-meta">
-                                <dt>Publicación</dt>
-                                <dd>{current.fechaPublicacion}</dd>
-                                <dt>Páginas</dt>
-                                <dd>{current.cantidadPaginas}</dd>
-                                <dt>ISBN</dt>
-                                <dd>{current.isbn}</dd>
+                                <div>
+                                    {/* Seed dates are year-only (YYYY-01-01) */}
+                                    <dt>Año</dt>
+                                    <dd>{current.fechaPublicacion?.slice(0, 4)}</dd>
+                                </div>
+                                <div>
+                                    <dt>Páginas</dt>
+                                    <dd>{current.cantidadPaginas}</dd>
+                                </div>
+                                <div>
+                                    <dt>ISBN</dt>
+                                    <dd>{current.isbn}</dd>
+                                </div>
                             </dl>
                         </div>
                     </article>

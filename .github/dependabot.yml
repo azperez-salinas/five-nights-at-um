@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # R29: Análisis periódico de dependencias para el Backend (Java / Maven)
+  - package-ecosystem: "maven"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  # R29: Análisis periódico de dependencias para el Frontend (Node.js / npm)
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10

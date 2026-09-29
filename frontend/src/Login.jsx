@@ -31,13 +31,13 @@ export default function Login({ onLoginSuccess, onNavigateToRegister }) {
 
             if (response.ok) {
                 const data = await response.json();
-                onLoginSuccess(data.token, data.username);
+                onLoginSuccess(data.token, data.username, data.role);
             } else if (response.status === 401 || response.status === 400) {
                 setErrorMsg('Nombre de usuario o contraseña incorrectos.');
             } else {
                 setErrorMsg('Ocurrió un error al iniciar sesión. Intentalo de nuevo.');
             }
-        } catch (err) {
+        } catch {
             setErrorMsg('No pudimos conectar con el servicio. Por favor, intentá nuevamente en unos momentos.');
         } finally {
             setLoading(false);

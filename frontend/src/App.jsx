@@ -13,6 +13,15 @@ const parseCatalogPage = (hash) => {
   return match ? Number(match[1] ?? 1) : null;
 };
 
+// Screens that list books; the book detail links back to the last one visited
+const isListHash = (hash) => Boolean(parseCatalogPage(hash)) || hash === '#buscar' || hash === '#favoritos';
+
+const BACK_TARGETS = {
+  '#buscar': { nav: 'buscar', label: 'BÚSQUEDA' },
+  '#favoritos': { nav: 'favoritos', label: 'FAVORITOS' },
+};
+const CATALOG_BACK = { nav: 'catalogo', label: 'RECOMENDADOS' };
+
 const goTo = (hash) => {
   window.location.hash = hash;
 };
@@ -20,8 +29,12 @@ const goTo = (hash) => {
 // ponytail: hand-rolled hash routes, switch to react-router when routes multiply
 function App() {
   const [hash, setHash] = useState(window.location.hash);
-  // Last catalog page visited, so the book detail can link back to it
-  const [lastCatalogPage, setLastCatalogPage] = useState(parseCatalogPage(window.location.hash) ?? 1);
+  // Last list screen visited (#catalogo/N, #buscar or #favoritos) for the detail's back link
+  const [lastListHash, setLastListHash] = useState(
+    isListHash(window.location.hash) ? window.location.hash : '#catalogo'
+  );
+  // Kept here so the search text survives going to a book detail and back
+  const [searchQuery, setSearchQuery] = useState('');
   // Session lives in memory only (not localStorage) so an XSS cannot read the token
   // from storage; the trade-off is that a page reload ends the session.
   const [session, setSession] = useState(null);
@@ -36,8 +49,7 @@ function App() {
         return;
       }
       setHash(newHash);
-      const catalogPage = parseCatalogPage(newHash);
-      if (catalogPage) setLastCatalogPage(catalogPage);
+      if (isListHash(newHash)) setLastListHash(newHash);
       window.scrollTo(0, 0);
     };
     window.addEventListener('hashchange', onHashChange);
@@ -50,8 +62,8 @@ function App() {
   };
 
   // Logging in from #favoritos keeps the user there; otherwise go to the catalog
-  const handleLoginSuccess = (token, username) => {
-    setSession({ token, username });
+  const handleLoginSuccess = (token, username, role) => {
+    setSession({ token, username, role });
     if (hash !== '#favoritos') goTo('#catalogo');
   };
 
@@ -65,10 +77,13 @@ function App() {
   // Only numeric ids reach the API; anything else falls through to the default screen
   const bookMatch = hash.match(/^#libro\/(\d{1,18})$/);
   if (bookMatch) {
+    const back = BACK_TARGETS[lastListHash] ?? CATALOG_BACK;
     return (
       <BookDetail
         bookId={Number(bookMatch[1])}
-        backHref={`#catalogo/${lastCatalogPage}`}
+        backHref={lastListHash}
+        backLabel={back.label}
+        navActive={back.nav}
         session={session}
       />
     );
@@ -84,10 +99,10 @@ function App() {
   if (hash === '#buscar') {
     return (
       <BookSearch
-        token={session?.token}
-        currentUser={session?.username}
+        session={session}
         onLogout={handleLogout}
-        onNavigate={(dest) => goTo(`#${dest}`)}
+        initialQuery={searchQuery}
+        onQueryChange={setSearchQuery}
       />
     );
   }
@@ -103,8 +118,7 @@ function App() {
   if (hash === '#favoritos') {
     return (
       <Favorites
-        token={session.token}
-        currentUser={session.username}
+        session={session}
         onLogout={handleLogout}
         onNavigate={(dest) => goTo(`#${dest}`)}
       />

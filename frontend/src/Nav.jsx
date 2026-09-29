@@ -11,8 +11,7 @@ export default function Nav({ active, session }) {
                     <span className="logo-tagline">LIBRERÍA & EDITORIAL</span>
                 </div>
                 <nav className="booksaw-menu">
-                    <a href="#inicio" className={itemClass('inicio')}>INICIO</a>
-                    <a href="#catalogo" className={itemClass('catalogo')}>CATÁLOGO</a>
+                    <a href="#catalogo" className={itemClass('catalogo')}>RECOMENDADOS</a>
                     <a href="#buscar" className={`${itemClass('buscar')} nav-search-item`}>
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="11" cy="11" r="7.5"></circle>

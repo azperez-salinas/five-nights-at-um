@@ -5,6 +5,7 @@ import Favorites from './Favorites';
 import Login from './Login';
 import Profile from './Profile';
 import Register from './Register';
+import BookSearch from './BookSearch'
 
 // #catalogo -> 1, #catalogo/N -> N (N >= 1), anything else -> null
 const parseCatalogPage = (hash) => {
@@ -80,6 +81,17 @@ function App() {
       />
     );
   }
+  if (hash === '#buscar') {
+    return (
+      <BookSearch
+        token={session?.token}
+        currentUser={session?.username}
+        onLogout={handleLogout}
+        onNavigate={(dest) => goTo(`#${dest}`)}
+      />
+    );
+  }
+
   if (hash === '#login' || (hash === '#favoritos' && !session)) {
     return (
       <Login

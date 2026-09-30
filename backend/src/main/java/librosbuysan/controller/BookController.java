@@ -34,9 +34,9 @@ public class BookController {
         return bookService.getCatalog(page);
     }
 
-    // RF9: busqueda por texto libre (titulo, autor o ISBN). Restringido a
-    // rol COMPRADOR: la regla vive centralizada en SecurityConfig (RS1/RS9),
-    // no aca, para que toda la autorizacion de la app se pueda auditar en un
+    // RF9: busqueda por texto libre (titulo, autor o ISBN). Publica, igual que
+    // el catalogo: la regla vive centralizada en SecurityConfig (RS1/RS9), no
+    // aca, para que toda la autorizacion de la app se pueda auditar en un
     // solo lugar.
     @GetMapping("/search")
     public CatalogPage search(@RequestParam String q, @RequestParam(defaultValue = "1") int page) {

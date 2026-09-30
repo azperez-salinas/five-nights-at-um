@@ -20,7 +20,7 @@ const BACK_TARGETS = {
   '#buscar': { nav: 'buscar', label: 'BÚSQUEDA' },
   '#favoritos': { nav: 'favoritos', label: 'FAVORITOS' },
 };
-const CATALOG_BACK = { nav: 'catalogo', label: 'RECOMENDADOS' };
+const CATALOG_BACK = { nav: 'catalogo', label: 'DESTACADOS' };
 
 const goTo = (hash) => {
   window.location.hash = hash;
@@ -124,8 +124,9 @@ function App() {
       />
     );
   }
-  if (session) return <Catalog page={1} session={session} />;
-  return <Register onAuthenticated={handleAuthenticated} />;
+  if (hash === '#registro') return <Register onAuthenticated={handleAuthenticated} />;
+  // Visitors can browse without an account: the catalog is the landing page for everyone
+  return <Catalog page={1} session={session} />;
 }
 
 export default App;

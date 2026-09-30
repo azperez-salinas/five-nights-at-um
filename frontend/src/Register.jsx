@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Nav from './Nav';
 import './Register.css';
 
 export default function Register({ onAuthenticated }) {
@@ -81,22 +82,7 @@ export default function Register({ onAuthenticated }) {
 
     return (
         <div className="booksaw-page">
-            {/* Barra superior de navegación estilo BookSaw */}
-            <header className="booksaw-nav">
-                <div className="booksaw-nav-container">
-                    <div className="booksaw-logo">
-                        <span className="logo-title">LOS LIBROS DE BUYSAN</span>
-                        <span className="logo-tagline">LIBRERÍA & EDITORIAL</span>
-                    </div>
-                    <nav className="booksaw-menu">
-                        <a href="#inicio" className="nav-item active">INICIO</a>
-                        <a href="#novedades" className="nav-item">NOVEDADES</a>
-                        <a href="#temas" className="nav-item">TEMAS</a>
-                        <a href="#colecciones" className="nav-item">COLECCIONES</a>
-                        <a href="#nosotros" className="nav-item">SOBRE NOSOTROS</a>
-                    </nav>
-                </div>
-            </header>
+            <Nav active="registro" />
 
             {/* Contenido principal en 2 columnas */}
             <main className="booksaw-main">

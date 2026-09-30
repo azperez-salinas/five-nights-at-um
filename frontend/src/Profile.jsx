@@ -126,7 +126,7 @@ export default function Profile({ session, onUnauthorized }) {
 
                     {!session && (
                         <p className="card-subtitle">
-                            Tenés que iniciar sesión para ver tu perfil. <a href="#inicio" className="login-link">Crear cuenta</a>
+                            Tenés que iniciar sesión para ver tu perfil. <a href="#registro" className="login-link">Crear cuenta</a>
                         </p>
                     )}
 

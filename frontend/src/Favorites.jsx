@@ -116,13 +116,13 @@ export default function Favorites({ session, onLogout, onNavigate }) {
                                 <div className="favorites-empty-card">
                                     <h3 className="empty-title">Aún no tenés libros guardados</h3>
                                     <p className="empty-desc">
-                                        Mirá los recomendados y tocá el corazón para armar tu lista de lecturas preferidas.
+                                        Mirá los destacados y tocá el corazón para armar tu lista de lecturas preferidas.
                                     </p>
                                     <button
                                         className="editorial-action-btn"
                                         onClick={() => onNavigate('catalogo')}
                                     >
-                                        VER RECOMENDADOS
+                                        VER DESTACADOS
                                     </button>
                                 </div>
                             ) : (

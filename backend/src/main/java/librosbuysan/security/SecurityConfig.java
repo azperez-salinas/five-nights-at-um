@@ -58,15 +58,12 @@ public class SecurityConfig {
                         // terminaba devolviendo 401 "No autenticado").
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        // RF9/RS1/RS5/RS9/RS19: la busqueda es la una
-                        // operacion de books restringida por rol, y su regla
-                        // tiene que evaluarse ANTES que el permitAll general
-                        // de /api/books/** (Spring Security aplica la
-                        // primera regla que matchea la ruta+metodo).
-                        .requestMatchers(HttpMethod.GET, "/api/books/search").hasRole("COMPRADOR")
-                        // Catalogo (R7) y detalle de libro siguen publicos;
-                        // el filtro de RS34 (libreria deshabilitada) se
-                        // aplica en la query, no en la autorizacion.
+                        // Catalogo (R7), busqueda (RF9) y detalle de libro son
+                        // publicos: un visitante puede explorar sin cuenta y
+                        // solo necesita registrarse para usar favoritos. El
+                        // filtro de RS34 (libreria deshabilitada) se aplica en
+                        // la query, no en la autorizacion. Solo GET: cualquier
+                        // otro verbo cae en el deny-by-default de abajo.
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
                         // RF12/RS1/RS5/RS9/RS19: favoritos es una
                         // funcionalidad exclusiva del COMPRADOR en sus tres

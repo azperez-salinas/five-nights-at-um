@@ -30,6 +30,8 @@ export default function Catalog({ page, session }) {
     // Favorites are a COMPRADOR-only feature (the backend answers 403 to DUENO)
     const token = session?.token;
     const isComprador = session?.role === 'COMPRADOR';
+    // DUENO accounts never get favorites; visitors see the heart and are sent to sign up
+    const showHeart = !session || isComprador;
     const [favoriteIds, setFavoriteIds] = useState(() => new Set());
     const [pendingId, setPendingId] = useState(null);
     const [favError, setFavError] = useState('');
@@ -50,6 +52,10 @@ export default function Catalog({ page, session }) {
     }, [isComprador, token]);
 
     const toggleFavorite = async (book) => {
+        if (!session) {
+            window.location.hash = '#registro';
+            return;
+        }
         const isFav = favoriteIds.has(book.id);
         setFavError('');
         setPendingId(book.id);
@@ -85,7 +91,7 @@ export default function Catalog({ page, session }) {
             <Nav active="catalogo" session={session} />
 
             <main className="catalog-main">
-                <h1 className="catalog-title">Recomendados</h1>
+                <h1 className="catalog-title">Destacados</h1>
 
                 {errorMsg && (
                     <div className="alert-box alert-error" role="alert">
@@ -113,7 +119,7 @@ export default function Catalog({ page, session }) {
                                             <h3 className="caption-title">{book.titulo}</h3>
                                             <p className="caption-author">{book.autor}</p>
                                         </a>
-                                        {isComprador && (
+                                        {showHeart && (
                                             <button
                                                 type="button"
                                                 className="caption-heart-btn"

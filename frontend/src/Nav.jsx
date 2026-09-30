@@ -11,7 +11,7 @@ export default function Nav({ active, session }) {
                     <span className="logo-tagline">LIBRERÍA & EDITORIAL</span>
                 </div>
                 <nav className="booksaw-menu">
-                    <a href="#catalogo" className={itemClass('catalogo')}>RECOMENDADOS</a>
+                    <a href="#catalogo" className={itemClass('catalogo')}>DESTACADOS</a>
                     <a href="#buscar" className={`${itemClass('buscar')} nav-search-item`}>
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="11" cy="11" r="7.5"></circle>
@@ -29,7 +29,10 @@ export default function Nav({ active, session }) {
                             <a href="#logout" className="nav-item">CERRAR SESIÓN</a>
                         </>
                     ) : (
-                        <a href="#login" className="nav-item">INICIAR SESIÓN</a>
+                        <>
+                            <a href="#login" className={itemClass('login')}>INICIAR SESIÓN</a>
+                            <a href="#registro" className={itemClass('registro')}>REGISTRARSE</a>
+                        </>
                     )}
                 </nav>
             </div>

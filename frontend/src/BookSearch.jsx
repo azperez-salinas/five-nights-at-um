@@ -127,7 +127,7 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
 
     const handleToggleFavorite = async (book) => {
         if (!token) {
-            showToast('Iniciá sesión para guardar favoritos');
+            window.location.hash = '#registro';
             return;
         }
         const isFav = isFavorite(book.id);

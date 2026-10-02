@@ -35,7 +35,16 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
         }
     };
 
-    // Ejecutar búsqueda por texto libre
+    // Ejecutar búsqueda por texto libre contra el endpoint real del backend
+    // (GET /api/books/search), que ya busca en TODA la base por
+    // titulo/autor/ISBN, no solo en los libros ya cargados en pantalla.
+    // Antes esta funcion tenia un fallback que filtraba en el navegador
+    // sobre "allCatalog" (la primera pagina del catalogo, 12 libros): como
+    // ese endpoint devolvia 401 (la busqueda requeria login) el fallback se
+    // disparaba siempre, asi que una busqueda por ISBN o titulo que no
+    // estuviera entre esos 12 libros nunca aparecia aunque existiera en la
+    // base. Ahora que /api/books/search es publico (no requiere token), ese
+    // fallback ya no hace falta.
     const executeSearch = async (queryText) => {
         const cleanQuery = queryText.trim();
         if (!cleanQuery) {
@@ -46,40 +55,18 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
         setLoading(true);
         try {
             const encoded = encodeURIComponent(cleanQuery);
-
-            // Intentar endpoint de búsqueda
-            let res = await fetch(`http://localhost:8080/api/books/search?q=${encoded}`);
-
-            if (!res.ok && res.status === 404) {
-                res = await fetch(`http://localhost:8080/api/books?search=${encoded}`);
-            }
-            if (!res.ok && res.status === 404) {
-                res = await fetch(`http://localhost:8080/api/books?q=${encoded}`);
-            }
-
+            const res = await fetch(`http://localhost:8080/api/books/search?q=${encoded}`);
             if (res.ok) {
                 const data = await res.json();
-                const items = data.items || data || [];
-                setBooks(items);
+                setBooks(data.items || []);
             } else {
-                // Fallback defensivo en frontend
-                const lower = cleanQuery.toLowerCase();
-                const filtered = allCatalog.filter((b) =>
-                    (b.titulo && b.titulo.toLowerCase().includes(lower)) ||
-                    (b.autor && b.autor.toLowerCase().includes(lower)) ||
-                    (b.isbn && b.isbn.toLowerCase().includes(lower))
-                );
-                setBooks(filtered);
+                // RS31/RS38: no se exponen detalles del error al usuario,
+                // solo se muestra "sin resultados".
+                setBooks([]);
             }
         } catch (err) {
             console.error(err);
-            const lower = cleanQuery.toLowerCase();
-            const filtered = allCatalog.filter((b) =>
-                (b.titulo && b.titulo.toLowerCase().includes(lower)) ||
-                (b.autor && b.autor.toLowerCase().includes(lower)) ||
-                (b.isbn && b.isbn.toLowerCase().includes(lower))
-            );
-            setBooks(filtered);
+            setBooks([]);
         } finally {
             setLoading(false);
         }

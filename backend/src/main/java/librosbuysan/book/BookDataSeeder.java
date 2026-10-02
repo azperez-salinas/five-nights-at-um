@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.List;
-import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -40,12 +39,6 @@ public class BookDataSeeder implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(BookDataSeeder.class);
     private static final String SEED_FILE = "data/Bookseed.json";
 
-    // Cuantos libros del final de la lista van a la libreria deshabilitada
-    // de prueba. El resto se reparte entre las librerias habilitadas. Un
-    // numero chico y facil de reconocer para poder verificar a mano el
-    // filtro de RS34 (esos libros no deben aparecer en catalogo/busqueda).
-    private static final int BOOKS_FOR_DISABLED_LIBRARY = 15;
-
     private final BookRepo bookRepo;
     private final LibraryRepo libraryRepo;
     private final UserRepo userRepo;
@@ -75,10 +68,13 @@ public class BookDataSeeder implements CommandLineRunner {
             seedRecords = objectMapper.readValue(input, new TypeReference<List<BookSeedRecord>>() {});
         }
 
-        // Librerias de prueba para poder ejercitar RS34: dos habilitadas
-        // (donde va la mayoria del catalogo, repartido round-robin) y una
-        // deshabilitada (con un grupo chico de libros) para verificar que
-        // sus libros dejan de verse en catalogo/busqueda/detalle.
+        // Librerias de prueba para poder ejercitar RS34: dos habilitadas y
+        // una deshabilitada. Cada libreria cataloga el catalogo COMPLETO del
+        // seed como filas propias (mismo isbn/titulo/autor/etc., id
+        // distinto): las librerias no comparten filas de Book entre si, asi
+        // que un libro de una libreria deshabilitada sigue existiendo igual
+        // en las habilitadas bajo un id distinto, lo que permite probar que
+        // RS34 filtra por libreria y no por contenido del libro.
         Library libreriaA = createSeedLibrary("libreria.central.seed", "libreria.central.seed@example.test",
                 "Libreria Central (seed)");
         Library libreriaB = createSeedLibrary("libreria.norte.seed", "libreria.norte.seed@example.test",
@@ -88,28 +84,19 @@ public class BookDataSeeder implements CommandLineRunner {
         libreriaDeshabilitada.disable();
         libraryRepo.save(libreriaDeshabilitada);
 
-        int total = seedRecords.size();
-        int enabledCount = Math.max(total - BOOKS_FOR_DISABLED_LIBRARY, 0);
+        List<Library> librerias = List.of(libreriaA, libreriaB, libreriaDeshabilitada);
 
-        // IntStream.range en vez de stream().map(record -> indexOf(record)):
-        // los BookSeedRecord son records (igualdad por valor), asi que si dos
-        // filas del JSON tuvieran el mismo contenido, indexOf devolveria
-        // siempre la primera coincidencia y asignaria mal la libreria.
-        List<Book> books = IntStream.range(0, total)
-                .mapToObj(index -> {
-                    BookSeedRecord record = seedRecords.get(index);
-                    if (index >= enabledCount) {
-                        return record.toEntity(libreriaDeshabilitada);
-                    }
-                    // Round-robin entre las dos librerias habilitadas.
-                    Library library = (index % 2 == 0) ? libreriaA : libreriaB;
-                    return record.toEntity(library);
-                })
+        // Una copia de cada libro del seed por cada libreria: el isbn ya no
+        // es unique en la tabla (ver Book.java), asi que puede repetirse
+        // entre las copias de distintas librerias sin violar ninguna
+        // restriccion.
+        List<Book> books = librerias.stream()
+                .flatMap(library -> seedRecords.stream().map(record -> record.toEntity(library)))
                 .toList();
 
         bookRepo.saveAll(books);
-        log.info("Catalogo de libros inicializado con {} registros ({} en libreria deshabilitada de prueba).",
-                books.size(), total - enabledCount);
+        log.info("Catalogo de libros inicializado con {} registros ({} librerias x {} libros cada una).",
+                books.size(), librerias.size(), seedRecords.size());
     }
 
     /**

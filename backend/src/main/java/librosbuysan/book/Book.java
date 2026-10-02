@@ -15,9 +15,14 @@ import librosbuysan.library.Library;
 /**
  * Catalogo de libros disponibles en la plataforma.
  *
- * El ISBN es el identificador de negocio (unique, no null): es lo que
- * cualquier integracion externa (o el propio dueno de la libreria) usara
- * para referirse a un libro, por lo que nunca deberia repetirse ni faltar.
+ * Cada libreria cataloga sus propios libros como filas independientes: el
+ * mismo titulo (mismo ISBN incluido) puede existir en varias librerias a la
+ * vez, cada copia con su propio id. Por eso el ISBN ya NO es unique a nivel
+ * de tabla (antes si lo era, cuando cada libro pertenecia a una sola
+ * libreria del sistema); sigue siendo obligatorio como dato del libro.
+ *
+ * Esta manera de crear los datos (por script) cambiara en el sprint2
+ * ya que el dueño debera cargar los datos por csv
  */
 @Entity
 @Table(name = "books")
@@ -34,7 +39,7 @@ public class Book {
     @JoinColumn(name = "library_id", nullable = false)
     private Library library;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, length = 20)
     private String isbn;
 
     @Column(nullable = false, length = 255)

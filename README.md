@@ -21,7 +21,7 @@ Esto levanta tres contenedores:
 |---|---|---|
 | Frontend | 5173 | http://localhost:5173 |
 | Backend | 8080 | http://localhost:8080 |
-| Postgres | 5432 | `localhost:5432` (expuesto solo para desarrollo local, ej. conectar con DBeaver) |
+| Postgres | 5445 (configurable con `DB_PORT` en `.env`) | `localhost:5445` (expuesto solo para desarrollo local, ej. conectar con DBeaver). Si ese puerto tambien esta ocupado, cambia `DB_PORT` en tu `.env`. |
 
 ### 3. Datos de prueba
 

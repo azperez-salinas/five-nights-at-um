@@ -1,0 +1,1820 @@
+[
+  {
+    "isbn": "9789900000013",
+    "titulo": "Don Quijote de la Mancha",
+    "autor": "Miguel de Cervantes",
+    "fechaPublicacion": "1605-01-01",
+    "cantidadPaginas": 863,
+    "descripcion": "Un hidalgo enloquecido por las novelas de caballerias sale a repararlas junto a su fiel escudero.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000013-L.jpg"
+  },
+  {
+    "isbn": "9789900000020",
+    "titulo": "Hamlet",
+    "autor": "William Shakespeare",
+    "fechaPublicacion": "1601-01-01",
+    "cantidadPaginas": 342,
+    "descripcion": "Un principe danes busca vengar a su padre asesinado mientras duda entre la accion y la reflexion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000020-L.jpg"
+  },
+  {
+    "isbn": "9789900000037",
+    "titulo": "Crimen y castigo",
+    "autor": "Fiodor Dostoievski",
+    "fechaPublicacion": "1866-01-01",
+    "cantidadPaginas": 671,
+    "descripcion": "Un estudiante pobre comete un asesinato y carga con el peso moral de su culpa.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000037-L.jpg"
+  },
+  {
+    "isbn": "9789900000044",
+    "titulo": "Guerra y paz",
+    "autor": "Leon Tolstoi",
+    "fechaPublicacion": "1869-01-01",
+    "cantidadPaginas": 1225,
+    "descripcion": "Varias familias rusas atraviesan las guerras napoleonicas y sus consecuencias sociales.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000044-L.jpg"
+  },
+  {
+    "isbn": "9789900000051",
+    "titulo": "Orgullo y prejuicio",
+    "autor": "Jane Austen",
+    "fechaPublicacion": "1813-01-01",
+    "cantidadPaginas": 432,
+    "descripcion": "Clase social y sentimientos chocan en el cortejo entre Elizabeth Bennet y el senor Darcy.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000051-L.jpg"
+  },
+  {
+    "isbn": "9789900000068",
+    "titulo": "Madame Bovary",
+    "autor": "Gustave Flaubert",
+    "fechaPublicacion": "1856-01-01",
+    "cantidadPaginas": 384,
+    "descripcion": "Una mujer insatisfecha busca escapar del tedio de su matrimonio provinciano.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000068-L.jpg"
+  },
+  {
+    "isbn": "9789900000075",
+    "titulo": "Los miserables",
+    "autor": "Victor Hugo",
+    "fechaPublicacion": "1862-01-01",
+    "cantidadPaginas": 1463,
+    "descripcion": "Un ex convicto busca redimirse en la Francia convulsionada del siglo XIX.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000075-L.jpg"
+  },
+  {
+    "isbn": "9789900000082",
+    "titulo": "Moby Dick",
+    "autor": "Herman Melville",
+    "fechaPublicacion": "1851-01-01",
+    "cantidadPaginas": 635,
+    "descripcion": "La obsesiva persecucion de una ballena blanca por parte del capitan Ahab.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000082-L.jpg"
+  },
+  {
+    "isbn": "9789900000099",
+    "titulo": "Ana Karenina",
+    "autor": "Leon Tolstoi",
+    "fechaPublicacion": "1877-01-01",
+    "cantidadPaginas": 864,
+    "descripcion": "Un amor prohibido desafia las convenciones de la aristocracia rusa.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000099-L.jpg"
+  },
+  {
+    "isbn": "9789900000105",
+    "titulo": "Grandes esperanzas",
+    "autor": "Charles Dickens",
+    "fechaPublicacion": "1861-01-01",
+    "cantidadPaginas": 544,
+    "descripcion": "Un joven huerfano ve transformada su vida por una fortuna misteriosa.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000105-L.jpg"
+  },
+  {
+    "isbn": "9789900000112",
+    "titulo": "Cumbres borrascosas",
+    "autor": "Emily Bronte",
+    "fechaPublicacion": "1847-01-01",
+    "cantidadPaginas": 416,
+    "descripcion": "Una pasion destructiva marca a dos familias en los paramos ingleses.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000112-L.jpg"
+  },
+  {
+    "isbn": "9789900000129",
+    "titulo": "Jane Eyre",
+    "autor": "Charlotte Bronte",
+    "fechaPublicacion": "1847-01-01",
+    "cantidadPaginas": 500,
+    "descripcion": "Una institutriz independiente enfrenta secretos oscuros en la mansion donde trabaja.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000129-L.jpg"
+  },
+  {
+    "isbn": "9789900000136",
+    "titulo": "El retrato de Dorian Gray",
+    "autor": "Oscar Wilde",
+    "fechaPublicacion": "1890-01-01",
+    "cantidadPaginas": 254,
+    "descripcion": "Un joven conserva su belleza eterna mientras su retrato envejece y se corrompe por el.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000136-L.jpg"
+  },
+  {
+    "isbn": "9789900000143",
+    "titulo": "Frankenstein",
+    "autor": "Mary Shelley",
+    "fechaPublicacion": "1818-01-01",
+    "cantidadPaginas": 280,
+    "descripcion": "Un cientifico crea una criatura que termina volviendose contra su creador.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000143-L.jpg"
+  },
+  {
+    "isbn": "9789900000150",
+    "titulo": "Dracula",
+    "autor": "Bram Stoker",
+    "fechaPublicacion": "1897-01-01",
+    "cantidadPaginas": 418,
+    "descripcion": "Un conde transilvano lleva el terror vampirico hasta Inglaterra.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000150-L.jpg"
+  },
+  {
+    "isbn": "9789900000167",
+    "titulo": "Rojo y negro",
+    "autor": "Stendhal",
+    "fechaPublicacion": "1830-01-01",
+    "cantidadPaginas": 576,
+    "descripcion": "Un joven ambicioso intenta ascender socialmente en la Francia de la Restauracion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000167-L.jpg"
+  },
+  {
+    "isbn": "9789900000174",
+    "titulo": "El conde de Montecristo",
+    "autor": "Alejandro Dumas",
+    "fechaPublicacion": "1844-01-01",
+    "cantidadPaginas": 1276,
+    "descripcion": "Un hombre injustamente encarcelado planea una elaborada venganza tras escapar.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000174-L.jpg"
+  },
+  {
+    "isbn": "9789900000181",
+    "titulo": "Los tres mosqueteros",
+    "autor": "Alejandro Dumas",
+    "fechaPublicacion": "1844-01-01",
+    "cantidadPaginas": 700,
+    "descripcion": "Las aventuras de un joven gascon que se une a los mosqueteros del rey.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000181-L.jpg"
+  },
+  {
+    "isbn": "9789900000198",
+    "titulo": "Candido",
+    "autor": "Voltaire",
+    "fechaPublicacion": "1759-01-01",
+    "cantidadPaginas": 144,
+    "descripcion": "Un joven ingenuo recorre el mundo cuestionando el optimismo filosofico de su maestro.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000198-L.jpg"
+  },
+  {
+    "isbn": "9789900000204",
+    "titulo": "El extranjero",
+    "autor": "Albert Camus",
+    "fechaPublicacion": "1942-01-01",
+    "cantidadPaginas": 159,
+    "descripcion": "Un hombre indiferente enfrenta un crimen y el absurdo de la existencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000204-L.jpg"
+  },
+  {
+    "isbn": "9789900000211",
+    "titulo": "La metamorfosis",
+    "autor": "Franz Kafka",
+    "fechaPublicacion": "1915-01-01",
+    "cantidadPaginas": 96,
+    "descripcion": "Un hombre despierta convertido en un insecto y observa el colapso de su vida familiar.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000211-L.jpg"
+  },
+  {
+    "isbn": "9789900000228",
+    "titulo": "El proceso",
+    "autor": "Franz Kafka",
+    "fechaPublicacion": "1925-01-01",
+    "cantidadPaginas": 304,
+    "descripcion": "Un hombre es arrestado y juzgado por un crimen que nunca se le revela.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000228-L.jpg"
+  },
+  {
+    "isbn": "9789900000235",
+    "titulo": "Ulises",
+    "autor": "James Joyce",
+    "fechaPublicacion": "1922-01-01",
+    "cantidadPaginas": 730,
+    "descripcion": "Un dia en Dublin narrado con un experimental flujo de conciencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000235-L.jpg"
+  },
+  {
+    "isbn": "9789900000242",
+    "titulo": "Por el camino de Swann",
+    "autor": "Marcel Proust",
+    "fechaPublicacion": "1913-01-01",
+    "cantidadPaginas": 528,
+    "descripcion": "Primer volumen de una vasta reflexion sobre la memoria y el tiempo perdido.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000242-L.jpg"
+  },
+  {
+    "isbn": "9789900000259",
+    "titulo": "Middlemarch",
+    "autor": "George Eliot",
+    "fechaPublicacion": "1871-01-01",
+    "cantidadPaginas": 880,
+    "descripcion": "La vida de un pueblo ingles retratada a traves de sus ambiciones y matrimonios.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000259-L.jpg"
+  },
+  {
+    "isbn": "9789900000266",
+    "titulo": "Robinson Crusoe",
+    "autor": "Daniel Defoe",
+    "fechaPublicacion": "1719-01-01",
+    "cantidadPaginas": 320,
+    "descripcion": "Un naufrago sobrevive durante anios en una isla desierta.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000266-L.jpg"
+  },
+  {
+    "isbn": "9789900000273",
+    "titulo": "Los viajes de Gulliver",
+    "autor": "Jonathan Swift",
+    "fechaPublicacion": "1726-01-01",
+    "cantidadPaginas": 306,
+    "descripcion": "Un marino recorre paises fantasticos que satirizan la sociedad de su epoca.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000273-L.jpg"
+  },
+  {
+    "isbn": "9789900000280",
+    "titulo": "Las aventuras de Huckleberry Finn",
+    "autor": "Mark Twain",
+    "fechaPublicacion": "1884-01-01",
+    "cantidadPaginas": 366,
+    "descripcion": "Un joven y un esclavo fugitivo navegan el rio Mississippi en busca de libertad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000280-L.jpg"
+  },
+  {
+    "isbn": "9789900000297",
+    "titulo": "Las aventuras de Tom Sawyer",
+    "autor": "Mark Twain",
+    "fechaPublicacion": "1876-01-01",
+    "cantidadPaginas": 274,
+    "descripcion": "Las travesuras de un nino en un pueblo a orillas del Mississippi.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000297-L.jpg"
+  },
+  {
+    "isbn": "9789900000303",
+    "titulo": "El gran Gatsby",
+    "autor": "F. Scott Fitzgerald",
+    "fechaPublicacion": "1925-01-01",
+    "cantidadPaginas": 180,
+    "descripcion": "Un misterioso millonario persigue un amor perdido en la era del jazz.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000303-L.jpg"
+  },
+  {
+    "isbn": "9789900000310",
+    "titulo": "Matar a un ruisenor",
+    "autor": "Harper Lee",
+    "fechaPublicacion": "1960-01-01",
+    "cantidadPaginas": 336,
+    "descripcion": "Una nina aprende sobre la injusticia racial en el sur de Estados Unidos.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000310-L.jpg"
+  },
+  {
+    "isbn": "9789900000327",
+    "titulo": "Rebelion en la granja",
+    "autor": "George Orwell",
+    "fechaPublicacion": "1945-01-01",
+    "cantidadPaginas": 152,
+    "descripcion": "Los animales de una granja se rebelan contra sus duenios y crean un nuevo orden opresivo.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000327-L.jpg"
+  },
+  {
+    "isbn": "9789900000334",
+    "titulo": "1984",
+    "autor": "George Orwell",
+    "fechaPublicacion": "1949-01-01",
+    "cantidadPaginas": 328,
+    "descripcion": "Un regimen totalitario vigila y controla cada pensamiento de sus ciudadanos.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000334-L.jpg"
+  },
+  {
+    "isbn": "9789900000341",
+    "titulo": "Un mundo feliz",
+    "autor": "Aldous Huxley",
+    "fechaPublicacion": "1932-01-01",
+    "cantidadPaginas": 288,
+    "descripcion": "Una sociedad futura sacrifica la libertad individual a cambio de estabilidad y placer.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000341-L.jpg"
+  },
+  {
+    "isbn": "9789900000358",
+    "titulo": "Fausto",
+    "autor": "Johann Wolfgang von Goethe",
+    "fechaPublicacion": "1808-01-01",
+    "cantidadPaginas": 500,
+    "descripcion": "Un sabio hace un pacto con el diablo a cambio de conocimiento absoluto.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000358-L.jpg"
+  },
+  {
+    "isbn": "9789900000365",
+    "titulo": "La tregua",
+    "autor": "Mario Benedetti",
+    "fechaPublicacion": "1960-01-01",
+    "cantidadPaginas": 208,
+    "descripcion": "Un viudo montevideano de mediana edad se enamora de una joven empleada de su oficina.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000365-L.jpg"
+  },
+  {
+    "isbn": "9789900000372",
+    "titulo": "Gracias por el fuego",
+    "autor": "Mario Benedetti",
+    "fechaPublicacion": "1965-01-01",
+    "cantidadPaginas": 320,
+    "descripcion": "Un hijo enfrenta el legado corrupto de su padre en el Montevideo de los anios 60.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000372-L.jpg"
+  },
+  {
+    "isbn": "9789900000389",
+    "titulo": "Montevideanos",
+    "autor": "Mario Benedetti",
+    "fechaPublicacion": "1959-01-01",
+    "cantidadPaginas": 200,
+    "descripcion": "Cuentos que retratan la vida cotidiana y las frustraciones de la clase media montevideana.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000389-L.jpg"
+  },
+  {
+    "isbn": "9789900000396",
+    "titulo": "El pais de la cola de paja",
+    "autor": "Mario Benedetti",
+    "fechaPublicacion": "1960-01-01",
+    "cantidadPaginas": 150,
+    "descripcion": "Ensayo sobre la hipocresia y la mediocridad instalada en la sociedad uruguaya.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000396-L.jpg"
+  },
+  {
+    "isbn": "9789900000402",
+    "titulo": "Las venas abiertas de America Latina",
+    "autor": "Eduardo Galeano",
+    "fechaPublicacion": "1971-01-01",
+    "cantidadPaginas": 400,
+    "descripcion": "Ensayo historico sobre la explotacion economica de America Latina desde la colonia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000402-L.jpg"
+  },
+  {
+    "isbn": "9789900000419",
+    "titulo": "El libro de los abrazos",
+    "autor": "Eduardo Galeano",
+    "fechaPublicacion": "1989-01-01",
+    "cantidadPaginas": 280,
+    "descripcion": "Breves relatos y reflexiones poeticas sobre la memoria, el amor y la identidad latinoamericana.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000419-L.jpg"
+  },
+  {
+    "isbn": "9789900000426",
+    "titulo": "Memoria del fuego",
+    "autor": "Eduardo Galeano",
+    "fechaPublicacion": "1982-01-01",
+    "cantidadPaginas": 500,
+    "descripcion": "Trilogia que recorre la historia de America desde los mitos originarios hasta el siglo XX.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000426-L.jpg"
+  },
+  {
+    "isbn": "9789900000433",
+    "titulo": "El pozo",
+    "autor": "Juan Carlos Onetti",
+    "fechaPublicacion": "1939-01-01",
+    "cantidadPaginas": 96,
+    "descripcion": "Un hombre desencantado escribe sus memorias mientras cuestiona el sentido de su existencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000433-L.jpg"
+  },
+  {
+    "isbn": "9789900000440",
+    "titulo": "La vida breve",
+    "autor": "Juan Carlos Onetti",
+    "fechaPublicacion": "1950-01-01",
+    "cantidadPaginas": 320,
+    "descripcion": "Un empleado de publicidad crea una realidad paralela para escapar de su vida gris.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000440-L.jpg"
+  },
+  {
+    "isbn": "9789900000457",
+    "titulo": "Juntacadaveres",
+    "autor": "Juan Carlos Onetti",
+    "fechaPublicacion": "1964-01-01",
+    "cantidadPaginas": 280,
+    "descripcion": "La instalacion de un prostibulo desata el escandalo y la hipocresia de un pueblo ficticio.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000457-L.jpg"
+  },
+  {
+    "isbn": "9789900000464",
+    "titulo": "El astillero",
+    "autor": "Juan Carlos Onetti",
+    "fechaPublicacion": "1961-01-01",
+    "cantidadPaginas": 240,
+    "descripcion": "Un hombre intenta reflotar un astillero en ruinas como ultimo intento de dignidad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000464-L.jpg"
+  },
+  {
+    "isbn": "9789900000471",
+    "titulo": "Tierra de nadie",
+    "autor": "Juan Carlos Onetti",
+    "fechaPublicacion": "1941-01-01",
+    "cantidadPaginas": 200,
+    "descripcion": "Un mosaico de personajes desencantados retrata el Buenos Aires bohemio de los anios 40.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000471-L.jpg"
+  },
+  {
+    "isbn": "9789900000488",
+    "titulo": "Los adioses",
+    "autor": "Juan Carlos Onetti",
+    "fechaPublicacion": "1954-01-01",
+    "cantidadPaginas": 96,
+    "descripcion": "Un hombre enfermo se retira a un pueblo de montania rodeado de rumores y silencios.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000488-L.jpg"
+  },
+  {
+    "isbn": "9789900000495",
+    "titulo": "Cuentos completos",
+    "autor": "Juan Carlos Onetti",
+    "fechaPublicacion": "1994-01-01",
+    "cantidadPaginas": 500,
+    "descripcion": "Recopilacion de los relatos breves de uno de los grandes narradores rioplatenses.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000495-L.jpg"
+  },
+  {
+    "isbn": "9789900000501",
+    "titulo": "Ariel",
+    "autor": "Jose Enrique Rodo",
+    "fechaPublicacion": "1900-01-01",
+    "cantidadPaginas": 120,
+    "descripcion": "Ensayo que reflexiona sobre la identidad cultural latinoamericana frente al utilitarismo.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000501-L.jpg"
+  },
+  {
+    "isbn": "9789900000518",
+    "titulo": "Ismael",
+    "autor": "Eduardo Acevedo Diaz",
+    "fechaPublicacion": "1888-01-01",
+    "cantidadPaginas": 300,
+    "descripcion": "Novela historica ambientada en las luchas independentistas del Uruguay del siglo XIX.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000518-L.jpg"
+  },
+  {
+    "isbn": "9789900000525",
+    "titulo": "Cuentos de amor de locura y de muerte",
+    "autor": "Horacio Quiroga",
+    "fechaPublicacion": "1917-01-01",
+    "cantidadPaginas": 220,
+    "descripcion": "Relatos que exploran el horror y la fragilidad humana en la selva misionera.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000525-L.jpg"
+  },
+  {
+    "isbn": "9789900000532",
+    "titulo": "Los desterrados",
+    "autor": "Horacio Quiroga",
+    "fechaPublicacion": "1926-01-01",
+    "cantidadPaginas": 200,
+    "descripcion": "Historias de colonos y trabajadores marcados por la dureza de la selva.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000532-L.jpg"
+  },
+  {
+    "isbn": "9789900000549",
+    "titulo": "Anaconda",
+    "autor": "Horacio Quiroga",
+    "fechaPublicacion": "1921-01-01",
+    "cantidadPaginas": 180,
+    "descripcion": "Una asamblea de serpientes narra su lucha por sobrevivir frente al hombre.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000549-L.jpg"
+  },
+  {
+    "isbn": "9789900000556",
+    "titulo": "Cuentos de la selva",
+    "autor": "Horacio Quiroga",
+    "fechaPublicacion": "1918-01-01",
+    "cantidadPaginas": 150,
+    "descripcion": "Relatos infantiles protagonizados por animales de la selva sudamericana.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000556-L.jpg"
+  },
+  {
+    "isbn": "9789900000563",
+    "titulo": "Vivir adrede",
+    "autor": "Mario Benedetti",
+    "fechaPublicacion": "2007-01-01",
+    "cantidadPaginas": 176,
+    "descripcion": "Breves textos y reflexiones sobre el amor, el tiempo y la vejez.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000563-L.jpg"
+  },
+  {
+    "isbn": "9789900000570",
+    "titulo": "Las hortensias",
+    "autor": "Felisberto Hernandez",
+    "fechaPublicacion": "1949-01-01",
+    "cantidadPaginas": 100,
+    "descripcion": "Un hombre obsesionado con maniquies difumina los limites entre la realidad y la fantasia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000570-L.jpg"
+  },
+  {
+    "isbn": "9789900000587",
+    "titulo": "Nadie encendia las lamparas",
+    "autor": "Felisberto Hernandez",
+    "fechaPublicacion": "1947-01-01",
+    "cantidadPaginas": 200,
+    "descripcion": "Relatos donde lo cotidiano se desliza hacia lo extranio y lo onirico.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000587-L.jpg"
+  },
+  {
+    "isbn": "9789900000594",
+    "titulo": "La nave de los locos",
+    "autor": "Cristina Peri Rossi",
+    "fechaPublicacion": "1984-01-01",
+    "cantidadPaginas": 220,
+    "descripcion": "Un grupo de exiliados navega sin rumbo fijo en una alegoria del desarraigo.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000594-L.jpg"
+  },
+  {
+    "isbn": "9789900000600",
+    "titulo": "Solitario de amor",
+    "autor": "Cristina Peri Rossi",
+    "fechaPublicacion": "1988-01-01",
+    "cantidadPaginas": 150,
+    "descripcion": "La obsesion amorosa de un narrador hacia una mujer esquiva y libre.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000600-L.jpg"
+  },
+  {
+    "isbn": "9789900000617",
+    "titulo": "La novela luminosa",
+    "autor": "Mario Levrero",
+    "fechaPublicacion": "2005-01-01",
+    "cantidadPaginas": 550,
+    "descripcion": "Un escritor documenta su intento fallido de terminar una novela y su vida cotidiana.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000617-L.jpg"
+  },
+  {
+    "isbn": "9789900000624",
+    "titulo": "El discurso vacio",
+    "autor": "Mario Levrero",
+    "fechaPublicacion": "1996-01-01",
+    "cantidadPaginas": 130,
+    "descripcion": "Un ejercicio de caligrafia se transforma en una reflexion sobre la escritura y el yo.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000624-L.jpg"
+  },
+  {
+    "isbn": "9789900000631",
+    "titulo": "Los papeles salvajes",
+    "autor": "Marosa di Giorgio",
+    "fechaPublicacion": "1971-01-01",
+    "cantidadPaginas": 250,
+    "descripcion": "Poemas en prosa que mezclan la naturaleza, lo erotico y lo fantastico.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000631-L.jpg"
+  },
+  {
+    "isbn": "9789900000648",
+    "titulo": "Cien anios de soledad",
+    "autor": "Gabriel Garcia Marquez",
+    "fechaPublicacion": "1967-01-01",
+    "cantidadPaginas": 471,
+    "descripcion": "La saga de la familia Buendia a lo largo de generaciones en el pueblo de Macondo.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000648-L.jpg"
+  },
+  {
+    "isbn": "9789900000655",
+    "titulo": "El amor en los tiempos del colera",
+    "autor": "Gabriel Garcia Marquez",
+    "fechaPublicacion": "1985-01-01",
+    "cantidadPaginas": 348,
+    "descripcion": "Un amor postergado durante mas de medio siglo finalmente encuentra su oportunidad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000655-L.jpg"
+  },
+  {
+    "isbn": "9789900000662",
+    "titulo": "Cronica de una muerte anunciada",
+    "autor": "Gabriel Garcia Marquez",
+    "fechaPublicacion": "1981-01-01",
+    "cantidadPaginas": 122,
+    "descripcion": "Un pueblo entero conoce de antemano un crimen que nadie logra evitar.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000662-L.jpg"
+  },
+  {
+    "isbn": "9789900000679",
+    "titulo": "Rayuela",
+    "autor": "Julio Cortazar",
+    "fechaPublicacion": "1963-01-01",
+    "cantidadPaginas": 736,
+    "descripcion": "Una novela que puede leerse en varios ordenes, centrada en la busqueda existencial de Horacio Oliveira.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000679-L.jpg"
+  },
+  {
+    "isbn": "9789900000686",
+    "titulo": "Bestiario",
+    "autor": "Julio Cortazar",
+    "fechaPublicacion": "1951-01-01",
+    "cantidadPaginas": 176,
+    "descripcion": "Cuentos donde lo fantastico irrumpe en situaciones cotidianas.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000686-L.jpg"
+  },
+  {
+    "isbn": "9789900000693",
+    "titulo": "La casa de los espiritus",
+    "autor": "Isabel Allende",
+    "fechaPublicacion": "1982-01-01",
+    "cantidadPaginas": 448,
+    "descripcion": "Varias generaciones de una familia chilena atraviesan el amor, la politica y lo sobrenatural.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000693-L.jpg"
+  },
+  {
+    "isbn": "9789900000709",
+    "titulo": "Pedro Paramo",
+    "autor": "Juan Rulfo",
+    "fechaPublicacion": "1955-01-01",
+    "cantidadPaginas": 124,
+    "descripcion": "Un hombre busca a su padre en un pueblo habitado solo por fantasmas.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000709-L.jpg"
+  },
+  {
+    "isbn": "9789900000716",
+    "titulo": "La ciudad y los perros",
+    "autor": "Mario Vargas Llosa",
+    "fechaPublicacion": "1963-01-01",
+    "cantidadPaginas": 419,
+    "descripcion": "La violencia y el codigo de honor entre cadetes de un colegio militar limeno.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000716-L.jpg"
+  },
+  {
+    "isbn": "9789900000723",
+    "titulo": "Conversacion en La Catedral",
+    "autor": "Mario Vargas Llosa",
+    "fechaPublicacion": "1969-01-01",
+    "cantidadPaginas": 601,
+    "descripcion": "Dos hombres reconstruyen, en un bar, la corrupcion politica del Peru de los anios 50.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000723-L.jpg"
+  },
+  {
+    "isbn": "9789900000730",
+    "titulo": "El tunel",
+    "autor": "Ernesto Sabato",
+    "fechaPublicacion": "1948-01-01",
+    "cantidadPaginas": 150,
+    "descripcion": "Un pintor obsesivo confiesa el crimen pasional que cometio contra la unica mujer que lo comprendio.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000730-L.jpg"
+  },
+  {
+    "isbn": "9789900000747",
+    "titulo": "Sobre heroes y tumbas",
+    "autor": "Ernesto Sabato",
+    "fechaPublicacion": "1961-01-01",
+    "cantidadPaginas": 480,
+    "descripcion": "Varias historias entrelazadas exploran la locura, el amor y la historia argentina.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000747-L.jpg"
+  },
+  {
+    "isbn": "9789900000754",
+    "titulo": "Ficciones",
+    "autor": "Jorge Luis Borges",
+    "fechaPublicacion": "1944-01-01",
+    "cantidadPaginas": 174,
+    "descripcion": "Relatos que juegan con laberintos, espejos y bibliotecas infinitas.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000754-L.jpg"
+  },
+  {
+    "isbn": "9789900000761",
+    "titulo": "El Aleph",
+    "autor": "Jorge Luis Borges",
+    "fechaPublicacion": "1949-01-01",
+    "cantidadPaginas": 192,
+    "descripcion": "Cuentos que exploran el infinito, el tiempo y la identidad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000761-L.jpg"
+  },
+  {
+    "isbn": "9789900000778",
+    "titulo": "La casa verde",
+    "autor": "Mario Vargas Llosa",
+    "fechaPublicacion": "1966-01-01",
+    "cantidadPaginas": 432,
+    "descripcion": "Multiples historias se entrelazan alrededor de un prostibulo en la selva y el desierto peruanos.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000778-L.jpg"
+  },
+  {
+    "isbn": "9789900000785",
+    "titulo": "El senor Presidente",
+    "autor": "Miguel Angel Asturias",
+    "fechaPublicacion": "1946-01-01",
+    "cantidadPaginas": 316,
+    "descripcion": "Retrato de la vida bajo la sombra de un dictador latinoamericano.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000785-L.jpg"
+  },
+  {
+    "isbn": "9789900000792",
+    "titulo": "Como agua para chocolate",
+    "autor": "Laura Esquivel",
+    "fechaPublicacion": "1989-01-01",
+    "cantidadPaginas": 246,
+    "descripcion": "Una joven expresa sus emociones prohibidas a traves de la cocina familiar.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000792-L.jpg"
+  },
+  {
+    "isbn": "9789900000808",
+    "titulo": "La sombra del viento",
+    "autor": "Carlos Ruiz Zafon",
+    "fechaPublicacion": "2001-01-01",
+    "cantidadPaginas": 565,
+    "descripcion": "Un joven descubre un libro maldito que lo enreda en un misterio del Barcelona de posguerra.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000808-L.jpg"
+  },
+  {
+    "isbn": "9789900000815",
+    "titulo": "Los detectives salvajes",
+    "autor": "Roberto Bolano",
+    "fechaPublicacion": "1998-01-01",
+    "cantidadPaginas": 609,
+    "descripcion": "Dos poetas recorren America y Europa buscando a una escritora desaparecida.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000815-L.jpg"
+  },
+  {
+    "isbn": "9789900000822",
+    "titulo": "2666",
+    "autor": "Roberto Bolano",
+    "fechaPublicacion": "2004-01-01",
+    "cantidadPaginas": 1119,
+    "descripcion": "Una serie de crimenes sin resolver en una ciudad fronteriza articula cinco historias entrelazadas.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000822-L.jpg"
+  },
+  {
+    "isbn": "9789900000839",
+    "titulo": "Dona Barbara",
+    "autor": "Romulo Gallegos",
+    "fechaPublicacion": "1929-01-01",
+    "cantidadPaginas": 336,
+    "descripcion": "El enfrentamiento entre la civilizacion y la barbarie en los llanos venezolanos.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000839-L.jpg"
+  },
+  {
+    "isbn": "9789900000846",
+    "titulo": "Harry Potter y la piedra filosofal",
+    "autor": "J. K. Rowling",
+    "fechaPublicacion": "1997-01-01",
+    "cantidadPaginas": 223,
+    "descripcion": "Un nino descubre que es un mago y comienza su formacion en Hogwarts.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000846-L.jpg"
+  },
+  {
+    "isbn": "9789900000853",
+    "titulo": "Harry Potter y la camara secreta",
+    "autor": "J. K. Rowling",
+    "fechaPublicacion": "1998-01-01",
+    "cantidadPaginas": 251,
+    "descripcion": "Un peligro oculto amenaza a los estudiantes nacidos de muggles en Hogwarts.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000853-L.jpg"
+  },
+  {
+    "isbn": "9789900000860",
+    "titulo": "Harry Potter y el prisionero de Azkaban",
+    "autor": "J. K. Rowling",
+    "fechaPublicacion": "1999-01-01",
+    "cantidadPaginas": 317,
+    "descripcion": "Un preso fugado de la prision magica parece perseguir al joven mago.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000860-L.jpg"
+  },
+  {
+    "isbn": "9789900000877",
+    "titulo": "El codigo Da Vinci",
+    "autor": "Dan Brown",
+    "fechaPublicacion": "2003-01-01",
+    "cantidadPaginas": 454,
+    "descripcion": "Un simbologo investiga un asesinato que esconde un secreto religioso milenario.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000877-L.jpg"
+  },
+  {
+    "isbn": "9789900000884",
+    "titulo": "Angeles y demonios",
+    "autor": "Dan Brown",
+    "fechaPublicacion": "2000-01-01",
+    "cantidadPaginas": 616,
+    "descripcion": "Un profesor de simbologia enfrenta una conspiracion contra el Vaticano.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000884-L.jpg"
+  },
+  {
+    "isbn": "9789900000891",
+    "titulo": "Los juegos del hambre",
+    "autor": "Suzanne Collins",
+    "fechaPublicacion": "2008-01-01",
+    "cantidadPaginas": 374,
+    "descripcion": "Una joven se ofrece como voluntaria en un mortal torneo televisado para sobrevivir.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000891-L.jpg"
+  },
+  {
+    "isbn": "9789900000907",
+    "titulo": "Crepusculo",
+    "autor": "Stephenie Meyer",
+    "fechaPublicacion": "2005-01-01",
+    "cantidadPaginas": 498,
+    "descripcion": "Una adolescente se enamora de un vampiro en un pequenio pueblo lluvioso.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000907-L.jpg"
+  },
+  {
+    "isbn": "9789900000914",
+    "titulo": "Cincuenta sombras de Grey",
+    "autor": "E. L. James",
+    "fechaPublicacion": "2011-01-01",
+    "cantidadPaginas": 514,
+    "descripcion": "Una relacion intensa y controvertida une a una estudiante con un empresario millonario.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000914-L.jpg"
+  },
+  {
+    "isbn": "9789900000921",
+    "titulo": "Perdida",
+    "autor": "Gillian Flynn",
+    "fechaPublicacion": "2012-01-01",
+    "cantidadPaginas": 419,
+    "descripcion": "La desaparicion de una mujer revela las grietas ocultas de su matrimonio.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000921-L.jpg"
+  },
+  {
+    "isbn": "9789900000938",
+    "titulo": "La chica del tren",
+    "autor": "Paula Hawkins",
+    "fechaPublicacion": "2015-01-01",
+    "cantidadPaginas": 336,
+    "descripcion": "Una mujer se ve envuelta en una investigacion tras presenciar algo perturbador desde el tren.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000938-L.jpg"
+  },
+  {
+    "isbn": "9789900000945",
+    "titulo": "Los hombres que no amaban a las mujeres",
+    "autor": "Stieg Larsson",
+    "fechaPublicacion": "2005-01-01",
+    "cantidadPaginas": 553,
+    "descripcion": "Un periodista y una hacker investigan la desaparicion de una joven cuatro decadas atras.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000945-L.jpg"
+  },
+  {
+    "isbn": "9789900000952",
+    "titulo": "El nino con el pijama de rayas",
+    "autor": "John Boyne",
+    "fechaPublicacion": "2006-01-01",
+    "cantidadPaginas": 224,
+    "descripcion": "La amistad entre dos ninios separados por la alambrada de un campo de concentracion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000952-L.jpg"
+  },
+  {
+    "isbn": "9789900000969",
+    "titulo": "Bajo la misma estrella",
+    "autor": "John Green",
+    "fechaPublicacion": "2012-01-01",
+    "cantidadPaginas": 313,
+    "descripcion": "Dos adolescentes con cancer viven una historia de amor breve e intensa.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000969-L.jpg"
+  },
+  {
+    "isbn": "9789900000976",
+    "titulo": "El diario de Ana Frank",
+    "autor": "Ana Frank",
+    "fechaPublicacion": "1947-01-01",
+    "cantidadPaginas": 283,
+    "descripcion": "El testimonio de una adolescente escondida durante la ocupacion nazi de Amsterdam.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000976-L.jpg"
+  },
+  {
+    "isbn": "9789900000983",
+    "titulo": "Sapiens: de animales a dioses",
+    "autor": "Yuval Noah Harari",
+    "fechaPublicacion": "2011-01-01",
+    "cantidadPaginas": 496,
+    "descripcion": "Un recorrido por la historia de la humanidad desde la evolucion hasta la actualidad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000983-L.jpg"
+  },
+  {
+    "isbn": "9789900000990",
+    "titulo": "El alquimista",
+    "autor": "Paulo Coelho",
+    "fechaPublicacion": "1988-01-01",
+    "cantidadPaginas": 208,
+    "descripcion": "Un joven pastor viaja en busca de un tesoro y descubre su proposito de vida.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900000990-L.jpg"
+  },
+  {
+    "isbn": "9789900001003",
+    "titulo": "Tokio blues (Norwegian Wood)",
+    "autor": "Haruki Murakami",
+    "fechaPublicacion": "1987-01-01",
+    "cantidadPaginas": 296,
+    "descripcion": "Un joven recuerda su juventud marcada por la perdida y el primer amor.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001003-L.jpg"
+  },
+  {
+    "isbn": "9789900001010",
+    "titulo": "Kafka en la orilla",
+    "autor": "Haruki Murakami",
+    "fechaPublicacion": "2002-01-01",
+    "cantidadPaginas": 505,
+    "descripcion": "Un adolescente fugitivo y un anciano peculiar avanzan hacia un destino entrelazado.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001010-L.jpg"
+  },
+  {
+    "isbn": "9789900001027",
+    "titulo": "El paciente silencioso",
+    "autor": "Alex Michaelides",
+    "fechaPublicacion": "2019-01-01",
+    "cantidadPaginas": 336,
+    "descripcion": "Una pintora deja de hablar tras matar a su esposo y un psicoterapeuta intenta descifrar por que.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001027-L.jpg"
+  },
+  {
+    "isbn": "9789900001034",
+    "titulo": "American Gods",
+    "autor": "Neil Gaiman",
+    "fechaPublicacion": "2001-01-01",
+    "cantidadPaginas": 635,
+    "descripcion": "Antiguos dioses olvidados libran una guerra silenciosa contra las nuevas deidades del mundo moderno.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001034-L.jpg"
+  },
+  {
+    "isbn": "9789900001041",
+    "titulo": "Buenos presagios",
+    "autor": "Neil Gaiman y Terry Pratchett",
+    "fechaPublicacion": "1990-01-01",
+    "cantidadPaginas": 412,
+    "descripcion": "Un angel y un demonio intentan evitar el apocalipsis por pura conveniencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001041-L.jpg"
+  },
+  {
+    "isbn": "9789900001058",
+    "titulo": "El curioso incidente del perro a medianoche",
+    "autor": "Mark Haddon",
+    "fechaPublicacion": "2003-01-01",
+    "cantidadPaginas": 226,
+    "descripcion": "Un adolescente investiga la muerte de un perro con una logica muy particular.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001058-L.jpg"
+  },
+  {
+    "isbn": "9789900001065",
+    "titulo": "Orgullo, prejuicio y zombis",
+    "autor": "Seth Grahame-Smith",
+    "fechaPublicacion": "2009-01-01",
+    "cantidadPaginas": 320,
+    "descripcion": "La novela de Austen reescrita como una lucha contra una plaga de no-muertos.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001065-L.jpg"
+  },
+  {
+    "isbn": "9789900001072",
+    "titulo": "Veronika decide morir",
+    "autor": "Paulo Coelho",
+    "fechaPublicacion": "1998-01-01",
+    "cantidadPaginas": 210,
+    "descripcion": "Una joven que intenta suicidarse reflexiona sobre la vida internada en un hospital psiquiatrico.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001072-L.jpg"
+  },
+  {
+    "isbn": "9789900001089",
+    "titulo": "Eleanor Oliphant esta perfectamente",
+    "autor": "Gail Honeyman",
+    "fechaPublicacion": "2017-01-01",
+    "cantidadPaginas": 400,
+    "descripcion": "Una mujer solitaria y con rutinas rigidas ve su vida transformada por una amistad inesperada.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001089-L.jpg"
+  },
+  {
+    "isbn": "9789900001096",
+    "titulo": "Donde cantan los cangrejos",
+    "autor": "Delia Owens",
+    "fechaPublicacion": "2018-01-01",
+    "cantidadPaginas": 384,
+    "descripcion": "Una joven aislada en los pantanos de Carolina se convierte en sospechosa de un asesinato.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001096-L.jpg"
+  },
+  {
+    "isbn": "9789900001102",
+    "titulo": "El hombre en busca de sentido",
+    "autor": "Viktor Frankl",
+    "fechaPublicacion": "1946-01-01",
+    "cantidadPaginas": 154,
+    "descripcion": "Un psiquiatra reflexiona sobre la busqueda de sentido a partir de su experiencia en campos de concentracion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001102-L.jpg"
+  },
+  {
+    "isbn": "9789900001119",
+    "titulo": "Una educacion",
+    "autor": "Tara Westover",
+    "fechaPublicacion": "2018-01-01",
+    "cantidadPaginas": 334,
+    "descripcion": "Una mujer criada al margen del sistema educativo logra llegar a la universidad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001119-L.jpg"
+  },
+  {
+    "isbn": "9789900001126",
+    "titulo": "La verdad sobre el caso Harry Quebert",
+    "autor": "Joel Dicker",
+    "fechaPublicacion": "2012-01-01",
+    "cantidadPaginas": 662,
+    "descripcion": "Un escritor investiga el crimen que involucra a su mentor para probar su inocencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001126-L.jpg"
+  },
+  {
+    "isbn": "9789900001133",
+    "titulo": "El psicoanalista",
+    "autor": "John Katzenbach",
+    "fechaPublicacion": "2002-01-01",
+    "cantidadPaginas": 550,
+    "descripcion": "Un terapeuta recibe una amenaza anonima que pone en juego todo lo que ama.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001133-L.jpg"
+  },
+  {
+    "isbn": "9789900001140",
+    "titulo": "Milenio 2: La chica que sonaba con una cerilla y un bidon de gasolina",
+    "autor": "Stieg Larsson",
+    "fechaPublicacion": "2006-01-01",
+    "cantidadPaginas": 569,
+    "descripcion": "La hacker Lisbeth Salander se convierte en la principal sospechosa de un triple homicidio.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001140-L.jpg"
+  },
+  {
+    "isbn": "9789900001157",
+    "titulo": "Big Little Lies",
+    "autor": "Liane Moriarty",
+    "fechaPublicacion": "2014-01-01",
+    "cantidadPaginas": 460,
+    "descripcion": "Las vidas de tres madres esconden secretos que terminan en tragedia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001157-L.jpg"
+  },
+  {
+    "isbn": "9789900001164",
+    "titulo": "La chica salvaje",
+    "autor": "Karin Slaughter",
+    "fechaPublicacion": "2021-01-01",
+    "cantidadPaginas": 480,
+    "descripcion": "Una investigacion criminal desentierra secretos familiares de larga data.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001164-L.jpg"
+  },
+  {
+    "isbn": "9789900001171",
+    "titulo": "Klara y el sol",
+    "autor": "Kazuo Ishiguro",
+    "fechaPublicacion": "2021-01-01",
+    "cantidadPaginas": 320,
+    "descripcion": "Una amiga artificial observa el mundo humano mientras espera ser elegida por una familia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001171-L.jpg"
+  },
+  {
+    "isbn": "9789900001188",
+    "titulo": "Dune",
+    "autor": "Frank Herbert",
+    "fechaPublicacion": "1965-01-01",
+    "cantidadPaginas": 604,
+    "descripcion": "El heredero de una casa noble lucha por el control del planeta desertico Arrakis.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001188-L.jpg"
+  },
+  {
+    "isbn": "9789900001195",
+    "titulo": "Fundacion",
+    "autor": "Isaac Asimov",
+    "fechaPublicacion": "1951-01-01",
+    "cantidadPaginas": 255,
+    "descripcion": "Un matematico disenia un plan milenario para preservar el conocimiento tras la caida de un imperio galactico.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001195-L.jpg"
+  },
+  {
+    "isbn": "9789900001201",
+    "titulo": "Yo, robot",
+    "autor": "Isaac Asimov",
+    "fechaPublicacion": "1950-01-01",
+    "cantidadPaginas": 253,
+    "descripcion": "Relatos que exploran los limites eticos de la inteligencia artificial mediante las leyes de la robotica.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001201-L.jpg"
+  },
+  {
+    "isbn": "9789900001218",
+    "titulo": "Fahrenheit 451",
+    "autor": "Ray Bradbury",
+    "fechaPublicacion": "1953-01-01",
+    "cantidadPaginas": 194,
+    "descripcion": "En una sociedad futura los bomberos se dedican a quemar libros prohibidos.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001218-L.jpg"
+  },
+  {
+    "isbn": "9789900001225",
+    "titulo": "Cronicas marcianas",
+    "autor": "Ray Bradbury",
+    "fechaPublicacion": "1950-01-01",
+    "cantidadPaginas": 222,
+    "descripcion": "La colonizacion humana de Marte y el choque con una civilizacion marciana en decadencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001225-L.jpg"
+  },
+  {
+    "isbn": "9789900001232",
+    "titulo": "El hobbit",
+    "autor": "J. R. R. Tolkien",
+    "fechaPublicacion": "1937-01-01",
+    "cantidadPaginas": 310,
+    "descripcion": "Un hobbit sedentario es arrastrado a una aventura para recuperar un tesoro custodiado por un dragon.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001232-L.jpg"
+  },
+  {
+    "isbn": "9789900001249",
+    "titulo": "La comunidad del anillo",
+    "autor": "J. R. R. Tolkien",
+    "fechaPublicacion": "1954-01-01",
+    "cantidadPaginas": 423,
+    "descripcion": "Un grupo heterogeneo emprende un viaje para destruir un anillo de poder.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001249-L.jpg"
+  },
+  {
+    "isbn": "9789900001256",
+    "titulo": "Las dos torres",
+    "autor": "J. R. R. Tolkien",
+    "fechaPublicacion": "1954-01-01",
+    "cantidadPaginas": 352,
+    "descripcion": "La comunidad se divide mientras la guerra contra el mal se intensifica en la Tierra Media.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001256-L.jpg"
+  },
+  {
+    "isbn": "9789900001263",
+    "titulo": "El retorno del rey",
+    "autor": "J. R. R. Tolkien",
+    "fechaPublicacion": "1955-01-01",
+    "cantidadPaginas": 416,
+    "descripcion": "La batalla final decide el destino de la Tierra Media.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001263-L.jpg"
+  },
+  {
+    "isbn": "9789900001270",
+    "titulo": "Juego de tronos",
+    "autor": "George R. R. Martin",
+    "fechaPublicacion": "1996-01-01",
+    "cantidadPaginas": 694,
+    "descripcion": "Varias familias nobles luchan por el trono de un reino fracturado por intrigas y traiciones.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001270-L.jpg"
+  },
+  {
+    "isbn": "9789900001287",
+    "titulo": "Choque de reyes",
+    "autor": "George R. R. Martin",
+    "fechaPublicacion": "1998-01-01",
+    "cantidadPaginas": 761,
+    "descripcion": "Multiples pretendientes se disputan el trono mientras una amenaza antigua se aproxima desde el norte.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001287-L.jpg"
+  },
+  {
+    "isbn": "9789900001294",
+    "titulo": "El nombre del viento",
+    "autor": "Patrick Rothfuss",
+    "fechaPublicacion": "2007-01-01",
+    "cantidadPaginas": 662,
+    "descripcion": "Un legendario mago narra en primera persona los origenes de su propia leyenda.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001294-L.jpg"
+  },
+  {
+    "isbn": "9789900001300",
+    "titulo": "Neuromante",
+    "autor": "William Gibson",
+    "fechaPublicacion": "1984-01-01",
+    "cantidadPaginas": 271,
+    "descripcion": "Un hacker es contratado para un ultimo golpe en un mundo dominado por corporaciones y redes digitales.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001300-L.jpg"
+  },
+  {
+    "isbn": "9789900001317",
+    "titulo": "La guerra de los mundos",
+    "autor": "H. G. Wells",
+    "fechaPublicacion": "1898-01-01",
+    "cantidadPaginas": 189,
+    "descripcion": "Una invasion marciana pone a prueba la fragilidad de la civilizacion humana.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001317-L.jpg"
+  },
+  {
+    "isbn": "9789900001324",
+    "titulo": "La maquina del tiempo",
+    "autor": "H. G. Wells",
+    "fechaPublicacion": "1895-01-01",
+    "cantidadPaginas": 118,
+    "descripcion": "Un inventor viaja hacia un futuro lejano y descubre en que se ha convertido la humanidad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001324-L.jpg"
+  },
+  {
+    "isbn": "9789900001331",
+    "titulo": "El cuento de la criada",
+    "autor": "Margaret Atwood",
+    "fechaPublicacion": "1985-01-01",
+    "cantidadPaginas": 311,
+    "descripcion": "En un regimen totalitario, las mujeres fertiles son reducidas a su funcion reproductiva.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001331-L.jpg"
+  },
+  {
+    "isbn": "9789900001348",
+    "titulo": "Ready Player One",
+    "autor": "Ernest Cline",
+    "fechaPublicacion": "2011-01-01",
+    "cantidadPaginas": 374,
+    "descripcion": "Un joven compite en un mundo virtual para heredar la fortuna de su creador.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001348-L.jpg"
+  },
+  {
+    "isbn": "9789900001355",
+    "titulo": "El marciano",
+    "autor": "Andy Weir",
+    "fechaPublicacion": "2011-01-01",
+    "cantidadPaginas": 369,
+    "descripcion": "Un astronauta abandonado en Marte debe ingeniarselas para sobrevivir hasta ser rescatado.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001355-L.jpg"
+  },
+  {
+    "isbn": "9789900001362",
+    "titulo": "El juego de Ender",
+    "autor": "Orson Scott Card",
+    "fechaPublicacion": "1985-01-01",
+    "cantidadPaginas": 324,
+    "descripcion": "Un nino es entrenado como estratega militar para enfrentar una invasion alienigena.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001362-L.jpg"
+  },
+  {
+    "isbn": "9789900001379",
+    "titulo": "Solaris",
+    "autor": "Stanislaw Lem",
+    "fechaPublicacion": "1961-01-01",
+    "cantidadPaginas": 204,
+    "descripcion": "Un oceano pensante en un planeta lejano confronta a los tripulantes con sus propios recuerdos.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001379-L.jpg"
+  },
+  {
+    "isbn": "9789900001386",
+    "titulo": "Breve historia del tiempo",
+    "autor": "Stephen Hawking",
+    "fechaPublicacion": "1988-01-01",
+    "cantidadPaginas": 256,
+    "descripcion": "Una introduccion accesible a la cosmologia, los agujeros negros y el origen del universo.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001386-L.jpg"
+  },
+  {
+    "isbn": "9789900001393",
+    "titulo": "El origen de las especies",
+    "autor": "Charles Darwin",
+    "fechaPublicacion": "1859-01-01",
+    "cantidadPaginas": 502,
+    "descripcion": "La formulacion original de la teoria de la evolucion por seleccion natural.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001393-L.jpg"
+  },
+  {
+    "isbn": "9789900001409",
+    "titulo": "El capital",
+    "autor": "Karl Marx",
+    "fechaPublicacion": "1867-01-01",
+    "cantidadPaginas": 1152,
+    "descripcion": "Analisis critico del sistema capitalista y sus relaciones de produccion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001409-L.jpg"
+  },
+  {
+    "isbn": "9789900001416",
+    "titulo": "El principe",
+    "autor": "Nicolas Maquiavelo",
+    "fechaPublicacion": "1532-01-01",
+    "cantidadPaginas": 128,
+    "descripcion": "Un tratado sobre las estrategias necesarias para conquistar y conservar el poder politico.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001416-L.jpg"
+  },
+  {
+    "isbn": "9789900001423",
+    "titulo": "Meditaciones",
+    "autor": "Marco Aurelio",
+    "fechaPublicacion": "0180-01-01",
+    "cantidadPaginas": 254,
+    "descripcion": "Reflexiones filosoficas de inspiracion estoica escritas por un emperador romano.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001423-L.jpg"
+  },
+  {
+    "isbn": "9789900001430",
+    "titulo": "Homo Deus",
+    "autor": "Yuval Noah Harari",
+    "fechaPublicacion": "2015-01-01",
+    "cantidadPaginas": 450,
+    "descripcion": "Una mirada especulativa sobre los proximos desafios de la humanidad: la inmortalidad y la inteligencia artificial.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001430-L.jpg"
+  },
+  {
+    "isbn": "9789900001447",
+    "titulo": "El poder del ahora",
+    "autor": "Eckhart Tolle",
+    "fechaPublicacion": "1997-01-01",
+    "cantidadPaginas": 236,
+    "descripcion": "Una guia sobre como liberarse del sufrimiento habitando plenamente el presente.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001447-L.jpg"
+  },
+  {
+    "isbn": "9789900001454",
+    "titulo": "Los 7 habitos de la gente altamente efectiva",
+    "autor": "Stephen Covey",
+    "fechaPublicacion": "1989-01-01",
+    "cantidadPaginas": 372,
+    "descripcion": "Un metodo de desarrollo personal basado en principios de caracter y efectividad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001454-L.jpg"
+  },
+  {
+    "isbn": "9789900001461",
+    "titulo": "Padre rico, padre pobre",
+    "autor": "Robert Kiyosaki",
+    "fechaPublicacion": "1997-01-01",
+    "cantidadPaginas": 336,
+    "descripcion": "Una comparacion de mentalidades financieras a partir de dos figuras paternas del autor.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001461-L.jpg"
+  },
+  {
+    "isbn": "9789900001478",
+    "titulo": "Pensar rapido, pensar despacio",
+    "autor": "Daniel Kahneman",
+    "fechaPublicacion": "2011-01-01",
+    "cantidadPaginas": 499,
+    "descripcion": "Un estudio sobre los dos sistemas de pensamiento que guian nuestras decisiones.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001478-L.jpg"
+  },
+  {
+    "isbn": "9789900001485",
+    "titulo": "Una breve historia de casi todo",
+    "autor": "Bill Bryson",
+    "fechaPublicacion": "2003-01-01",
+    "cantidadPaginas": 544,
+    "descripcion": "Un recorrido divulgativo por la ciencia, desde el big bang hasta la vida en la Tierra.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001485-L.jpg"
+  },
+  {
+    "isbn": "9789900001492",
+    "titulo": "Cosmos",
+    "autor": "Carl Sagan",
+    "fechaPublicacion": "1980-01-01",
+    "cantidadPaginas": 384,
+    "descripcion": "Un viaje por el universo que combina astronomia, historia y filosofia de la ciencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001492-L.jpg"
+  },
+  {
+    "isbn": "9789900001508",
+    "titulo": "El gen egoista",
+    "autor": "Richard Dawkins",
+    "fechaPublicacion": "1976-01-01",
+    "cantidadPaginas": 360,
+    "descripcion": "Una explicacion de la evolucion desde la perspectiva de los genes como unidad de seleccion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001508-L.jpg"
+  },
+  {
+    "isbn": "9789900001515",
+    "titulo": "Primavera silenciosa",
+    "autor": "Rachel Carson",
+    "fechaPublicacion": "1962-01-01",
+    "cantidadPaginas": 368,
+    "descripcion": "Una denuncia pionera sobre el impacto de los pesticidas en el medio ambiente.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001515-L.jpg"
+  },
+  {
+    "isbn": "9789900001522",
+    "titulo": "Armas, germenes y acero",
+    "autor": "Jared Diamond",
+    "fechaPublicacion": "1997-01-01",
+    "cantidadPaginas": 480,
+    "descripcion": "Un analisis de por que unas sociedades dominaron a otras a lo largo de la historia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001522-L.jpg"
+  },
+  {
+    "isbn": "9789900001539",
+    "titulo": "Mindset: la actitud del exito",
+    "autor": "Carol Dweck",
+    "fechaPublicacion": "2006-01-01",
+    "cantidadPaginas": 320,
+    "descripcion": "La diferencia entre una mentalidad fija y una de crecimiento a la hora de afrontar desafios.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001539-L.jpg"
+  },
+  {
+    "isbn": "9789900001546",
+    "titulo": "Steve Jobs",
+    "autor": "Walter Isaacson",
+    "fechaPublicacion": "2011-01-01",
+    "cantidadPaginas": 656,
+    "descripcion": "Biografia autorizada del cofundador de Apple basada en entrevistas exhaustivas.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001546-L.jpg"
+  },
+  {
+    "isbn": "9789900001553",
+    "titulo": "Yo soy Malala",
+    "autor": "Malala Yousafzai",
+    "fechaPublicacion": "2013-01-01",
+    "cantidadPaginas": 327,
+    "descripcion": "El testimonio de una joven activista que sobrevivio a un atentado por defender la educacion de las ninias.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001553-L.jpg"
+  },
+  {
+    "isbn": "9789900001560",
+    "titulo": "Superinteligencia",
+    "autor": "Nick Bostrom",
+    "fechaPublicacion": "2014-01-01",
+    "cantidadPaginas": 390,
+    "descripcion": "Un analisis de los riesgos y escenarios posibles ante el desarrollo de una inteligencia artificial superior.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001560-L.jpg"
+  },
+  {
+    "isbn": "9789900001577",
+    "titulo": "Sapiens de bolsillo: una historia grafica",
+    "autor": "Yuval Noah Harari",
+    "fechaPublicacion": "2020-01-01",
+    "cantidadPaginas": 256,
+    "descripcion": "Version ilustrada del recorrido por la historia de la humanidad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001577-L.jpg"
+  },
+  {
+    "isbn": "9789900001584",
+    "titulo": "El principito",
+    "autor": "Antoine de Saint-Exupery",
+    "fechaPublicacion": "1943-01-01",
+    "cantidadPaginas": 96,
+    "descripcion": "Un aviador perdido en el desierto conoce a un pequenio principe que viene de otro planeta.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001584-L.jpg"
+  },
+  {
+    "isbn": "9789900001591",
+    "titulo": "Alicia en el pais de las maravillas",
+    "autor": "Lewis Carroll",
+    "fechaPublicacion": "1865-01-01",
+    "cantidadPaginas": 200,
+    "descripcion": "Una nina cae por una madriguera y descubre un mundo absurdo y fantastico.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001591-L.jpg"
+  },
+  {
+    "isbn": "9789900001607",
+    "titulo": "El leon, la bruja y el ropero",
+    "autor": "C. S. Lewis",
+    "fechaPublicacion": "1950-01-01",
+    "cantidadPaginas": 206,
+    "descripcion": "Cuatro hermanos descubren un mundo magico al atravesar un ropero.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001607-L.jpg"
+  },
+  {
+    "isbn": "9789900001614",
+    "titulo": "Matilda",
+    "autor": "Roald Dahl",
+    "fechaPublicacion": "1988-01-01",
+    "cantidadPaginas": 240,
+    "descripcion": "Una nina superdotada enfrenta a su familia negligente y a una directora tirana con su inteligencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001614-L.jpg"
+  },
+  {
+    "isbn": "9789900001621",
+    "titulo": "Charlie y la fabrica de chocolate",
+    "autor": "Roald Dahl",
+    "fechaPublicacion": "1964-01-01",
+    "cantidadPaginas": 192,
+    "descripcion": "Un nino humilde gana un boleto dorado para visitar la fabrica de un excentrico chocolatero.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001621-L.jpg"
+  },
+  {
+    "isbn": "9789900001638",
+    "titulo": "James y el melocoton gigante",
+    "autor": "Roald Dahl",
+    "fechaPublicacion": "1961-01-01",
+    "cantidadPaginas": 176,
+    "descripcion": "Un huerfano viaja dentro de un melocoton gigante junto a insectos de tamanio descomunal.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001638-L.jpg"
+  },
+  {
+    "isbn": "9789900001645",
+    "titulo": "Diario de Greg",
+    "autor": "Jeff Kinney",
+    "fechaPublicacion": "2007-01-01",
+    "cantidadPaginas": 224,
+    "descripcion": "Las peripecias de un adolescente comunes contadas en formato de diario ilustrado.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001645-L.jpg"
+  },
+  {
+    "isbn": "9789900001652",
+    "titulo": "Percy Jackson y el ladron del rayo",
+    "autor": "Rick Riordan",
+    "fechaPublicacion": "2005-01-01",
+    "cantidadPaginas": 375,
+    "descripcion": "Un adolescente descubre que es hijo de un dios griego y debe evitar una guerra entre dioses.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001652-L.jpg"
+  },
+  {
+    "isbn": "9789900001669",
+    "titulo": "Coraline",
+    "autor": "Neil Gaiman",
+    "fechaPublicacion": "2002-01-01",
+    "cantidadPaginas": 176,
+    "descripcion": "Una nina descubre una puerta secreta hacia un mundo paralelo inquietantemente similar al suyo.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001669-L.jpg"
+  },
+  {
+    "isbn": "9789900001676",
+    "titulo": "La historia interminable",
+    "autor": "Michael Ende",
+    "fechaPublicacion": "1979-01-01",
+    "cantidadPaginas": 445,
+    "descripcion": "Un nino se sumerge en un libro magico para salvar un reino de fantasia de su destruccion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001676-L.jpg"
+  },
+  {
+    "isbn": "9789900001683",
+    "titulo": "Momo",
+    "autor": "Michael Ende",
+    "fechaPublicacion": "1973-01-01",
+    "cantidadPaginas": 292,
+    "descripcion": "Una nina enfrenta a los ladrones de tiempo que amenazan con robar la vida de la gente.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001683-L.jpg"
+  },
+  {
+    "isbn": "9789900001690",
+    "titulo": "Peter Pan",
+    "autor": "J. M. Barrie",
+    "fechaPublicacion": "1911-01-01",
+    "cantidadPaginas": 224,
+    "descripcion": "Un nino que nunca crece lleva a otros ninios a la isla de Nunca Jamas.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001690-L.jpg"
+  },
+  {
+    "isbn": "9789900001706",
+    "titulo": "El mago de Oz",
+    "autor": "L. Frank Baum",
+    "fechaPublicacion": "1900-01-01",
+    "cantidadPaginas": 259,
+    "descripcion": "Una nina es transportada a un pais magico y busca la forma de volver a casa.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001706-L.jpg"
+  },
+  {
+    "isbn": "9789900001713",
+    "titulo": "Pippi Calzaslargas",
+    "autor": "Astrid Lindgren",
+    "fechaPublicacion": "1945-01-01",
+    "cantidadPaginas": 160,
+    "descripcion": "Una nina extraordinariamente fuerte e independiente vive sola y desafia las normas adultas.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001713-L.jpg"
+  },
+  {
+    "isbn": "9789900001720",
+    "titulo": "Platero y yo",
+    "autor": "Juan Ramon Jimenez",
+    "fechaPublicacion": "1914-01-01",
+    "cantidadPaginas": 220,
+    "descripcion": "Un poeta narra su vida cotidiana en Andalucia junto a su burro Platero.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001720-L.jpg"
+  },
+  {
+    "isbn": "9789900001737",
+    "titulo": "Veinte poemas de amor y una cancion desesperada",
+    "autor": "Pablo Neruda",
+    "fechaPublicacion": "1924-01-01",
+    "cantidadPaginas": 100,
+    "descripcion": "Poemario juvenil sobre el amor, el deseo y la melancolia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001737-L.jpg"
+  },
+  {
+    "isbn": "9789900001744",
+    "titulo": "Canto general",
+    "autor": "Pablo Neruda",
+    "fechaPublicacion": "1950-01-01",
+    "cantidadPaginas": 400,
+    "descripcion": "Un extenso poema que recorre la historia y la naturaleza de America Latina.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001744-L.jpg"
+  },
+  {
+    "isbn": "9789900001751",
+    "titulo": "Poeta en Nueva York",
+    "autor": "Federico Garcia Lorca",
+    "fechaPublicacion": "1940-01-01",
+    "cantidadPaginas": 180,
+    "descripcion": "Poemas escritos durante la estadia del autor en la ciudad, marcados por la alienacion urbana.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001751-L.jpg"
+  },
+  {
+    "isbn": "9789900001768",
+    "titulo": "Romancero gitano",
+    "autor": "Federico Garcia Lorca",
+    "fechaPublicacion": "1928-01-01",
+    "cantidadPaginas": 150,
+    "descripcion": "Poemas que retratan el mundo y la cultura gitana de Andalucia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001768-L.jpg"
+  },
+  {
+    "isbn": "9789900001775",
+    "titulo": "Rimas y leyendas",
+    "autor": "Gustavo Adolfo Becquer",
+    "fechaPublicacion": "1871-01-01",
+    "cantidadPaginas": 200,
+    "descripcion": "Poemas breves e intensos sobre el amor y la perdida, junto a relatos de corte fantastico.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001775-L.jpg"
+  },
+  {
+    "isbn": "9789900001782",
+    "titulo": "Hojas de hierba",
+    "autor": "Walt Whitman",
+    "fechaPublicacion": "1855-01-01",
+    "cantidadPaginas": 624,
+    "descripcion": "Un extenso poemario que celebra la democracia, el cuerpo y la naturaleza americana.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001782-L.jpg"
+  },
+  {
+    "isbn": "9789900001799",
+    "titulo": "Las flores del mal",
+    "autor": "Charles Baudelaire",
+    "fechaPublicacion": "1857-01-01",
+    "cantidadPaginas": 288,
+    "descripcion": "Poemas que exploran la belleza, el vicio y la decadencia de la vida moderna.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001799-L.jpg"
+  },
+  {
+    "isbn": "9789900001805",
+    "titulo": "Trilce",
+    "autor": "Cesar Vallejo",
+    "fechaPublicacion": "1922-01-01",
+    "cantidadPaginas": 120,
+    "descripcion": "Un poemario vanguardista que rompe con las formas tradicionales del lenguaje poetico.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001805-L.jpg"
+  },
+  {
+    "isbn": "9789900001812",
+    "titulo": "Los heraldos negros",
+    "autor": "Cesar Vallejo",
+    "fechaPublicacion": "1919-01-01",
+    "cantidadPaginas": 100,
+    "descripcion": "Poemas marcados por el dolor, la orfandad y la busqueda espiritual.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001812-L.jpg"
+  },
+  {
+    "isbn": "9789900001829",
+    "titulo": "Inventario",
+    "autor": "Mario Benedetti",
+    "fechaPublicacion": "1963-01-01",
+    "cantidadPaginas": 400,
+    "descripcion": "Antologia poetica que reune la obra de uno de los poetas mas leidos de Uruguay.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001829-L.jpg"
+  },
+  {
+    "isbn": "9789900001836",
+    "titulo": "Poemas humanos",
+    "autor": "Cesar Vallejo",
+    "fechaPublicacion": "1939-01-01",
+    "cantidadPaginas": 200,
+    "descripcion": "Poemas publicados posthumamente sobre el sufrimiento humano y la solidaridad.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001836-L.jpg"
+  },
+  {
+    "isbn": "9789900001843",
+    "titulo": "Cantos de vida y esperanza",
+    "autor": "Ruben Dario",
+    "fechaPublicacion": "1905-01-01",
+    "cantidadPaginas": 200,
+    "descripcion": "Poemario clave del modernismo hispanoamericano sobre la vida, la fe y la incertidumbre.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001843-L.jpg"
+  },
+  {
+    "isbn": "9789900001850",
+    "titulo": "Azul",
+    "autor": "Ruben Dario",
+    "fechaPublicacion": "1888-01-01",
+    "cantidadPaginas": 150,
+    "descripcion": "Obra fundacional del modernismo que combina prosa y verso con un lenguaje refinado.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001850-L.jpg"
+  },
+  {
+    "isbn": "9789900001867",
+    "titulo": "La voz a ti debida",
+    "autor": "Pedro Salinas",
+    "fechaPublicacion": "1933-01-01",
+    "cantidadPaginas": 140,
+    "descripcion": "Un extenso poema de amor dirigido a una amada idealizada.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001867-L.jpg"
+  },
+  {
+    "isbn": "9789900001874",
+    "titulo": "Poesia completa",
+    "autor": "Delmira Agustini",
+    "fechaPublicacion": "1924-01-01",
+    "cantidadPaginas": 300,
+    "descripcion": "Obra reunida de una de las voces pioneras de la poesia erotica en America Latina.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001874-L.jpg"
+  },
+  {
+    "isbn": "9789900001881",
+    "titulo": "El silencio de los corderos",
+    "autor": "Thomas Harris",
+    "fechaPublicacion": "1988-01-01",
+    "cantidadPaginas": 338,
+    "descripcion": "Una agente del FBI recurre a un brillante y peligroso psiquiatra caniba para atrapar a un asesino.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001881-L.jpg"
+  },
+  {
+    "isbn": "9789900001898",
+    "titulo": "Carrie",
+    "autor": "Stephen King",
+    "fechaPublicacion": "1974-01-01",
+    "cantidadPaginas": 199,
+    "descripcion": "Una adolescente acosada descubre poderes telequineticos que desata en un baile de graduacion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001898-L.jpg"
+  },
+  {
+    "isbn": "9789900001904",
+    "titulo": "El exorcista",
+    "autor": "William Peter Blatty",
+    "fechaPublicacion": "1971-01-01",
+    "cantidadPaginas": 340,
+    "descripcion": "Dos sacerdotes intentan liberar a una nina poseida por una entidad demoniaca.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001904-L.jpg"
+  },
+  {
+    "isbn": "9789900001911",
+    "titulo": "La casa de hojas",
+    "autor": "Mark Z. Danielewski",
+    "fechaPublicacion": "2000-01-01",
+    "cantidadPaginas": 709,
+    "descripcion": "Una casa cuyo interior es mas grande que su exterior desata una espiral de locura documental.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001911-L.jpg"
+  },
+  {
+    "isbn": "9789900001928",
+    "titulo": "Entrevista con el vampiro",
+    "autor": "Anne Rice",
+    "fechaPublicacion": "1976-01-01",
+    "cantidadPaginas": 342,
+    "descripcion": "Un vampiro relata dos siglos de existencia inmortal, culpa y busqueda de sentido.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001928-L.jpg"
+  },
+  {
+    "isbn": "9789900001935",
+    "titulo": "Cementerio de animales",
+    "autor": "Stephen King",
+    "fechaPublicacion": "1983-01-01",
+    "cantidadPaginas": 374,
+    "descripcion": "Un cementerio con el poder de revivir a los muertos trae consecuencias terribles a una familia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001935-L.jpg"
+  },
+  {
+    "isbn": "9789900001942",
+    "titulo": "El otro",
+    "autor": "Thomas Tryon",
+    "fechaPublicacion": "1971-01-01",
+    "cantidadPaginas": 300,
+    "descripcion": "Un pueblo se ve sacudido por una serie de muertes ligadas a un par de hermanos gemelos.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001942-L.jpg"
+  },
+  {
+    "isbn": "9789900001959",
+    "titulo": "Rebeca",
+    "autor": "Daphne du Maurier",
+    "fechaPublicacion": "1938-01-01",
+    "cantidadPaginas": 400,
+    "descripcion": "La nueva esposa de un viudo vive bajo la sombra de la anterior senora de la mansion.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001959-L.jpg"
+  },
+  {
+    "isbn": "9789900001966",
+    "titulo": "Doctor Sueno",
+    "autor": "Stephen King",
+    "fechaPublicacion": "2013-01-01",
+    "cantidadPaginas": 531,
+    "descripcion": "El nino superviviente de El resplandor, ya adulto, enfrenta a una secta que caza ninios con dones especiales.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001966-L.jpg"
+  },
+  {
+    "isbn": "9789900001973",
+    "titulo": "Cell (Celular)",
+    "autor": "Stephen King",
+    "fechaPublicacion": "2006-01-01",
+    "cantidadPaginas": 351,
+    "descripcion": "Una senial de telefono convierte a la poblacion en una horda violenta y sin conciencia.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001973-L.jpg"
+  },
+  {
+    "isbn": "9789900001980",
+    "titulo": "Christine",
+    "autor": "Stephen King",
+    "fechaPublicacion": "1983-01-01",
+    "cantidadPaginas": 526,
+    "descripcion": "Un adolescente queda obsesionado con un auto clasico que parece tener voluntad propia y asesina.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001980-L.jpg"
+  },
+  {
+    "isbn": "9789900001997",
+    "titulo": "El talento de Mr. Ripley",
+    "autor": "Patricia Highsmith",
+    "fechaPublicacion": "1955-01-01",
+    "cantidadPaginas": 290,
+    "descripcion": "Un joven estafador suplanta la identidad de un heredero acaudalado tras un crimen.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900001997-L.jpg"
+  },
+  {
+    "isbn": "9789900002000",
+    "titulo": "Los renglones torcidos de Dios",
+    "autor": "Torcuato Luca de Tena",
+    "fechaPublicacion": "1979-01-01",
+    "cantidadPaginas": 350,
+    "descripcion": "Una mujer se interna de forma encubierta en un psiquiatrico para investigar una muerte.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900002000-L.jpg"
+  },
+  {
+    "isbn": "9789900002017",
+    "titulo": "Misery",
+    "autor": "Stephen King",
+    "fechaPublicacion": "1987-01-01",
+    "cantidadPaginas": 320,
+    "descripcion": "Un escritor es rescatado y luego secuestrado por su fan mas obsesiva.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900002017-L.jpg"
+  },
+  {
+    "isbn": "9789900002024",
+    "titulo": "El resplandor",
+    "autor": "Stephen King",
+    "fechaPublicacion": "1977-01-01",
+    "cantidadPaginas": 447,
+    "descripcion": "Una familia aislada en un hotel de montania es acechada por presencias sobrenaturales y la locura.",
+    "portadaUrl": "https://covers.openlibrary.org/b/isbn/9789900002024-L.jpg"
+  }
+]

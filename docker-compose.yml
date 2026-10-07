@@ -21,7 +21,6 @@ services:
     # 5432 estandar de Postgres) 
     ports:
       - "${DB_PORT:-5445}:5432"
-
   backend:
     build: ./backend
     environment:
@@ -30,8 +29,10 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       CORS_ALLOWED_ORIGINS: ${CORS_SECRET}
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ports:
       - "8080:8080"
+      - "5005:5005"
     depends_on:
       db:
         condition: service_healthy

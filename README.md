@@ -17,11 +17,11 @@ docker compose up --build -d
 
 Esto levanta tres contenedores:
 
-| Servicio | Puerto | URL |
-|---|---|---|
-| Frontend | 5173 | http://localhost:5173 |
-| Backend | 8080 | http://localhost:8080 |
-| Postgres | 5445 (configurable con `DB_PORT` en `.env`) | `localhost:5445` (expuesto solo para desarrollo local, ej. conectar con DBeaver). Si ese puerto tambien esta ocupado, cambia `DB_PORT` en tu `.env`. |
+| Servicio | Puerto | URL                                                                                                                                                 |
+|---|---|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| Frontend | 5173 | http://localhost:5173                                                                                                                               |
+| Backend | 8080 | http://localhost:8080                                                                                                                               |
+| Postgres | 5445 (configurable con `DB_PORT` en `.env`) | `localhost:5445` (expuesto solo para desarrollo local, ej. conectar con DBeaver). Si ese puerto tambien esta ocupado, cambie `DB_PORT` en su `.env`. |
 
 ### 3. Datos de prueba
 
@@ -46,3 +46,41 @@ Si cambia el modelo de datos y hace falta recrear la base:
 docker compose down -v   # borra tambien el volumen de Postgres
 docker compose up --build -d
 ```
+
+## ¿Cómo debuguear el backend desde IntelliJ?
+
+El servicio `backend` arranca con el agente JDWP de Java escuchando en el puerto **5005** (configurado en `docker-compose.yml` con `JAVA_TOOL_OPTIONS`). Así, IntelliJ se conecta al contenedor y se puede frenar en breakpoints mientras se usa el frontend en http://localhost:5173.
+
+### 1. Levantar el stack
+
+```bash
+docker compose up --build -d
+```
+
+### 2. Poner breakpoints
+Abrir el archivo que guste seguir, coloque el breakpoint **dentro del cuerpo del método**, no en la línea de la firma (`public ... search(...)`).
+
+### 3. Crear la configuración de debug en IntelliJ
+1. Menú **Run → Edit Configurations...**
+2. **+** → **Remote JVM Debug**
+3. Configurar:
+   - **Host:** `localhost`
+   - **Port:** `5005`
+   - **Use module classpath:** dejar el default
+4. Seleccionar el botón de debug.
+5. En la consola de Debug tiene que aparecer **Connected to the target VM**.
+
+![img.png](img.png)
+
+![img_1.png](img_1.png)
+
+### 5. Probarlo desde el navegador
+
+1. Entrá a http://localhost:5173.
+2. Realice la operación que espera que el breakpoint pare.
+
+### Problemas comunes
+
+- **No aparece "Connected to the target VM":** verificá que el contenedor esté arriba (`docker compose ps`) y que el puerto 5005 esté publicado. Si el puerto está ocupado, cambialo en `docker-compose.yml`.
+- **Actualizó los breakpoints:** seleccione el "stop" de la consola de debug y luego el "Rerun"
+![img_2.png](img_2.png)

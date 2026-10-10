@@ -1,31 +1,49 @@
 import { useEffect, useState } from 'react';
 import BookCover from './BookCover';
+import CatalogFilters from './CatalogFilters';
 import Nav from './Nav';
 import './Catalog.css';
 
 const FAVORITES_URL = 'http://localhost:8080/api/favorites';
 
-// The page lives in the URL (#catalogo/N) so returning from a book detail keeps it
-export default function Catalog({ page, session }) {
+// R10: only the filters with a value are sent; the backend builds the WHERE from those
+const buildCatalogQuery = (page, filters) => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (filters.libreria) params.set('libreria', filters.libreria);
+    if (filters.autor) params.set('autor', filters.autor);
+    return params.toString();
+};
+
+// The page lives in the URL (#catalogo/N) so returning from a book detail keeps it.
+// Filters live in App for the same reason.
+export default function Catalog({ page, session, filters, onFiltersChange }) {
+    const query = buildCatalogQuery(page, filters);
+    // { query, result } so a response is only shown for the request that produced it
     const [data, setData] = useState(null);
-    // Page number whose request failed; the error only shows for that page
-    const [failedPage, setFailedPage] = useState(null);
+    // Query whose request failed; the error only shows for that query
+    const [failedQuery, setFailedQuery] = useState(null);
 
     useEffect(() => {
         const controller = new AbortController();
 
-        fetch(`http://localhost:8080/api/books?page=${page}`, { signal: controller.signal })
+        fetch(`http://localhost:8080/api/books?${query}`, { signal: controller.signal })
             .then((response) => {
                 if (!response.ok) throw new Error();
                 return response.json();
             })
-            .then(setData)
+            .then((result) => setData({ query, result }))
             .catch((err) => {
-                if (err.name !== 'AbortError') setFailedPage(page);
+                if (err.name !== 'AbortError') setFailedQuery(query);
             });
 
         return () => controller.abort();
-    }, [page]);
+    }, [query]);
+
+    // New filters always start from the first page
+    const applyFilters = (next) => {
+        onFiltersChange(next);
+        if (page !== 1) window.location.hash = '#catalogo';
+    };
 
     // Favorites are a COMPRADOR-only feature (the backend answers 403 to DUENO)
     const token = session?.token;
@@ -80,11 +98,13 @@ export default function Catalog({ page, session }) {
         }
     };
 
-    const errorMsg = failedPage === page
+    const errorMsg = failedQuery === query
         ? 'No pudimos cargar el catálogo. Por favor, intentá nuevamente en unos momentos.'
         : favError;
-    const loading = data?.page !== page && !errorMsg;
-    const totalPages = data?.totalPages ?? 1;
+    const loading = data?.query !== query && !errorMsg;
+    const books = data?.result;
+    const totalPages = books?.totalPages ?? 1;
+    const filtered = filters.libreria !== '' || filters.autor !== '';
 
     return (
         <div className="booksaw-page">
@@ -93,21 +113,27 @@ export default function Catalog({ page, session }) {
             <main className="catalog-main">
                 <h1 className="catalog-title">Destacados</h1>
 
+                <CatalogFilters filters={filters} onApply={applyFilters} />
+
                 {errorMsg && (
                     <div className="alert-box alert-error" role="alert">
                         <span>{errorMsg}</span>
                     </div>
                 )}
 
-                {loading && !data && <p className="catalog-status">Cargando libros...</p>}
+                {loading && !books && <p className="catalog-status">Cargando libros...</p>}
 
-                {data && data.items.length === 0 && (
-                    <p className="catalog-status">No hay libros disponibles por el momento.</p>
+                {books && books.items.length === 0 && (
+                    <p className="catalog-status">
+                        {filtered
+                            ? 'No hay libros que coincidan con los filtros elegidos.'
+                            : 'No hay libros disponibles por el momento.'}
+                    </p>
                 )}
 
-                {data && (
+                {books && (
                     <div className="editorial-books-grid" aria-busy={loading}>
-                        {data.items.map((book) => {
+                        {books.items.map((book) => {
                             const fav = favoriteIds.has(book.id);
                             return (
                                 <article key={book.id} className="book-card-item">
@@ -141,7 +167,7 @@ export default function Catalog({ page, session }) {
                     </div>
                 )}
 
-                {data && totalPages > 1 && (
+                {books && totalPages > 1 && (
                     <nav className="catalog-pagination" aria-label="Paginación del catálogo">
                         <button
                             type="button"

@@ -13,6 +13,33 @@
     margin: 0 0 32px;
 }
 
+.catalog-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.catalog-filters .input-group {
+    flex: 1 1 220px;
+}
+
+.catalog-filters select {
+    background-color: var(--booksaw-input-bg);
+    border: 1px solid var(--booksaw-input-border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: var(--font-sans);
+    color: var(--booksaw-dark);
+}
+
+.catalog-filters .btn-submit-pill {
+    margin-top: 0;
+    padding: 12px 24px;
+}
+
 .catalog-status {
     color: var(--booksaw-muted);
 }

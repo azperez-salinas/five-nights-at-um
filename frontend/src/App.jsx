@@ -7,6 +7,9 @@ import Profile from './Profile';
 import Register from './Register';
 import BookSearch from './BookSearch'
 
+// R10: no filter applied
+const EMPTY_FILTERS = { libreria: '', autor: '' };
+
 // #catalogo -> 1, #catalogo/N -> N (N >= 1), anything else -> null
 const parseCatalogPage = (hash) => {
   const match = hash.match(/^#catalogo(?:\/([1-9]\d{0,5}))?$/);
@@ -35,6 +38,8 @@ function App() {
   );
   // Kept here so the search text survives going to a book detail and back
   const [searchQuery, setSearchQuery] = useState('');
+  // R10: same idea for the catalog filters
+  const [catalogFilters, setCatalogFilters] = useState(EMPTY_FILTERS);
   // Session lives in memory only (not localStorage) so an XSS cannot read the token
   // from storage; the trade-off is that a page reload ends the session.
   const [session, setSession] = useState(null);
@@ -73,7 +78,16 @@ function App() {
   const handleLogout = () => goTo('#logout');
 
   const catalogPage = parseCatalogPage(hash);
-  if (catalogPage) return <Catalog page={catalogPage} session={session} />;
+  if (catalogPage) {
+    return (
+      <Catalog
+        page={catalogPage}
+        session={session}
+        filters={catalogFilters}
+        onFiltersChange={setCatalogFilters}
+      />
+    );
+  }
   // Only numeric ids reach the API; anything else falls through to the default screen
   const bookMatch = hash.match(/^#libro\/(\d{1,18})$/);
   if (bookMatch) {
@@ -126,7 +140,14 @@ function App() {
   }
   if (hash === '#registro') return <Register onAuthenticated={handleAuthenticated} />;
   // Visitors can browse without an account: the catalog is the landing page for everyone
-  return <Catalog page={1} session={session} />;
+  return (
+    <Catalog
+      page={1}
+      session={session}
+      filters={catalogFilters}
+      onFiltersChange={setCatalogFilters}
+    />
+  );
 }
 
 export default App;

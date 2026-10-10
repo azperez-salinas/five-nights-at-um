@@ -65,6 +65,9 @@ public class SecurityConfig {
                         // la query, no en la autorizacion. Solo GET: cualquier
                         // otro verbo cae en el deny-by-default de abajo.
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
+                        // R10: el listado de librerias habilitadas alimenta el
+                        // filtro del catalogo, que es publico como el catalogo.
+                        .requestMatchers(HttpMethod.GET, "/api/librerias").permitAll()
                         // RF12/RS1/RS5/RS9/RS19: favoritos es una
                         // funcionalidad exclusiva del COMPRADOR en sus tres
                         // operaciones (listar, agregar, quitar) — no hay

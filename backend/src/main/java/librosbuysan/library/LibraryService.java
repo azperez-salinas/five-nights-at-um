@@ -1,5 +1,6 @@
 package librosbuysan.library;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,12 @@ public class LibraryService {
 
     public LibraryService(LibraryRepo libraryRepo) {
         this.libraryRepo = libraryRepo;
+    }
+
+    // R10: librerias habilitadas, para el filtro del catalogo
+    @Transactional(readOnly = true)
+    public List<LibraryResponse> listEnabled() {
+        return libraryRepo.findByEnabledTrueOrderByNombreAsc().stream().map(LibraryResponse::from).toList();
     }
 
     @Transactional(readOnly = true)

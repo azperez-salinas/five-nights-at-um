@@ -75,7 +75,7 @@ export default function OwnLibrary({ token, onUnauthorized }) {
     };
 
     return (
-        <div className="register-form">
+        <div className="register-form own-library">
             <h3 className="card-title">Mi librería</h3>
 
             {errorMsg && (

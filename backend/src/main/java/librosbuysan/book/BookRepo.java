@@ -3,21 +3,26 @@ package librosbuysan.book;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface BookRepo extends JpaRepository<Book, Long> {
+public interface BookRepo extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
 
     boolean existsByIsbn(String isbn);
 
-    // RS34: el catalogo solo muestra libros de librerias habilitadas.
-    // JOIN FETCH trae la libreria en la misma consulta: como el proyecto usa
-    // open-in-view=false, la sesion de Hibernate ya esta cerrada cuando
-    // BookSummary.from() lee book.getLibrary().getNombre() (R11); sin el
-    // FETCH esa lectura tiraria LazyInitializationException.
-    @Query("SELECT b FROM Book b JOIN FETCH b.library l WHERE l.enabled = true")
-    Page<Book> findByLibraryEnabledTrue(Pageable pageable);
+    // R10: catalogo con filtros dinamicos (BookSpecs siempre agrega RS34).
+    // El EntityGraph trae la libreria en la misma consulta: como el proyecto
+    // usa open-in-view=false, la sesion de Hibernate ya esta cerrada cuando
+    // BookSummary.from() lee book.getLibrary().getNombre() (R11). Se usa
+    // EntityGraph y no JOIN FETCH porque JOIN FETCH rompe la consulta de
+    // conteo que Spring Data genera para paginar.
+    @Override
+    @EntityGraph(attributePaths = "library")
+    Page<Book> findAll(Specification<Book> spec, Pageable pageable);
 
     // RS34: el detalle de un libro de una libreria deshabilitada no debe
     // encontrarse (el controller lo traduce a 404), aunque el registro siga

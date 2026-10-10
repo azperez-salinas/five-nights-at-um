@@ -29,14 +29,28 @@ public class BookService {
     // implementacion al cliente.
     private static final String INVALID_QUERY = "El parametro 'q' es obligatorio y no puede estar vacio";
 
+    private static final String INVALID_FILTER = "Filtro invalido";
+
+    // Mismo largo maximo que la columna autor
+    private static final int MAX_AUTOR_CHARS = 150;
+
     private final BookRepo bookRepo;
 
     public BookService(BookRepo bookRepo) {
         this.bookRepo = bookRepo;
     }
 
-    public CatalogPage getCatalog(int page) {
+    /**
+     * R10/F10: catalogo paginado con filtros opcionales y combinables. Sin
+     * filtros devuelve el catalogo completo (R7).
+     */
+    public CatalogPage getCatalog(int page, Long libreriaId, String autor) {
         validatePage(page);
+        String autorFilter = validateAutor(autor);
+        if (libreriaId != null && libreriaId < 1) {
+            log.warn("Solicitud de catalogo invalida: libreria={}", libreriaId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_FILTER);
+        }
 
         // Orden explicito: sin ORDER BY, Postgres no garantiza el mismo orden
         // entre dos consultas paginadas separadas (podria repetir o saltear
@@ -44,8 +58,8 @@ public class BookService {
         Sort orderById = Sort.by("id").ascending();
         PageRequest pageable = PageRequest.of(page - 1, PAGE_SIZE, orderById);
 
-        // RS34: solo libros de librerias habilitadas.
-        Page<Book> result = bookRepo.findByLibraryEnabledTrue(pageable);
+        // RS34: solo libros de librerias habilitadas (BookSpecs lo agrega siempre).
+        Page<Book> result = bookRepo.findAll(BookSpecs.catalogFilter(libreriaId, autorFilter), pageable);
         List<BookSummary> items = result.getContent().stream().map(BookSummary::from).toList();
 
         return new CatalogPage(items, page, PAGE_SIZE, result.getTotalElements(), result.getTotalPages());
@@ -88,6 +102,19 @@ public class BookService {
             log.warn("Solicitud de catalogo invalida: page={}", page);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_PAGE);
         }
+    }
+
+    // Autor vacio o ausente equivale a no filtrar por autor
+    private String validateAutor(String autor) {
+        if (autor == null || autor.isBlank()) {
+            return null;
+        }
+        String trimmed = autor.trim();
+        if (trimmed.length() > MAX_AUTOR_CHARS) {
+            log.warn("Solicitud de catalogo invalida: autor demasiado largo");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_FILTER);
+        }
+        return trimmed;
     }
 
     private String validateQuery(String q) {

@@ -29,9 +29,12 @@ public class BookController {
         this.bookService = bookService;
     }
 
+    // R10: libreria y autor son filtros opcionales y combinables
     @GetMapping
-    public CatalogPage list(@RequestParam(defaultValue = "1") int page) {
-        return bookService.getCatalog(page);
+    public CatalogPage list(@RequestParam(defaultValue = "1") int page,
+                            @RequestParam(required = false) Long libreria,
+                            @RequestParam(required = false) String autor) {
+        return bookService.getCatalog(page, libreria, autor);
     }
 
     // RF9: busqueda por texto libre (titulo, autor o ISBN). Publica, igual que

@@ -16,6 +16,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import librosbuysan.auth.JwtService;
+import librosbuysan.auth.TokenRevocationService;
 import librosbuysan.user.User;
 
 // Sin @Component a proposito: Spring Boot registraria este filtro dos veces
@@ -27,9 +28,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
+    private final TokenRevocationService revocationService;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, TokenRevocationService revocationService) {
         this.jwtService = jwtService;
+        this.revocationService = revocationService;
     }
 
     @Override
@@ -50,10 +53,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void authenticate(String token) {
         Claims claims = jwtService.parseAndValidate(token);
+
+        // R3: un token con firma y expiracion validas puede haber sido revocado
+        // por un logout. Sin jti no se puede verificar, y sin exp no se sabe
+        // hasta cuando guardar la revocacion: en ambos casos se rechaza.
+        String tokenId = claims.getId();
+        if (tokenId == null || claims.getExpiration() == null || revocationService.isRevoked(tokenId)) {
+            log.warn("Token revocado o incompleto (sin jti/exp) rechazado");
+            return;
+        }
+
         Long userId = Long.valueOf(claims.getSubject());
         User.Role role = User.Role.valueOf(claims.get(JwtService.ROLE_CLAIM, String.class));
 
-        AuthenticatedUser principal = new AuthenticatedUser(userId, role);
+        AuthenticatedUser principal = new AuthenticatedUser(userId, role, tokenId, claims.getExpiration().toInstant());
         var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
         var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);

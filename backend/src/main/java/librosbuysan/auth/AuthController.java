@@ -4,6 +4,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import librosbuysan.auth.AuthDtos.AuthResponse;
 import librosbuysan.auth.AuthDtos.LoginRequest;
 import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.AuthDtos.RegisterRequest;
+import librosbuysan.security.AuthenticatedUser;
 
 /**
  * Sin @Valid a proposito: la validacion la hace AuthService dentro de su
@@ -40,6 +42,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return withNoStore(HttpStatus.OK, authService.login(request));
+    }
+
+    // R3: no recibe body; el token a revocar es el del header Authorization
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal AuthenticatedUser principal) {
+        authService.logout(principal);
+        return ResponseEntity.noContent().build();
     }
 
     // Las respuestas contienen el token: no deben quedar en caches

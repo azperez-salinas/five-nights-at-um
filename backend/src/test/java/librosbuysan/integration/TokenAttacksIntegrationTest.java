@@ -14,6 +14,7 @@ import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import librosbuysan.support.IntegrationTestBase;
 import org.junit.jupiter.api.Test;
@@ -155,6 +156,7 @@ class TokenAttacksIntegrationTest extends IntegrationTestBase {
         String token = Jwts.builder()
                 .subject(String.valueOf(compradorA.getId()))
                 .claim("role", "ADMIN")
+                .id(UUID.randomUUID().toString()) // con jti: sin el, el filtro lo rechazaria por otro motivo (R3)
                 .expiration(Date.from(Instant.now().plusSeconds(600)))
                 .signWith(claveReal(), Jwts.SIG.HS256)
                 .compact();
@@ -167,6 +169,21 @@ class TokenAttacksIntegrationTest extends IntegrationTestBase {
     void tokenBienFirmadoPeroConSubjectNoNumericoEs401() throws Exception {
         String token = Jwts.builder()
                 .subject("no-es-un-id")
+                .id(UUID.randomUUID().toString()) // con jti: sin el, el filtro lo rechazaria por otro motivo (R3)
+                .claim("role", "COMPRADOR")
+                .expiration(Date.from(Instant.now().plusSeconds(600)))
+                .signWith(claveReal(), Jwts.SIG.HS256)
+                .compact();
+
+        mvc.perform(get(OBJETIVO).header(AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void tokenBienFirmadoPeroSinJtiEs401() throws Exception {
+        // R3: sin jti no se puede saber si el token fue revocado por un logout, asi que no se acepta
+        String token = Jwts.builder()
+                .subject(String.valueOf(compradorA.getId()))
                 .claim("role", "COMPRADOR")
                 .expiration(Date.from(Instant.now().plusSeconds(600)))
                 .signWith(claveReal(), Jwts.SIG.HS256)

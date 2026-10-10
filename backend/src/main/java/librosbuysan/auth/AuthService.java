@@ -20,11 +20,12 @@ import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.AuthDtos.RegisterRequest;
 import librosbuysan.library.Library;
 import librosbuysan.library.LibraryRepo;
+import librosbuysan.security.AuthenticatedUser;
 import librosbuysan.user.User;
 import librosbuysan.user.UserRepo;
 
 /**
- * Registro (R1 + R8) y login (R2).
+ * Registro (R1 + R8), login (R2) y logout (R3).
  *
  * <p>La contrasena se maneja siempre como char[] y nunca se convierte a String.
  * Todo el cuerpo de register y login esta dentro de un try/finally que la
@@ -50,6 +51,7 @@ public class AuthService {
     private final UserRepo userRepo;
     private final LibraryRepo libraryRepo;
     private final JwtService jwtService;
+    private final TokenRevocationService revocationService;
     private final Validator validator;
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -58,10 +60,12 @@ public class AuthService {
     private final String dummyHash;
 
     public AuthService(UserRepo userRepo, LibraryRepo libraryRepo,
-                       JwtService jwtService, Validator validator) {
+                       JwtService jwtService, TokenRevocationService revocationService,
+                       Validator validator) {
         this.userRepo = userRepo;
         this.libraryRepo = libraryRepo;
         this.jwtService = jwtService;
+        this.revocationService = revocationService;
         this.validator = validator;
         this.dummyHash = createDummyHash();
     }
@@ -168,6 +172,20 @@ public class AuthService {
                 Arrays.fill(password, '\0');
             }
         }
+    }
+
+    /**
+     * R3: cierra la sesion revocando el token con el que se hizo el request.
+     * Es idempotente: revocar dos veces el mismo token no tiene efecto extra.
+     */
+    public void logout(AuthenticatedUser principal) {
+        if (principal == null || principal.tokenId() == null || principal.tokenExpiresAt() == null) {
+            // No deberia pasar (SecurityConfig exige autenticacion), pero se
+            // falla cerrado en vez de dar un NPE
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        revocationService.revoke(principal.tokenId(), principal.tokenExpiresAt());
+        log.info("Logout exitoso: userId={}", principal.id());
     }
 
     /**

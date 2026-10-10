@@ -14,21 +14,25 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import librosbuysan.auth.JwtService;
+import librosbuysan.auth.TokenRevocationService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtService jwtService;
+    private final TokenRevocationService revocationService;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
     private final List<String> allowedOrigins;
 
     public SecurityConfig(JwtService jwtService,
+                          TokenRevocationService revocationService,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
                           @Value("${cors.allowed-origins}") List<String> allowedOrigins) {
         this.jwtService = jwtService;
+        this.revocationService = revocationService;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.allowedOrigins = allowedOrigins;
@@ -57,6 +61,11 @@ public class SecurityConfig {
                         // tapa el codigo de error real (ej. un 405 real
                         // terminaba devolviendo 401 "No autenticado").
                         .requestMatchers("/error").permitAll()
+                        // R3: el logout exige sesion activa. Esta regla DEBE ir
+                        // antes de "/api/auth/**": Spring usa la primera que
+                        // coincide, y si quedara despues el logout seria publico
+                        // y el principal llegaria null al controller.
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").hasAnyRole("COMPRADOR", "DUENO")
                         .requestMatchers("/api/auth/**").permitAll()
                         // Catalogo (R7), busqueda (RF9) y detalle de libro son
                         // publicos: un visitante puede explorar sin cuenta y
@@ -91,7 +100,7 @@ public class SecurityConfig {
                         // nuevo queda inaccesible hasta que se le asigne un
                         // rol aca. Sin token responde 401; con token, 403.
                         .anyRequest().denyAll())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocationService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

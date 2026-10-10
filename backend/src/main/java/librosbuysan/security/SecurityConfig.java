@@ -77,6 +77,11 @@ public class SecurityConfig {
                         // roles explicitos en lugar de "cualquier autenticado".
                         .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
                         .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
+                        // R14/F14: ver y dar de baja la libreria propia es
+                        // exclusivo del DUENO. Que la libreria sea suya lo
+                        // valida LibraryService, no esta regla.
+                        .requestMatchers(HttpMethod.GET, "/api/users/libreria").hasRole("DUENO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/libreria/*").hasRole("DUENO")
                         // RS5/RS19/RS27: deny-by-default real. Cualquier ruta
                         // o metodo sin regla explicita arriba se rechaza,
                         // aunque el usuario este autenticado: un endpoint

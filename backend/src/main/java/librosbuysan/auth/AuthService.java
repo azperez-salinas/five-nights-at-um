@@ -179,7 +179,7 @@ public class AuthService {
      * Es idempotente: revocar dos veces el mismo token no tiene efecto extra.
      */
     public void logout(AuthenticatedUser principal) {
-        if (principal == null || principal.tokenId() == null) {
+        if (principal == null || principal.tokenId() == null || principal.tokenExpiresAt() == null) {
             // No deberia pasar (SecurityConfig exige autenticacion), pero se
             // falla cerrado en vez de dar un NPE
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);

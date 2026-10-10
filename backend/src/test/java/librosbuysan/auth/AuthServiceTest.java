@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 import librosbuysan.auth.AuthDtos.AuthResponse;
@@ -19,6 +20,7 @@ import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.AuthDtos.RegisterRequest;
 import librosbuysan.library.Library;
 import librosbuysan.library.LibraryRepo;
+import librosbuysan.security.AuthenticatedUser;
 import librosbuysan.user.User;
 import librosbuysan.user.UserRepo;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,6 +49,7 @@ class AuthServiceTest {
     @Mock private UserRepo userRepo;
     @Mock private LibraryRepo libraryRepo;
     @Mock private JwtService jwtService;
+    @Mock private TokenRevocationService revocationService;
 
     private AuthService authService;
 
@@ -57,7 +60,7 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        authService = new AuthService(userRepo, libraryRepo, jwtService, VALIDATOR);
+        authService = new AuthService(userRepo, libraryRepo, jwtService, revocationService, VALIDATOR);
     }
 
     private void jwtDevuelveToken(User.Role role, long segundos) {
@@ -317,5 +320,58 @@ class AuthServiceTest {
                 () -> authService.login(new LoginRequest("a".repeat(31), PASSWORD.toCharArray())));
 
         verifyNoInteractions(userRepo);
+    }
+
+    // ================= logout (R3) =================
+
+    @Test
+    void logoutRevocaElTokenDelRequestConSuExpiracion() {
+        Instant expira = Instant.parse("2030-01-01T00:00:00Z");
+
+        authService.logout(new AuthenticatedUser(7L, User.Role.COMPRADOR, "jti-123", expira));
+
+        // La expiracion importa: es lo que permite descartar la entrada cuando el token vence solo
+        verify(revocationService).revoke("jti-123", expira);
+    }
+
+    @Test
+    void logoutFuncionaParaElRolDueno() {
+        Instant expira = Instant.parse("2030-01-01T00:00:00Z");
+
+        authService.logout(new AuthenticatedUser(9L, User.Role.DUENO, "jti-dueno", expira));
+
+        verify(revocationService).revoke("jti-dueno", expira);
+    }
+
+    @Test
+    void logoutNoTocaLaBaseNiGeneraTokens() {
+        authService.logout(new AuthenticatedUser(7L, User.Role.COMPRADOR, "jti-123",
+                Instant.parse("2030-01-01T00:00:00Z")));
+
+        verifyNoInteractions(userRepo, libraryRepo, jwtService);
+    }
+
+    @Test
+    void logoutSinPrincipalDa401YNoRevocaNada() {
+        // No deberia ocurrir (SecurityConfig exige autenticacion), pero se falla cerrado
+        assertThrowsStatus(HttpStatus.UNAUTHORIZED, () -> authService.logout(null));
+
+        verifyNoInteractions(revocationService);
+    }
+
+    @Test
+    void logoutConPrincipalSinTokenIdDa401YNoRevocaNada() {
+        assertThrowsStatus(HttpStatus.UNAUTHORIZED, () -> authService.logout(
+                new AuthenticatedUser(7L, User.Role.COMPRADOR, null, Instant.parse("2030-01-01T00:00:00Z"))));
+
+        verifyNoInteractions(revocationService);
+    }
+
+    @Test
+    void logoutConPrincipalSinExpiracionDa401YNoRevocaNada() {
+        assertThrowsStatus(HttpStatus.UNAUTHORIZED, () -> authService.logout(
+                new AuthenticatedUser(7L, User.Role.COMPRADOR, "jti-123", null)));
+
+        verifyNoInteractions(revocationService);
     }
 }

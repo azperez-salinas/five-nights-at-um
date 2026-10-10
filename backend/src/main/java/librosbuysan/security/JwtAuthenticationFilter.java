@@ -55,10 +55,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Claims claims = jwtService.parseAndValidate(token);
 
         // R3: un token con firma y expiracion validas puede haber sido revocado
-        // por un logout. Sin jti no se puede verificar, asi que tambien se rechaza.
+        // por un logout. Sin jti no se puede verificar, y sin exp no se sabe
+        // hasta cuando guardar la revocacion: en ambos casos se rechaza.
         String tokenId = claims.getId();
-        if (tokenId == null || revocationService.isRevoked(tokenId)) {
-            log.warn("Token revocado o sin jti rechazado");
+        if (tokenId == null || claims.getExpiration() == null || revocationService.isRevoked(tokenId)) {
+            log.warn("Token revocado o incompleto (sin jti/exp) rechazado");
             return;
         }
 

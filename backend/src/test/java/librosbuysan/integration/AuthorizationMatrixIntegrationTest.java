@@ -90,7 +90,10 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             // Autenticacion: publica por definicion (no se puede exigir token para obtener un token)
             new Caso("POST", "/api/auth/register", "/api/auth/register", "{}", OK, OK, OK),
             new Caso("POST", "/api/auth/register-dueno", "/api/auth/register-dueno", "{}", OK, OK, OK),
-            new Caso("POST", "/api/auth/login", "/api/auth/login", "{}", OK, OK, OK));
+            new Caso("POST", "/api/auth/login", "/api/auth/login", "{}", OK, OK, OK),
+            // R3: cerrar sesion exige estar autenticado (cualquier rol). Debe estar
+            // declarado ANTES de permitAll("/api/auth/**") en SecurityConfig.
+            new Caso("POST", "/api/auth/logout", "/api/auth/logout", null, NO_AUTH, OK, OK));
 
     // Operaciones que hoy NO existen y por lo tanto nadie debe poder ejecutar.
     // Si manana alguien crea un POST /api/books sin tocar SecurityConfig, el

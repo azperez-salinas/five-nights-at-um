@@ -42,5 +42,18 @@ services:
       - "5173:80"
     depends_on:
       - backend
+  test:
+    build:
+      context: ./backend
+      target: build
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    command: ["mvn", "-B", "test"]
+    depends_on:
+      db:
+        condition: service_healthy
 volumes:
   pgdata:

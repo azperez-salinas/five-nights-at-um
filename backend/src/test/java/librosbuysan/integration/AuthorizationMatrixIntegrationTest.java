@@ -83,6 +83,11 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             new Caso("POST", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null, NO_AUTH, OK, PROHIBIDO),
             new Caso("DELETE", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null, NO_AUTH, OK, PROHIBIDO),
 
+            // Librerias: el listado es publico (R10); ver/dar de baja la propia es solo del DUENO (R14/R15)
+            new Caso("GET", "/api/librerias", "/api/librerias", null, OK, OK, OK),
+            new Caso("GET", "/api/users/libreria", "/api/users/libreria", null, NO_AUTH, PROHIBIDO, OK),
+            new Caso("DELETE", "/api/users/libreria/{id}", "/api/users/libreria/{id}", null, NO_AUTH, PROHIBIDO, OK),
+
             // Perfil propio: la unica funcionalidad compartida por ambos roles (RS5)
             new Caso("GET", "/api/users/me", "/api/users/me", null, NO_AUTH, OK, OK),
             new Caso("PUT", "/api/users/me", "/api/users/me", "{}", NO_AUTH, OK, OK),

@@ -155,7 +155,7 @@ class TokenAttacksIntegrationTest extends IntegrationTestBase {
     void tokenBienFirmadoPeroConRolInexistenteEs401() throws Exception {
         String token = Jwts.builder()
                 .subject(String.valueOf(compradorA.getId()))
-                .claim("role", "ADMIN")
+                .claim("role", "SUPERADMIN")
                 .id(UUID.randomUUID().toString()) // con jti: sin el, el filtro lo rechazaria por otro motivo (R3)
                 .expiration(Date.from(Instant.now().plusSeconds(600)))
                 .signWith(claveReal(), Jwts.SIG.HS256)

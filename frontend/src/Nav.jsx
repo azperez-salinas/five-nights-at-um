@@ -3,6 +3,27 @@ import './Register.css';
 export default function Nav({ active, session }) {
     const itemClass = (name) => `nav-item${active === name ? ' active' : ''}`;
 
+    // R18: the admin only has its panel, and an owner with a temporary password only the
+    // password change screen, so the regular menu is hidden for both
+    if (session && (session.role === 'ADMIN' || session.mustChangePassword)) {
+        return (
+            <header className="booksaw-nav">
+                <div className="booksaw-nav-container">
+                    <div className="booksaw-logo">
+                        <span className="logo-title">LOS LIBROS DE BUYSAN</span>
+                        <span className="logo-tagline">LIBRERÍA & EDITORIAL</span>
+                    </div>
+                    <nav className="booksaw-menu">
+                        {session.role === 'ADMIN' && (
+                            <a href="#admin" className={itemClass('admin')}>PANEL</a>
+                        )}
+                        <a href="#logout" className="nav-item">CERRAR SESIÓN</a>
+                    </nav>
+                </div>
+            </header>
+        );
+    }
+
     return (
         <header className="booksaw-nav">
             <div className="booksaw-nav-container">

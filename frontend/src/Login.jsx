@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Nav from './Nav';
 import './Register.css';
 
-export default function Login({ onLoginSuccess, onNavigateToRegister }) {
+export default function Login({ notice, onLoginSuccess, onNavigateToRegister }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +32,7 @@ export default function Login({ onLoginSuccess, onNavigateToRegister }) {
 
             if (response.ok) {
                 const data = await response.json();
-                onLoginSuccess(data.token, data.username, data.role);
+                onLoginSuccess(data.token, data.username, data.role, data.mustChangePassword);
             } else if (response.status === 401 || response.status === 400) {
                 setErrorMsg('Nombre de usuario o contraseña incorrectos.');
             } else {
@@ -79,8 +79,15 @@ export default function Login({ onLoginSuccess, onNavigateToRegister }) {
                         <div className="register-card">
                             <div className="card-header">
                                 <h2 className="card-title">Iniciar sesión</h2>
-                                <p className="card-subtitle">Ingresá tus credenciales para acceder a tu cuenta de comprador.</p>
+                                <p className="card-subtitle">Ingresá tus credenciales para acceder a tu cuenta.</p>
                             </div>
+
+                            {notice && !errorMsg && (
+                                <div className="alert-box alert-success" role="status">
+                                    <span className="alert-icon">✓</span>
+                                    <span>{notice}</span>
+                                </div>
+                            )}
 
                             {errorMsg && (
                                 <div className="alert-box alert-error" role="alert">

@@ -20,6 +20,8 @@ import librosbuysan.auth.TokenRevocationService;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final String PWD_CHANGE = JwtAuthenticationFilter.PASSWORD_CHANGE_ROLE;
+
     private final JwtService jwtService;
     private final TokenRevocationService revocationService;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
@@ -65,8 +67,19 @@ public class SecurityConfig {
                         // antes de "/api/auth/**": Spring usa la primera que
                         // coincide, y si quedara despues el logout seria publico
                         // y el principal llegaria null al controller.
-                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").hasAnyRole("COMPRADOR", "DUENO")
+                        // R18: el admin y el dueno con contrasena temporal
+                        // tambien pueden cerrar sesion (revocar su token).
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout")
+                                .hasAnyRole("COMPRADOR", "DUENO", "ADMIN", PWD_CHANGE)
                         .requestMatchers("/api/auth/**").permitAll()
+                        // R18/F18: las dos unicas acciones del panel de admin.
+                        // Se declaran por metodo y ruta exactos: cualquier
+                        // otra cosa bajo /api/admin cae en el denyAll de abajo,
+                        // incluso para el admin. El rol ADMIN no aparece en
+                        // ninguna otra regla, asi que el resto de las
+                        // operaciones protegidas le responden 403.
+                        .requestMatchers(HttpMethod.POST, "/api/admin/owners").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/admin/password").hasRole("ADMIN")
                         // Catalogo (R7), busqueda (RF9) y detalle de libro son
                         // publicos: un visitante puede explorar sin cuenta y
                         // solo necesita registrarse para usar favoritos. El
@@ -89,8 +102,10 @@ public class SecurityConfig {
                         // RS5: el perfil propio es la unica funcionalidad
                         // compartida por ambos roles; se declara con los
                         // roles explicitos en lugar de "cualquier autenticado".
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
+                        // R18: con la contrasena temporal (PWD_CHANGE) el dueno
+                        // solo puede ver su perfil y cambiarla.
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO", PWD_CHANGE)
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO", PWD_CHANGE)
                         // R14/F14: ver y dar de baja la libreria propia es
                         // exclusivo del DUENO. Que la libreria sea suya lo
                         // valida LibraryService, no esta regla.

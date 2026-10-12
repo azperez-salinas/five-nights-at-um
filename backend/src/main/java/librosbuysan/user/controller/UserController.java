@@ -33,7 +33,7 @@ public class UserController {
     @PutMapping("/me")
     public ResponseEntity<ProfileResponse> updateMe(@AuthenticationPrincipal AuthenticatedUser principal,
             @RequestBody UpdateProfileRequest request) {
-        return withNoStore(HttpStatus.OK, userService.updateProfile(principal.id(), request));
+        return withNoStore(HttpStatus.OK, userService.updateProfile(principal, request));
     }
 
     private static ResponseEntity<ProfileResponse> withNoStore(HttpStatus status, ProfileResponse body) {

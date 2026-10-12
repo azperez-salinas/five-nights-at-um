@@ -55,21 +55,30 @@ class RegistrationAndProfileIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    void registroDeDuenoCreaLaLibreriaHabilitadaYAsignaRolDueno() throws Exception {
+    void elRegistroPublicoDeDuenosYaNoExiste() throws Exception {
+        // R18: los duenos solo los crea el admin desde su panel
         String body = "{\"username\":\"dueno_nuevo\",\"email\":\"dn@test.local\",\"password\":\"Password123!\","
                 + "\"nombreLibrary\":\"Mi Libreria\"}";
 
         mvc.perform(post("/api/auth/register-dueno").contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.role").value("DUENO"));
+                .andExpect(status().isNotFound());
 
-        User dueno = userRepo.findByUsername("dueno_nuevo").orElseThrow();
-        assertThat(libraryRepo.findAll())
-                .anySatisfy(l -> {
-                    assertThat(l.getNombre()).isEqualTo("Mi Libreria");
-                    assertThat(l.isEnabled()).isTrue();
-                });
-        assertThat(dueno.getRole()).isEqualTo(User.Role.DUENO);
+        assertThat(userRepo.findByUsername("dueno_nuevo")).isEmpty();
+    }
+
+    @Test
+    void elRegistroPublicoNoPermiteCrearDuenosNiAdminsAunqueSeMandeElRol() throws Exception {
+        for (String rol : new String[] {"DUENO", "ADMIN"}) {
+            String username = "intento_" + rol.toLowerCase();
+            String body = "{\"username\":\"" + username + "\",\"email\":\"" + username + "@test.local\","
+                    + "\"password\":\"Password123!\",\"role\":\"" + rol + "\"}";
+
+            mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.role").value("COMPRADOR"));
+
+            assertThat(userRepo.findByUsername(username).orElseThrow().getRole()).isEqualTo(User.Role.COMPRADOR);
+        }
     }
 
     @Test

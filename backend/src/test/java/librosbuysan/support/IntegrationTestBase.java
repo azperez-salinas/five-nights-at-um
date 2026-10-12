@@ -35,7 +35,10 @@ import org.springframework.test.web.servlet.MockMvc;
  *
  *   compradorA, compradorB            -> usuarios COMPRADOR
  *   duenoCentral / duenoNorte / duenoBaja -> usuarios DUENO, uno por libreria
- *   central, norte                    -> librerias habilitadas
+ *   duenoPendiente                    -> DUENO creado por el admin que todavia
+ *                                        tiene la contrasena temporal (R18)
+ *   admin                             -> usuario ADMIN (R18)
+ *   central, norte, pendiente         -> librerias habilitadas
  *   baja                              -> libreria deshabilitada (RS34)
  *   libroCentral, libroNorte, libroBaja -> MISMO titulo/ISBN, una copia por
  *                                          libreria (asi se ve que el filtro
@@ -70,9 +73,12 @@ public abstract class IntegrationTestBase {
     protected User duenoCentral;
     protected User duenoNorte;
     protected User duenoBaja;
+    protected User duenoPendiente;
+    protected User admin;
     protected Library central;
     protected Library norte;
     protected Library baja;
+    protected Library pendiente;
     protected Book libroCentral;
     protected Book libroNorte;
     protected Book libroBaja;
@@ -98,12 +104,16 @@ public abstract class IntegrationTestBase {
         duenoCentral = userRepo.saveAndFlush(User.dueno("dueno_central", "dueno_central@test.local", passwordHash));
         duenoNorte = userRepo.saveAndFlush(User.dueno("dueno_norte", "dueno_norte@test.local", passwordHash));
         duenoBaja = userRepo.saveAndFlush(User.dueno("dueno_baja", "dueno_baja@test.local", passwordHash));
+        duenoPendiente = userRepo.saveAndFlush(
+                User.duenoConPasswordTemporal("dueno_pendiente", "dueno_pendiente@test.local", passwordHash));
+        admin = userRepo.saveAndFlush(User.admin("admin_test", "admin_test@test.local", passwordHash));
 
         central = libraryRepo.saveAndFlush(new Library(duenoCentral, "Libreria Central"));
         norte = libraryRepo.saveAndFlush(new Library(duenoNorte, "Libreria Norte"));
         Library bajaNueva = new Library(duenoBaja, "Libreria Baja");
         bajaNueva.disable();
         baja = libraryRepo.saveAndFlush(bajaNueva);
+        pendiente = libraryRepo.saveAndFlush(new Library(duenoPendiente, "Libreria Pendiente"));
 
         libroCentral = bookRepo.saveAndFlush(quijote(central));
         libroNorte = bookRepo.saveAndFlush(quijote(norte));

@@ -17,17 +17,22 @@ import librosbuysan.user.User;
 public class JwtService {
 
     public static final String ROLE_CLAIM = "role";
+    // R18: presente (true) solo en tokens de duenos que todavia tienen la
+    // contrasena temporal; JwtAuthenticationFilter les da un permiso acotado
+    public static final String PASSWORD_CHANGE_CLAIM = "pwdChange";
 
     private static final int MIN_SECRET_BYTES = 32;
 
     private final SecretKey key;
     private final long compradorExpirationSeconds;
     private final long duenoExpirationSeconds;
+    private final long adminExpirationSeconds;
 
     public JwtService(
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.expiration-minutes.comprador:60}") long compradorMinutes,
-            @Value("${app.jwt.expiration-minutes.dueno:15}") long duenoMinutes) {
+            @Value("${app.jwt.expiration-minutes.dueno:15}") long duenoMinutes,
+            @Value("${app.jwt.expiration-minutes.admin:15}") long adminMinutes) {
         // Los mensajes de error nunca incluyen el valor del secreto
         if (secret == null || secret.isBlank()) {
             throw new IllegalStateException("app.jwt.secret (JWT_SECRET) no esta configurado");
@@ -50,30 +55,34 @@ public class JwtService {
             Arrays.fill(keyBytes, (byte) 0);
         }
 
-        if (compradorMinutes <= 0 || duenoMinutes <= 0) {
+        if (compradorMinutes <= 0 || duenoMinutes <= 0 || adminMinutes <= 0) {
             throw new IllegalStateException("app.jwt.expiration-minutes.* debe ser mayor a 0");
         }
         this.compradorExpirationSeconds = compradorMinutes * 60;
         this.duenoExpirationSeconds = duenoMinutes * 60;
+        this.adminExpirationSeconds = adminMinutes * 60;
     }
 
     public String generateToken(User user) {
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(getExpirationSeconds(user.getRole()));
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(Long.toString(user.getId()))
                 .claim(ROLE_CLAIM, user.getRole().name())
                 .id(UUID.randomUUID().toString())
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(expiration))
-                .signWith(key, Jwts.SIG.HS256)
-                .compact();
+                .expiration(Date.from(expiration));
+        if (user.isMustChangePassword()) {
+            builder.claim(PASSWORD_CHANGE_CLAIM, true);
+        }
+        return builder.signWith(key, Jwts.SIG.HS256).compact();
     }
 
     public long getExpirationSeconds(User.Role role) {
         return switch (role) {
             case COMPRADOR -> compradorExpirationSeconds;
             case DUENO -> duenoExpirationSeconds;
+            case ADMIN -> adminExpirationSeconds;
         };
     }
 

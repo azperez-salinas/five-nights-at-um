@@ -17,7 +17,9 @@ public class User {
 
     public enum Role {
         COMPRADOR,
-        DUENO
+        DUENO,
+        // R18: solo existe por seed (AdminSeeder); no hay endpoint que lo cree
+        ADMIN
     }
 
     @Id
@@ -41,6 +43,12 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    // R18: los duenos creados por el admin reciben una contrasena temporal y
+    // deben cambiarla en su primer inicio de sesion. Se apaga al cambiarla.
+    @ColumnDefault("false")
+    @Column(nullable = false)
+    private boolean mustChangePassword = false;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -58,6 +66,21 @@ public class User {
 
     public static User dueno(String username, String email, String passwordHash) {
         return new User(username, email, passwordHash, Role.DUENO);
+    }
+
+    /**
+     * R18: dueno dado de alta por el admin. La contrasena es temporal, asi que
+     * queda marcado para cambiarla en el primer inicio de sesion.
+     */
+    public static User duenoConPasswordTemporal(String username, String email, String passwordHash) {
+        User user = new User(username, email, passwordHash, Role.DUENO);
+        user.mustChangePassword = true;
+        return user;
+    }
+
+    // R18: solo lo usa AdminSeeder
+    public static User admin(String username, String email, String passwordHash) {
+        return new User(username, email, passwordHash, Role.ADMIN);
     }
 
     private User(String username, String email, String passwordHash, Role role) {
@@ -97,5 +120,13 @@ public class User {
         return createdAt;
     }
 
-    public void changePasswordHash(String passwordHash) {this.passwordHash = passwordHash;}
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    // Una contrasena elegida por el propio usuario deja de ser temporal (R18)
+    public void changePasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+        this.mustChangePassword = false;
+    }
 }

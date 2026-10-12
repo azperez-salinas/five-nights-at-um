@@ -26,7 +26,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * R37: matriz completa de autorizacion.
  *
  * Cada fila declara, para UNA operacion del backend, que debe pasar cuando la
- * llama un anonimo, un COMPRADOR y un DUENO. La politica esperada queda
+ * llama un anonimo, un COMPRADOR, un DUENO, un DUENO que todavia tiene la
+ * contrasena temporal (R18) y un ADMIN (R18). La politica esperada queda
  * escrita en un solo lugar y se ejecuta contra la cadena de seguridad real.
  *
  * Hay dos tipos de filas:
@@ -41,7 +42,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  */
 class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
 
-    enum Quien { ANONIMO, COMPRADOR, DUENO }
+    enum Quien { ANONIMO, COMPRADOR, DUENO, DUENO_PENDIENTE, ADMIN }
 
     enum Resultado {
         /** Pasa la autorizacion (despues el controller puede dar 200, 201, 400, 404...). */
@@ -51,13 +52,16 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
     }
 
     record Caso(String metodo, String patron, String ruta, String body,
-                Resultado anonimo, Resultado comprador, Resultado dueno) {
+                Resultado anonimo, Resultado comprador, Resultado dueno,
+                Resultado duenoPendiente, Resultado admin) {
 
         Resultado para(Quien quien) {
             return switch (quien) {
                 case ANONIMO -> anonimo;
                 case COMPRADOR -> comprador;
                 case DUENO -> dueno;
+                case DUENO_PENDIENTE -> duenoPendiente;
+                case ADMIN -> admin;
             };
         }
 
@@ -72,36 +76,50 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
     private static final Resultado PROHIBIDO = Resultado.PROHIBIDO_403;
 
     // {id} / {bookId} se reemplazan en runtime por el id real de un libro de prueba.
+    // Columnas: anonimo, comprador, dueno, dueno con contrasena temporal, admin.
     static final List<Caso> ENDPOINTS_DE_LA_APP = List.of(
-            // Catalogo: publico para todos (R7, RF9, RS34 se filtra en la query, no aca)
-            new Caso("GET", "/api/books", "/api/books", null, OK, OK, OK),
-            new Caso("GET", "/api/books/search", "/api/books/search?q=quijote", null, OK, OK, OK),
-            new Caso("GET", "/api/books/{id}", "/api/books/{id}", null, OK, OK, OK),
+            // Catalogo: publico para todos (R7, RF9, RS34 se filtra en la query, no aca).
+            // R18: se decidio dejarlo abierto tambien para el admin (es publico)
+            new Caso("GET", "/api/books", "/api/books", null, OK, OK, OK, OK, OK),
+            new Caso("GET", "/api/books/search", "/api/books/search?q=quijote", null, OK, OK, OK, OK, OK),
+            new Caso("GET", "/api/books/{id}", "/api/books/{id}", null, OK, OK, OK, OK, OK),
 
             // Importación masiva: exclusiva del DUENO (R17)
-            new Caso("POST", "/api/books/import", "/api/books/import", null, NO_AUTH, PROHIBIDO, OK),
+            new Caso("POST", "/api/books/import", "/api/books/import", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
 
             // Favoritos: exclusivo del COMPRADOR (RF12, RS1, RS19)
-            new Caso("GET", "/api/favorites", "/api/favorites", null, NO_AUTH, OK, PROHIBIDO),
-            new Caso("POST", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null, NO_AUTH, OK, PROHIBIDO),
-            new Caso("DELETE", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null, NO_AUTH, OK, PROHIBIDO),
+            new Caso("GET", "/api/favorites", "/api/favorites", null, NO_AUTH, OK, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null,
+                    NO_AUTH, OK, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null,
+                    NO_AUTH, OK, PROHIBIDO, PROHIBIDO, PROHIBIDO),
 
             // Librerias: el listado es publico (R10); ver/dar de baja la propia es solo del DUENO (R14/R15)
-            new Caso("GET", "/api/librerias", "/api/librerias", null, OK, OK, OK),
-            new Caso("GET", "/api/users/libreria", "/api/users/libreria", null, NO_AUTH, PROHIBIDO, OK),
-            new Caso("DELETE", "/api/users/libreria/{id}", "/api/users/libreria/{id}", null, NO_AUTH, PROHIBIDO, OK),
+            new Caso("GET", "/api/librerias", "/api/librerias", null, OK, OK, OK, OK, OK),
+            new Caso("GET", "/api/users/libreria", "/api/users/libreria", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/users/libreria/{id}", "/api/users/libreria/{id}", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
 
-            // Perfil propio: la unica funcionalidad compartida por ambos roles (RS5)
-            new Caso("GET", "/api/users/me", "/api/users/me", null, NO_AUTH, OK, OK),
-            new Caso("PUT", "/api/users/me", "/api/users/me", "{}", NO_AUTH, OK, OK),
+            // Perfil propio: compartido por comprador y dueno (RS5). El dueno con
+            // contrasena temporal solo puede usarlo para cambiarla (R18). El admin
+            // cambia su contrasena desde /api/admin/password.
+            new Caso("GET", "/api/users/me", "/api/users/me", null, NO_AUTH, OK, OK, OK, PROHIBIDO),
+            new Caso("PUT", "/api/users/me", "/api/users/me", "{}", NO_AUTH, OK, OK, OK, PROHIBIDO),
 
             // Autenticacion: publica por definicion (no se puede exigir token para obtener un token)
-            new Caso("POST", "/api/auth/register", "/api/auth/register", "{}", OK, OK, OK),
-            new Caso("POST", "/api/auth/register-dueno", "/api/auth/register-dueno", "{}", OK, OK, OK),
-            new Caso("POST", "/api/auth/login", "/api/auth/login", "{}", OK, OK, OK),
+            new Caso("POST", "/api/auth/register", "/api/auth/register", "{}", OK, OK, OK, OK, OK),
+            new Caso("POST", "/api/auth/login", "/api/auth/login", "{}", OK, OK, OK, OK, OK),
             // R3: cerrar sesion exige estar autenticado (cualquier rol). Debe estar
             // declarado ANTES de permitAll("/api/auth/**") en SecurityConfig.
-            new Caso("POST", "/api/auth/logout", "/api/auth/logout", null, NO_AUTH, OK, OK));
+            new Caso("POST", "/api/auth/logout", "/api/auth/logout", null, NO_AUTH, OK, OK, OK, OK),
+
+            // R18/F18: las dos unicas acciones del admin, y exclusivas de el
+            new Caso("POST", "/api/admin/owners", "/api/admin/owners", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, OK),
+            new Caso("PUT", "/api/admin/password", "/api/admin/password", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, OK));
 
     // Operaciones que hoy NO existen y por lo tanto nadie debe poder ejecutar.
     // Si manana alguien crea un POST /api/books sin tocar SecurityConfig, el
@@ -109,20 +127,39 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
     // test falla y obliga a decidir el rol de forma explicita.
     static final List<Caso> RUTAS_SIN_REGLA = List.of(
             // Escritura sobre el catalogo (solo GET es publico)
-            new Caso("POST", "/api/books", "/api/books", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("PUT", "/api/books/{id}", "/api/books/{id}", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("DELETE", "/api/books/{id}", "/api/books/{id}", null, NO_AUTH, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/books", "/api/books", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("PUT", "/api/books/{id}", "/api/books/{id}", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/books/{id}", "/api/books/{id}", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             // Un dueno tampoco puede escribir catalogo todavia (no esta implementado)
-            new Caso("PATCH", "/api/books/{id}", "/api/books/{id}", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO),
-            // Acceso a cuentas AJENAS: solo existe /me
-            new Caso("GET", "/api/users/{id}", "/api/users/1", null, NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("GET", "/api/users", "/api/users", null, NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("DELETE", "/api/users/me", "/api/users/me", null, NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("POST", "/api/users/me", "/api/users/me", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO),
-            // Funcionalidades que podrian crearse (librerias, admin) y nacen cerradas
-            new Caso("GET", "/api/libraries", "/api/libraries", null, NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("GET", "/api/admin", "/api/admin", null, NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("GET", "/actuator/health", "/actuator/health", null, NO_AUTH, PROHIBIDO, PROHIBIDO));
+            new Caso("PATCH", "/api/books/{id}", "/api/books/{id}", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            // Acceso a cuentas AJENAS: solo existe /me (ni siquiera el admin puede listar usuarios)
+            new Caso("GET", "/api/users/{id}", "/api/users/1", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/users", "/api/users", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/users/me", "/api/users/me", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/users/me", "/api/users/me", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            // Funcionalidades que podrian crearse y nacen cerradas
+            new Caso("GET", "/api/libraries", "/api/libraries", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/actuator/health", "/actuator/health", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            // R18: bajo /api/admin solo existen las dos acciones del panel. Cualquier
+            // otra ruta o verbo se rechaza, incluso para el admin (no puede listar,
+            // editar ni borrar duenos, ni crear otros admins)
+            new Caso("GET", "/api/admin", "/api/admin", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/admin/owners", "/api/admin/owners", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("PUT", "/api/admin/owners", "/api/admin/owners", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/admin/owners/{id}", "/api/admin/owners/1", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/admin/admins", "/api/admin/admins", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/admin/password", "/api/admin/password", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO));
 
     static Stream<Arguments> todosLosCasos() {
         return Stream.concat(ENDPOINTS_DE_LA_APP.stream(), RUTAS_SIN_REGLA.stream())
@@ -142,6 +179,8 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
         switch (quien) {
             case COMPRADOR -> req.header(AUTHORIZATION, bearer(compradorA));
             case DUENO -> req.header(AUTHORIZATION, bearer(duenoCentral));
+            case DUENO_PENDIENTE -> req.header(AUTHORIZATION, bearer(duenoPendiente));
+            case ADMIN -> req.header(AUTHORIZATION, bearer(admin));
             case ANONIMO -> {
                 // sin header Authorization
             }

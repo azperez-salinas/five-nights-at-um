@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import librosbuysan.auth.AuthDtos.AuthResponse;
 import librosbuysan.auth.AuthDtos.LoginRequest;
-import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.AuthDtos.RegisterRequest;
 import librosbuysan.security.AuthenticatedUser;
 
@@ -32,11 +31,6 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         return withNoStore(HttpStatus.CREATED, authService.register(request));
-    }
-
-    @PostMapping("/register-dueno")
-    public ResponseEntity<AuthResponse> registerDueno(@RequestBody RegisterDuenoRequest request) {
-        return withNoStore(HttpStatus.CREATED, authService.registerDueno(request));
     }
 
     @PostMapping("/login")

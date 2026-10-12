@@ -16,10 +16,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import librosbuysan.auth.AuthDtos.AuthResponse;
 import librosbuysan.auth.AuthDtos.LoginRequest;
-import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.AuthDtos.RegisterRequest;
-import librosbuysan.library.Library;
-import librosbuysan.library.LibraryRepo;
 import librosbuysan.security.AuthenticatedUser;
 import librosbuysan.user.User;
 import librosbuysan.user.UserRepo;
@@ -47,7 +44,6 @@ class AuthServiceTest {
     private static String passwordHash;
 
     @Mock private UserRepo userRepo;
-    @Mock private LibraryRepo libraryRepo;
     @Mock private JwtService jwtService;
     @Mock private TokenRevocationService revocationService;
 
@@ -60,7 +56,7 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        authService = new AuthService(userRepo, libraryRepo, jwtService, revocationService, VALIDATOR);
+        authService = new AuthService(userRepo, jwtService, revocationService, VALIDATOR);
     }
 
     private void jwtDevuelveToken(User.Role role, long segundos) {
@@ -170,52 +166,7 @@ class AuthServiceTest {
     @MethodSource("registrosInvalidos")
     void registerRechazaDatosInvalidosSinTocarLaBase(RegisterRequest request) {
         assertThrowsStatus(HttpStatus.BAD_REQUEST, () -> authService.register(request));
-        verifyNoInteractions(userRepo, libraryRepo, jwtService);
-    }
-
-    // ================= registerDueno =================
-
-    @Test
-    void registerDuenoCreaUnUsuarioDuenoYSuLibreriaHabilitada() {
-        when(userRepo.saveAndFlush(any(User.class))).then(returnsFirstArg());
-        jwtDevuelveToken(User.Role.DUENO, 900);
-
-        AuthResponse response = authService.registerDueno(new RegisterDuenoRequest(
-                "duenonuevo", "dueno@test.local", PASSWORD.toCharArray(), "  Mi Libreria  "));
-
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepo).saveAndFlush(userCaptor.capture());
-        assertThat(userCaptor.getValue().getRole()).isEqualTo(User.Role.DUENO);
-
-        ArgumentCaptor<Library> libraryCaptor = ArgumentCaptor.forClass(Library.class);
-        verify(libraryRepo).saveAndFlush(libraryCaptor.capture());
-        assertThat(libraryCaptor.getValue().getNombre()).isEqualTo("Mi Libreria");
-        assertThat(libraryCaptor.getValue().getDueno()).isSameAs(userCaptor.getValue());
-        assertThat(libraryCaptor.getValue().isEnabled()).isTrue();
-
-        assertThat(response.role()).isEqualTo(User.Role.DUENO);
-        assertThat(response.expiresIn()).isEqualTo(900);
-    }
-
-    @Test
-    void registerDuenoDa409SiElUsuarioYaExisteYNoCreaLibreria() {
-        when(userRepo.existsByUsername("duenonuevo")).thenReturn(true);
-
-        assertThrowsStatus(HttpStatus.CONFLICT, () -> authService.registerDueno(new RegisterDuenoRequest(
-                "duenonuevo", "dueno@test.local", PASSWORD.toCharArray(), "Mi Libreria")));
-
-        verifyNoInteractions(libraryRepo);
-    }
-
-    @Test
-    void registerDuenoRechazaNombreDeLibreriaEnBlancoOMuyCorto() {
-        assertThrowsStatus(HttpStatus.BAD_REQUEST, () -> authService.registerDueno(new RegisterDuenoRequest(
-                "duenonuevo", "dueno@test.local", PASSWORD.toCharArray(), "   ")));
-        assertThrowsStatus(HttpStatus.BAD_REQUEST, () -> authService.registerDueno(new RegisterDuenoRequest(
-                "duenonuevo", "dueno@test.local", PASSWORD.toCharArray(), "x")));
-        assertThrowsStatus(HttpStatus.BAD_REQUEST, () -> authService.registerDueno(null));
-
-        verifyNoInteractions(userRepo, libraryRepo);
+        verifyNoInteractions(userRepo, jwtService);
     }
 
     // ================= login =================
@@ -230,6 +181,44 @@ class AuthServiceTest {
         assertThat(response.token()).isEqualTo("jwt-de-prueba");
         assertThat(response.username()).isEqualTo("pepe");
         assertThat(response.role()).isEqualTo(User.Role.COMPRADOR);
+    }
+
+    @Test
+    void loginDeUnUsuarioNormalNoPideCambiarLaPassword() {
+        when(userRepo.findByUsername("pepe")).thenReturn(Optional.of(usuarioExistente(User.Role.DUENO)));
+        jwtDevuelveToken(User.Role.DUENO, 900);
+
+        assertThat(authService.login(new LoginRequest("pepe", PASSWORD.toCharArray())).mustChangePassword())
+                .isFalse();
+    }
+
+    @Test
+    void loginDeDuenoConPasswordTemporalAvisaQueDebeCambiarla() {
+        // R18: el dueno creado por el admin entra con la temporal y debe cambiarla
+        User pendiente = User.duenoConPasswordTemporal("pepe", "pepe@test.local", passwordHash);
+        ReflectionTestUtils.setField(pendiente, "id", 7L);
+        when(userRepo.findByUsername("pepe")).thenReturn(Optional.of(pendiente));
+        jwtDevuelveToken(User.Role.DUENO, 900);
+
+        AuthResponse response = authService.login(new LoginRequest("pepe", PASSWORD.toCharArray()));
+
+        assertThat(response.mustChangePassword()).isTrue();
+        assertThat(response.role()).isEqualTo(User.Role.DUENO);
+        verify(jwtService).generateToken(pendiente);
+    }
+
+    @Test
+    void loginDeAdminDevuelveElRolAdmin() {
+        // R18: el admin entra por el mismo login que el resto
+        User admin = User.admin("pepe", "pepe@test.local", passwordHash);
+        ReflectionTestUtils.setField(admin, "id", 1L);
+        when(userRepo.findByUsername("pepe")).thenReturn(Optional.of(admin));
+        jwtDevuelveToken(User.Role.ADMIN, 900);
+
+        AuthResponse response = authService.login(new LoginRequest("pepe", PASSWORD.toCharArray()));
+
+        assertThat(response.role()).isEqualTo(User.Role.ADMIN);
+        assertThat(response.mustChangePassword()).isFalse();
     }
 
     @Test
@@ -348,7 +337,7 @@ class AuthServiceTest {
         authService.logout(new AuthenticatedUser(7L, User.Role.COMPRADOR, "jti-123",
                 Instant.parse("2030-01-01T00:00:00Z")));
 
-        verifyNoInteractions(userRepo, libraryRepo, jwtService);
+        verifyNoInteractions(userRepo, jwtService);
     }
 
     @Test

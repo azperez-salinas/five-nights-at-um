@@ -27,6 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private static final String BEARER_PREFIX = "Bearer ";
 
+    // R18: rol de los tokens emitidos mientras la contrasena es temporal
+    public static final String PASSWORD_CHANGE_ROLE = "PWD_CHANGE";
+
     private final JwtService jwtService;
     private final TokenRevocationService revocationService;
 
@@ -66,8 +69,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Long userId = Long.valueOf(claims.getSubject());
         User.Role role = User.Role.valueOf(claims.get(JwtService.ROLE_CLAIM, String.class));
 
-        AuthenticatedUser principal = new AuthenticatedUser(userId, role, tokenId, claims.getExpiration().toInstant());
-        var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        // R18: con la contrasena temporal todavia vigente, el token NO lleva el
+        // rol real sino uno acotado que SecurityConfig solo deja usar para
+        // cambiarla. Asi el cambio obligatorio no depende del frontend.
+        boolean passwordChangeRequired = Boolean.TRUE.equals(
+                claims.get(JwtService.PASSWORD_CHANGE_CLAIM, Boolean.class));
+        String authority = passwordChangeRequired ? PASSWORD_CHANGE_ROLE : role.name();
+
+        AuthenticatedUser principal = new AuthenticatedUser(userId, role, tokenId,
+                claims.getExpiration().toInstant(), passwordChangeRequired);
+        var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + authority));
         var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

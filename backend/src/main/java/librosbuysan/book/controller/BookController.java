@@ -1,55 +1,79 @@
 package librosbuysan.book;
 
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+
 import librosbuysan.book.BookDtos.BookSummary;
 import librosbuysan.book.BookDtos.CatalogPage;
+import librosbuysan.security.AuthenticatedUser;
 
 /**
- * Endpoints de solo lectura sobre el catalogo de libros: listado paginado
- * (R7), busqueda por texto libre (RF9) y detalle por id. Las tres
- * operaciones respetan RS34 (libros de librerias deshabilitadas no se ven).
+ * Endpoints del catálogo de libros: listado paginado (R7),
+ * búsqueda por texto libre (RF9), detalle por ID e importación
+ * masiva mediante CSV.
  *
- * Todos los metodos son @GetMapping: si se llama a estas rutas con otro
- * verbo HTTP (POST, PUT, DELETE, etc.) la peticion se rechaza (RS33) sin
- * llegar al BookService. SecurityConfig solo permite GET sobre /api/books,
- * asi que el deny-by-default responde 401/403 antes de que Spring MVC
- * llegue a devolver 405 por falta de handler.
+ * Las operaciones de lectura respetan RS34: los libros de
+ * librerías deshabilitadas no deben ser visibles.
+ *
+ * La autorización de cada endpoint debe estar definida en
+ * SecurityConfig y aplicar las reglas correspondientes a cada
+ * método HTTP.
  */
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
 
     private final BookService bookService;
+    private final BookCsvImportService csvImportService;
 
-    public BookController(BookService bookService) {
+    public BookController(
+            BookService bookService,
+            BookCsvImportService csvImportService) {
         this.bookService = bookService;
+        this.csvImportService = csvImportService;
     }
 
-    // R10: libreria y autor son filtros opcionales y combinables
+    // R10: librería y autor son filtros opcionales y combinables.
     @GetMapping
-    public CatalogPage list(@RequestParam(defaultValue = "1") int page,
-                            @RequestParam(required = false) Long libreria,
-                            @RequestParam(required = false) String autor) {
+    public CatalogPage list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(required = false) Long libreria,
+            @RequestParam(required = false) String autor) {
         return bookService.getCatalog(page, libreria, autor);
     }
 
-    // RF9: busqueda por texto libre (titulo, autor o ISBN). Publica, igual que
-    // el catalogo: la regla vive centralizada en SecurityConfig (RS1/RS9), no
-    // aca, para que toda la autorizacion de la app se pueda auditar en un
-    // solo lugar.
+    // RF9: búsqueda por título, autor o ISBN.
     @GetMapping("/search")
-    public CatalogPage search(@RequestParam String q, @RequestParam(defaultValue = "1") int page) {
+    public CatalogPage search(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "1") int page) {
         return bookService.search(q, page);
     }
 
-    // RS34: detalle publico de un libro. Devuelve 404 si no existe o si su
-    // libreria esta deshabilitada (BookService no distingue el motivo).
+    // RS34: detalle público de un libro.
     @GetMapping("/{id}")
     public BookSummary detail(@PathVariable Long id) {
         return bookService.getDetail(id);
+    }
+
+    // Importación masiva de libros mediante CSV.
+    @PostMapping(
+            value = "/import",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CsvImportResult importCsv(
+            @RequestPart("file") MultipartFile file,
+            Authentication authentication) {
+        AuthenticatedUser user =
+                (AuthenticatedUser) authentication.getPrincipal();
+
+        return csvImportService.importCsv(user.id(), file);
     }
 }

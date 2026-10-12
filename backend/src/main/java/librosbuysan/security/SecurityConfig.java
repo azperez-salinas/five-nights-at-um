@@ -73,6 +73,8 @@ public class SecurityConfig {
                         // filtro de RS34 (libreria deshabilitada) se aplica en
                         // la query, no en la autorizacion. Solo GET: cualquier
                         // otro verbo cae en el deny-by-default de abajo.
+                        .requestMatchers(HttpMethod.POST, "/api/books/import").hasRole("DUENO")
+                        // R17: importación masiva exclusiva de dueños.
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
                         // R10: el listado de librerias habilitadas alimenta el
                         // filtro del catalogo, que es publico como el catalogo.

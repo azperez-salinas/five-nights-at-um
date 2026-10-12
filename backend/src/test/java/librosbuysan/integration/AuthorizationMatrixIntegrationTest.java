@@ -78,6 +78,9 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             new Caso("GET", "/api/books/search", "/api/books/search?q=quijote", null, OK, OK, OK),
             new Caso("GET", "/api/books/{id}", "/api/books/{id}", null, OK, OK, OK),
 
+            // Importación masiva: exclusiva del DUENO (R17)
+            new Caso("POST", "/api/books/import", "/api/books/import", null, NO_AUTH, PROHIBIDO, OK),
+
             // Favoritos: exclusivo del COMPRADOR (RF12, RS1, RS19)
             new Caso("GET", "/api/favorites", "/api/favorites", null, NO_AUTH, OK, PROHIBIDO),
             new Caso("POST", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null, NO_AUTH, OK, PROHIBIDO),

@@ -1,10 +1,11 @@
-package librosbuysan.favorite;
+package librosbuysan.favorite.repository;
 
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import librosbuysan.favorite.entity.Favorite;
 
 public interface FavoriteRepo extends JpaRepository<Favorite, Long> {
 
@@ -18,13 +19,14 @@ public interface FavoriteRepo extends JpaRepository<Favorite, Long> {
     Optional<Favorite> findByUserIdAndBookId(Long userId, Long bookId);
 
     // RS34: el listado de "mis favoritos" no muestra libros cuya libreria
-    // fue deshabilitada despues de haberlos agregado. JOIN FETCH trae libro
-    // y libreria en la misma consulta (evita N+1 al mapear a BookSummary).
+    // fue deshabilitada, ni libros dados de baja individualmente (R18),
+    // despues de haberlos agregado. JOIN FETCH trae libro y libreria en la
+    // misma consulta (evita N+1 al mapear a BookSummary).
     @Query("""
             SELECT f FROM Favorite f
             JOIN FETCH f.book b
             JOIN FETCH b.library l
-            WHERE f.user.id = :userId AND l.enabled = true
+            WHERE f.user.id = :userId AND b.enabled = true AND l.enabled = true
             ORDER BY f.createdAt DESC
             """)
     List<Favorite> findVisibleByUserId(@Param("userId") Long userId);

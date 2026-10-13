@@ -1,10 +1,11 @@
-package librosbuysan.library;
+package librosbuysan.library.controller;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import librosbuysan.library.LibraryDtos.LibraryResponse;
+import librosbuysan.library.dto.LibraryDtos.LibraryResponse;
+import librosbuysan.library.service.LibraryService;
 
 /**
  * R10: listado publico de librerias habilitadas (solo id y nombre), para el

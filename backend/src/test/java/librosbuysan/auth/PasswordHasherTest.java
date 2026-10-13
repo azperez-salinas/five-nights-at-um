@@ -2,6 +2,7 @@ package librosbuysan.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import librosbuysan.auth.service.PasswordHasher;
 import org.junit.jupiter.api.Test;
 
 class PasswordHasherTest {

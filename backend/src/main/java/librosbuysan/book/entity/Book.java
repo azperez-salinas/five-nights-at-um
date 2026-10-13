@@ -1,4 +1,4 @@
-package librosbuysan.book;
+package librosbuysan.book.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +10,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import librosbuysan.library.Library;
+import librosbuysan.library.entity.Library;
+import org.hibernate.annotations.ColumnDefault;
 
 /**
  * Catalogo de libros disponibles en la plataforma.
@@ -62,6 +63,15 @@ public class Book {
     @Column(name = "portada_url", length = 500)
     private String portadaUrl;
 
+    // R18/F18: baja logica de UN libro puntual (independiente de que su
+    // libreria siga habilitada). Mismo patron que Library.enabled: las
+    // consultas de catalogo/busqueda/detalle/mine filtran por este flag, y
+    // DELETE /api/books/{id} lo pone en false en vez de borrar la fila, para
+    // no romper la integridad con reservas asociadas al libro.
+    @ColumnDefault("true")
+    @Column(nullable = false)
+    private boolean enabled = true;
+
     protected Book() {
         // requerido por JPA
     }
@@ -76,6 +86,7 @@ public class Book {
         this.cantidadPaginas = cantidadPaginas;
         this.descripcion = descripcion;
         this.portadaUrl = portadaUrl;
+        this.enabled = true;
     }
 
     public Long getId() {
@@ -112,5 +123,35 @@ public class Book {
 
     public String getPortadaUrl() {
         return portadaUrl;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    // R18/F18: baja logica desde DELETE /api/books/{id}. No borra la fila
+    // (se preserva por integridad con reservas asociadas al libro), solo lo
+    // oculta de catalogo/busqueda/detalle/mine.
+    public void disable() {
+        this.enabled = false;
+    }
+
+    // R18/F18: unicos campos editables via PUT /api/books/{id} (RS36/RS2/RS7).
+    // libreriaId e isEnabled NO tienen setter: no son editables por el
+    // cliente, el estado solo cambia por disable().
+    public void changeTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public void changeAutor(String autor) {
+        this.autor = autor;
+    }
+
+    public void changeIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
+    public void changePortadaUrl(String portadaUrl) {
+        this.portadaUrl = portadaUrl;
     }
 }

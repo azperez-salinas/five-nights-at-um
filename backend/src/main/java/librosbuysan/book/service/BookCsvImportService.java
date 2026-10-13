@@ -1,4 +1,4 @@
-package librosbuysan.book;
+package librosbuysan.book.service;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,10 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.time.ZoneId;
+
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -21,8 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import librosbuysan.library.Library;
-import librosbuysan.library.LibraryRepo;
+import librosbuysan.book.entity.Book;
+import librosbuysan.book.dto.CsvImportResult;
+import librosbuysan.book.repository.BookRepo;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
 
 @Service
 public class BookCsvImportService {
@@ -37,12 +42,6 @@ public class BookCsvImportService {
             "descripcion",
             "anio"
     );
-
-    private static final Pattern ISBN_10 =
-            Pattern.compile("[0-9]{9}[0-9Xx]");
-
-    private static final Pattern ISBN_13 =
-            Pattern.compile("[0-9]{13}");
 
     private final BookRepo bookRepo;
     private final LibraryRepo libraryRepo;
@@ -106,10 +105,10 @@ public class BookCsvImportService {
                 int rowNumber = 1;
 
                 while (iterator.hasNext()) {
-                    CSVRecord record = iterator.next();
+                    CSVRecord theRecord = iterator.next();
                     rowNumber++;
 
-                    if (record.size() == 0) {
+                    if (theRecord.size() == 0) {
                         continue;
                     }
 
@@ -120,8 +119,8 @@ public class BookCsvImportService {
                     for (String header : EXPECTED_HEADERS) {
                         int index = headerIndexes.get(header);
 
-                        String value = index < record.size()
-                                ? record.get(index).trim()
+                        String value = index < theRecord.size()
+                                ? theRecord.get(index).trim()
                                 : "";
 
                         row.put(header, neutralize(value));
@@ -140,7 +139,7 @@ public class BookCsvImportService {
                 }
             }
 
-        } catch (IOException | IllegalArgumentException ex) {
+        } catch (IOException | IllegalArgumentException _) {
             throw badRequest("No se pudo procesar el archivo CSV");
         }
 
@@ -247,7 +246,7 @@ public class BookCsvImportService {
             valid = false;
         }
 
-        if (!isValidIsbn(isbn)) {
+        if (!IsbnValidator.isValid(isbn)) {
             errors.add("Fila " + rowNumber + ": ISBN inválido");
             valid = false;
         }
@@ -267,7 +266,7 @@ public class BookCsvImportService {
             if (pages < 1) {
                 throw new NumberFormatException();
             }
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException _) {
             errors.add("Fila " + rowNumber
                     + ": cantidad_paginas debe ser un entero positivo");
             valid = false;
@@ -276,10 +275,10 @@ public class BookCsvImportService {
         try {
             year = Integer.parseInt(row.get("anio"));
 
-            if (year < 1 || year > LocalDate.now().getYear()) {
+            if (year < 1 || year > LocalDate.now(ZoneId.systemDefault()).getYear()) {
                 throw new NumberFormatException();
             }
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException _) {
             errors.add("Fila " + rowNumber
                     + ": anio debe ser un año válido no futuro");
             valid = false;
@@ -308,39 +307,6 @@ public class BookCsvImportService {
         }
 
         return value;
-    }
-
-    private static boolean isValidIsbn(String value) {
-        String isbn = value.replaceAll("[- ]", "");
-
-        if (ISBN_10.matcher(isbn).matches()) {
-            int sum = 0;
-
-            for (int i = 0; i < 10; i++) {
-                int digit = i == 9
-                        && (isbn.charAt(i) == 'X'
-                        || isbn.charAt(i) == 'x')
-                        ? 10
-                        : isbn.charAt(i) - '0';
-
-                sum += digit * (10 - i);
-            }
-
-            return sum % 11 == 0;
-        }
-
-        if (ISBN_13.matcher(isbn).matches()) {
-            int sum = 0;
-
-            for (int i = 0; i < 13; i++) {
-                int digit = isbn.charAt(i) - '0';
-                sum += digit * (i % 2 == 0 ? 1 : 3);
-            }
-
-            return sum % 10 == 0;
-        }
-
-        return false;
     }
 
     private ResponseStatusException badRequest(String message) {

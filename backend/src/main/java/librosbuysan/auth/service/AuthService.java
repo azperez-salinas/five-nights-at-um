@@ -1,4 +1,4 @@
-package librosbuysan.auth;
+package librosbuysan.auth.service;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -14,15 +14,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import librosbuysan.auth.AuthDtos.AuthResponse;
-import librosbuysan.auth.AuthDtos.LoginRequest;
-import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
-import librosbuysan.auth.AuthDtos.RegisterRequest;
-import librosbuysan.library.Library;
-import librosbuysan.library.LibraryRepo;
+import librosbuysan.auth.dto.AuthDtos.AuthResponse;
+import librosbuysan.auth.dto.AuthDtos.LoginRequest;
+import librosbuysan.auth.dto.AuthDtos.RegisterDuenoRequest;
+import librosbuysan.auth.dto.AuthDtos.RegisterRequest;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
 import librosbuysan.security.AuthenticatedUser;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.security.JwtService;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 
 /**
  * Registro (R1 + R8), login (R2) y logout (R3).

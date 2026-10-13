@@ -1,16 +1,16 @@
 package librosbuysan.support;
 
 import java.time.LocalDate;
-import librosbuysan.auth.JwtService;
-import librosbuysan.auth.PasswordHasher;
-import librosbuysan.book.Book;
-import librosbuysan.book.BookDataSeeder;
-import librosbuysan.book.BookRepo;
-import librosbuysan.favorite.FavoriteRepo;
-import librosbuysan.library.Library;
-import librosbuysan.library.LibraryRepo;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.book.entity.Book;
+import librosbuysan.book.repository.BookRepo;
+import librosbuysan.book.seed.BookDataSeeder;
+import librosbuysan.favorite.repository.FavoriteRepo;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
+import librosbuysan.security.JwtService;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

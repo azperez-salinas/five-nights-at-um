@@ -1,4 +1,4 @@
-package librosbuysan.favorite;
+package librosbuysan.favorite.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,8 +11,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
-import librosbuysan.book.Book;
-import librosbuysan.user.User;
+import librosbuysan.book.entity.Book;
+import librosbuysan.user.entity.User;
 
 /**
  * RF12: relacion entre un usuario (COMPRADOR) y un libro que marco como

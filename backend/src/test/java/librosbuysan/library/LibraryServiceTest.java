@@ -8,7 +8,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import librosbuysan.user.User;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
+import librosbuysan.library.service.LibraryService;
+import librosbuysan.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

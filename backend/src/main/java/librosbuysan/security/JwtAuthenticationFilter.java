@@ -15,9 +15,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-import librosbuysan.auth.JwtService;
-import librosbuysan.auth.TokenRevocationService;
-import librosbuysan.user.User;
+import librosbuysan.auth.service.TokenRevocationService;
+import librosbuysan.user.entity.User;
 
 // Sin @Component a proposito: Spring Boot registraria este filtro dos veces
 // (una vez solo en el contenedor servlet, otra via addFilterBefore en

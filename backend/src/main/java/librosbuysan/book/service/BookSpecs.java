@@ -1,4 +1,4 @@
-package librosbuysan.book;
+package librosbuysan.book.service;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.data.jpa.domain.Specification;
-import librosbuysan.library.Library;
+import librosbuysan.book.entity.Book;
+import librosbuysan.library.entity.Library;
 
 /**
  * R10/F10: arma el WHERE del catalogo dinamicamente, agregando solo las
@@ -32,6 +33,9 @@ final class BookSpecs {
 
             // RS34: siempre, haya o no filtros
             conditions.add(cb.isTrue(library.get("enabled")));
+            // R18/F18: un libro dado de baja individualmente tampoco se ve
+            // en el catalogo, aunque su libreria siga habilitada.
+            conditions.add(cb.isTrue(root.get("enabled")));
 
             if (libreriaId != null) {
                 conditions.add(cb.equal(library.get("id"), libreriaId));

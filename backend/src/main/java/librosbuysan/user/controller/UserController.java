@@ -1,4 +1,4 @@
-package librosbuysan.controller;
+package librosbuysan.user.controller;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import librosbuysan.security.AuthenticatedUser;
-import librosbuysan.user.UserDtos.ProfileResponse;
-import librosbuysan.user.UserDtos.UpdateProfileRequest;
-import librosbuysan.service.UserService;
+import librosbuysan.user.dto.UserDtos.ProfileResponse;
+import librosbuysan.user.dto.UserDtos.UpdateProfileRequest;
+import librosbuysan.user.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")

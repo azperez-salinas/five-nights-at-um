@@ -1,18 +1,27 @@
-package librosbuysan.book;
+package librosbuysan.book.controller;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import librosbuysan.book.BookDtos.BookSummary;
-import librosbuysan.book.BookDtos.CatalogPage;
+import librosbuysan.book.dto.BookDtos.BookSummary;
+import librosbuysan.book.dto.BookDtos.CatalogPage;
+import librosbuysan.book.dto.BookDtos.UpdateBookRequest;
+import librosbuysan.book.dto.CsvImportResult;
+import librosbuysan.book.service.BookCsvImportService;
+import librosbuysan.book.service.BookService;
 import librosbuysan.security.AuthenticatedUser;
 
 /**
@@ -75,5 +84,32 @@ public class BookController {
                 (AuthenticatedUser) authentication.getPrincipal();
 
         return csvImportService.importCsv(user.id(), file);
+    }
+
+    // R18/F18: catalogo propio del dueno autenticado. La libreria sale del
+    // token (principal.id()), nunca de un parametro de la request — asi no
+    // hay forma de pedir el catalogo de una libreria ajena desde aca.
+    @GetMapping("/mine")
+    public CatalogPage mine(@AuthenticationPrincipal AuthenticatedUser principal,
+                            @RequestParam(defaultValue = "1") int page) {
+        return bookService.getMine(principal.id(), page);
+    }
+
+    // R18/F18/RS36: edita un libro de la propia libreria del dueno. El body
+    // es UpdateBookRequest (allowlist: titulo/autor/isbn/portadaUrl), nunca
+    // acepta libreriaId ni isEnabled.
+    @PutMapping("/{id}")
+    public BookSummary update(@AuthenticationPrincipal AuthenticatedUser principal,
+                              @PathVariable Long id,
+                              @RequestBody UpdateBookRequest request) {
+        return bookService.updateBook(principal.id(), id, request);
+    }
+
+    // R18/F18: baja logica de un libro de la propia libreria del dueno.
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal AuthenticatedUser principal,
+                                       @PathVariable Long id) {
+        bookService.deleteBook(principal.id(), id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,4 +1,4 @@
-package librosbuysan.auth;
+package librosbuysan.auth.service;
 
 import java.security.SecureRandom;
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;

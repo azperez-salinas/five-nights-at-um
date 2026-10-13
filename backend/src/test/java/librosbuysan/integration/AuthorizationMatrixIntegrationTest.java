@@ -112,6 +112,12 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
                     NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
             new Caso("DELETE", "/api/users/libreria/{id}", "/api/users/libreria/{id}", null,
                     NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+            // R13/F13/RS1: panel de metricas, exclusivo del DUENO. Que solo
+            // cuente favoritos de la propia libreria (RS20) se prueba en
+            // LibraryMetricsIntegrationTest, no aca: esta matriz solo cubre
+            // la politica por ROL.
+            new Caso("GET", "/api/users/libreria/metricas", "/api/users/libreria/metricas", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
 
             // Perfil propio: compartido por comprador y dueno (RS5). El dueno con
             // contrasena temporal solo puede usarlo para cambiarla (R18). El admin

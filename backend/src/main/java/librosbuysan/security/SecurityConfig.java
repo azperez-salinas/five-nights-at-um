@@ -127,6 +127,12 @@ public class SecurityConfig {
                         // valida LibraryService, no esta regla.
                         .requestMatchers(HttpMethod.GET, "/api/users/libreria").hasRole(ROLE_DUENO)
                         .requestMatchers(HttpMethod.DELETE, "/api/users/libreria/*").hasRole(ROLE_DUENO)
+                        // R13/F13/RS1: panel de metricas, exclusivo del DUENO.
+                        // Un COMPRADOR cae en esta regla (no en el deny-by-default
+                        // de abajo) y recibe 403, no 404 ni 401 (RS1). Que la
+                        // libreria sea la propia lo resuelve LibraryService
+                        // (RS20/R6-IDOR), no esta regla.
+                        .requestMatchers(HttpMethod.GET, "/api/users/libreria/metricas").hasRole(ROLE_DUENO)
                         // RS5/RS19/RS27: deny-by-default real. Cualquier ruta
                         // o metodo sin regla explicita arriba se rechaza,
                         // aunque el usuario este autenticado: un endpoint

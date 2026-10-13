@@ -44,6 +44,13 @@
     color: var(--booksaw-muted);
 }
 
+.catalog-results-count {
+    color: var(--booksaw-muted);
+    font-size: 14px;
+    margin: -16px 0 24px;
+    font-style: italic;
+}
+
 .catalog-card-library {
     font-size: 11px;
     letter-spacing: 1px;

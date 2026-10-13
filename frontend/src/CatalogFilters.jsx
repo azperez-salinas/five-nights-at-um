@@ -5,10 +5,16 @@ const LIBRARIES_URL = 'http://localhost:8080/api/librerias';
 const EMPTY_FILTERS = { libreria: '', autor: '' };
 
 // R10: library and author filters, combinable. They apply on submit, not on every keystroke
-export default function CatalogFilters({ filters, onApply }) {
+export default function CatalogFilters({ filters, onApply, loading = false }) {
     const [libraries, setLibraries] = useState([]);
     const [libreria, setLibreria] = useState(filters.libreria);
     const [autor, setAutor] = useState(filters.autor);
+
+    // Mantiene los inputs sincronizados si los filtros cambian desde afuera (ej. navegación)
+    useEffect(() => {
+        setLibreria(filters.libreria);
+        setAutor(filters.autor);
+    }, [filters.libreria, filters.autor]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -57,9 +63,11 @@ export default function CatalogFilters({ filters, onApply }) {
                 />
             </div>
 
-            <button type="submit" className="btn-submit-pill">FILTRAR</button>
+            <button type="submit" className="btn-submit-pill" disabled={loading}>
+                {loading ? 'FILTRANDO...' : 'FILTRAR'}
+            </button>
             {active && (
-                <button type="button" className="btn-cancel" onClick={handleClear}>
+                <button type="button" className="btn-cancel" onClick={handleClear} disabled={loading}>
                     Limpiar filtros
                 </button>
             )}

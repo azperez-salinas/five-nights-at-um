@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
-import librosbuysan.user.User;
+import librosbuysan.user.entity.User;
 import org.junit.jupiter.api.Test;
 import librosbuysan.support.IntegrationTestBase;
 import org.springframework.http.MediaType;

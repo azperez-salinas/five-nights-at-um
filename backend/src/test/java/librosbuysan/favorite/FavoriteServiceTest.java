@@ -10,13 +10,16 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import librosbuysan.book.Book;
-import librosbuysan.book.BookDtos.BookSummary;
-import librosbuysan.book.BookRepo;
-import librosbuysan.favorite.FavoriteService.AddResult;
-import librosbuysan.library.Library;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.book.entity.Book;
+import librosbuysan.book.dto.BookDtos.BookSummary;
+import librosbuysan.book.repository.BookRepo;
+import librosbuysan.favorite.entity.Favorite;
+import librosbuysan.favorite.repository.FavoriteRepo;
+import librosbuysan.favorite.service.FavoriteService;
+import librosbuysan.favorite.service.FavoriteService.AddResult;
+import librosbuysan.library.entity.Library;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +58,7 @@ class FavoriteServiceTest {
     void agregarCreaElFavoritoAsociadoAlUsuarioRecibido() {
         User usuarioA = new User("a", "a@test.local", "hash");
         when(favoriteRepo.existsByUserIdAndBookId(USER_A, BOOK_ID)).thenReturn(false);
-        when(bookRepo.findByIdAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.of(libro));
+        when(bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.of(libro));
         when(userRepo.getReferenceById(USER_A)).thenReturn(usuarioA);
 
         AddResult result = service.add(USER_A, BOOK_ID);
@@ -80,7 +83,7 @@ class FavoriteServiceTest {
     void elFavoritoDeOtroUsuarioNoCuentaComoYaExistente() {
         // B ya tiene el libro; A todavia no: a A se le crea el suyo
         when(favoriteRepo.existsByUserIdAndBookId(USER_A, BOOK_ID)).thenReturn(false);
-        when(bookRepo.findByIdAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.of(libro));
+        when(bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.of(libro));
         when(userRepo.getReferenceById(USER_A)).thenReturn(new User("a", "a@test.local", "hash"));
 
         assertThat(service.add(USER_A, BOOK_ID)).isEqualTo(AddResult.CREATED);
@@ -91,7 +94,7 @@ class FavoriteServiceTest {
     @Test
     void agregarUnLibroInexistenteODeLibreriaDeshabilitadaEs404() {
         when(favoriteRepo.existsByUserIdAndBookId(USER_A, BOOK_ID)).thenReturn(false);
-        when(bookRepo.findByIdAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.empty());
+        when(bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.empty());
 
         assertThrowsStatus(HttpStatus.NOT_FOUND, () -> service.add(USER_A, BOOK_ID));
 

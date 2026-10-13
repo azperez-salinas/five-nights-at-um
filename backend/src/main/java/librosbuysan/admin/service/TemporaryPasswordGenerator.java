@@ -1,4 +1,4 @@
-package librosbuysan.admin;
+package librosbuysan.admin.service;
 
 import java.security.SecureRandom;
 import org.springframework.stereotype.Component;
@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TemporaryPasswordGenerator {
 
-    static final String ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-    static final int LENGTH = 16;
+    public static final String ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    public static final int LENGTH = 16;
 
     private final SecureRandom secureRandom = new SecureRandom();
 

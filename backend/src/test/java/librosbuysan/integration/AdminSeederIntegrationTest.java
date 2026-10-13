@@ -5,10 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import librosbuysan.admin.AdminSeeder;
-import librosbuysan.book.BookDataSeeder;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.admin.seed.AdminSeeder;
+import librosbuysan.book.seed.BookDataSeeder;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

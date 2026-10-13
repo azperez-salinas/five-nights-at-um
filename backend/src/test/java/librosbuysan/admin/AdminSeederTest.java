@@ -7,9 +7,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import librosbuysan.auth.PasswordHasher;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import librosbuysan.admin.seed.AdminSeeder;
 
 /**
  * R18/F18: la cuenta de admin se crea por seed y solo una vez.

@@ -1,4 +1,4 @@
-package librosbuysan.book;
+package librosbuysan.book.service;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -8,9 +8,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import librosbuysan.book.BookDtos.BookSummary;
-import librosbuysan.book.BookDtos.CatalogPage;
+import librosbuysan.book.dto.BookDtos.BookSummary;
+import librosbuysan.book.dto.BookDtos.CatalogPage;
+import librosbuysan.book.dto.BookDtos.UpdateBookRequest;
+import librosbuysan.book.entity.Book;
+import librosbuysan.book.repository.BookRepo;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
 
 @Service
 public class BookService {
@@ -31,13 +37,28 @@ public class BookService {
 
     private static final String INVALID_FILTER = "Filtro invalido";
 
+    // R18/F18/RS20: mismo mensaje para "la libreria del dueno no existe o
+    // esta deshabilitada" — no se distingue el motivo.
+    private static final String LIBRARY_NOT_FOUND = "Libreria no encontrada";
+
+    // R18/F18/RS31/RS38: mismo mensaje para "no existe" y "es de otra
+    // libreria" — no se puede enumerar libros ajenos (R6/IDOR).
+    private static final String BOOK_NOT_FOUND = "Libro no encontrado";
+
+    private static final String INVALID_BOOK_DATA = "Datos de libro invalidos";
+
     // Mismo largo maximo que la columna autor
     private static final int MAX_AUTOR_CHARS = 150;
+    private static final int MAX_TITULO_CHARS = 255;
+    private static final int MAX_ISBN_CHARS = 20;
+    private static final int MAX_PORTADA_CHARS = 500;
 
     private final BookRepo bookRepo;
+    private final LibraryRepo libraryRepo;
 
-    public BookService(BookRepo bookRepo) {
+    public BookService(BookRepo bookRepo, LibraryRepo libraryRepo) {
         this.bookRepo = bookRepo;
+        this.libraryRepo = libraryRepo;
     }
 
     /**
@@ -92,9 +113,108 @@ public class BookService {
      * vez bajo una libreria dada de baja.
      */
     public BookSummary getDetail(Long id) {
-        Book book = bookRepo.findByIdAndLibraryEnabledTrue(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Libro no encontrado"));
+        Book book = bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, BOOK_NOT_FOUND));
         return BookSummary.from(book);
+    }
+
+    /**
+     * R18/F18: catalogo propio del dueno autenticado. La libreria se resuelve
+     * SIEMPRE a partir del userId del token (RS6-equivalente para libros): el
+     * endpoint no recibe libreriaId por parametro, asi que no hay forma de
+     * pedir el catalogo de otra libreria desde aca.
+     */
+    public CatalogPage getMine(Long userId, int page) {
+        validatePage(page);
+        Library library = ownEnabledLibrary(userId);
+
+        Sort orderById = Sort.by("id").ascending();
+        PageRequest pageable = PageRequest.of(page - 1, PAGE_SIZE, orderById);
+
+        Page<Book> result = bookRepo.findByLibrary_IdAndEnabledTrue(library.getId(), pageable);
+        List<BookSummary> items = result.getContent().stream().map(BookSummary::from).toList();
+
+        return new CatalogPage(items, page, PAGE_SIZE, result.getTotalElements(), result.getTotalPages());
+    }
+
+    /**
+     * R18/F18/RS20/RS24: edita un libro de la PROPIA libreria del dueno.
+     * Actualizacion parcial (campo null = no se toca). RS36/RS2/RS7: el unico
+     * origen de los campos editables es UpdateBookRequest, que ya es un
+     * allowlist — no hay forma de que este metodo reciba libreriaId ni
+     * isEnabled del cliente.
+     */
+    @Transactional
+    public BookSummary updateBook(Long userId, Long bookId, UpdateBookRequest request) {
+        Library library = ownEnabledLibrary(userId);
+        Book book = ownBook(library, bookId);
+
+        if (request.titulo() != null) {
+            String titulo = validateField(request.titulo(), MAX_TITULO_CHARS, "titulo");
+            book.changeTitulo(titulo);
+        }
+        if (request.autor() != null) {
+            String autor = validateField(request.autor(), MAX_AUTOR_CHARS, "autor");
+            book.changeAutor(autor);
+        }
+        if (request.isbn() != null) {
+            String isbn = validateField(request.isbn(), MAX_ISBN_CHARS, "isbn");
+            if (!IsbnValidator.isValid(isbn)) {
+                log.warn("Edicion de libro rechazada: userId={} bookId={} motivo=isbn_invalido", userId, bookId);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_BOOK_DATA);
+            }
+            book.changeIsbn(isbn);
+        }
+        if (request.portadaUrl() != null) {
+            String portada = validateField(request.portadaUrl(), MAX_PORTADA_CHARS, "portadaUrl");
+            book.changePortadaUrl(portada);
+        }
+
+        Book saved = bookRepo.save(book);
+        log.info("Libro editado: userId={} bookId={}", userId, bookId);
+        return BookSummary.from(saved);
+    }
+
+    /**
+     * R18/F18/RS20: baja logica de un libro de la PROPIA libreria del dueno.
+     */
+    @Transactional
+    public void deleteBook(Long userId, Long bookId) {
+        Library library = ownEnabledLibrary(userId);
+        Book book = ownBook(library, bookId);
+        book.disable();
+        bookRepo.save(book);
+        log.info("Libro dado de baja: userId={} bookId={}", userId, bookId);
+    }
+
+    // R18/F18: libreria del dueno autenticado. Si no tiene libreria, o la
+    // tiene deshabilitada, ninguna operacion de R18 esta disponible.
+    private Library ownEnabledLibrary(Long userId) {
+        return libraryRepo.findByDuenoIdAndEnabledTrue(userId)
+                .orElseThrow(() -> {
+                    log.warn("Operacion de libro rechazada: userId={} motivo=sin_libreria_habilitada", userId);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, LIBRARY_NOT_FOUND);
+                });
+    }
+
+    // R6(IDOR)/RS20/RS31/RS38: el mismo 404 para libro inexistente, de otra
+    // libreria, o ya dado de baja — no se revela cual de los tres motivos es.
+    private Book ownBook(Library library, Long bookId) {
+        return bookRepo.findByIdAndLibrary_IdAndEnabledTrue(bookId, library.getId())
+                .orElseThrow(() -> {
+                    log.warn("Operacion de libro rechazada: libraryId={} bookId={} motivo=no_encontrado_o_ajeno",
+                            library.getId(), bookId);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, BOOK_NOT_FOUND);
+                });
+    }
+
+    private String validateField(String value, int maxLength, String fieldName) {
+        String trimmed = value.trim();
+        if (trimmed.isEmpty() || trimmed.length() > maxLength) {
+            log.warn("Edicion de libro rechazada: motivo=campo_invalido campo={}", fieldName);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_BOOK_DATA);
+        }
+        return trimmed;
     }
 
     private void validatePage(int page) {

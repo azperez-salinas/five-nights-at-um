@@ -1,4 +1,4 @@
-package librosbuysan.user;
+package librosbuysan.user.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

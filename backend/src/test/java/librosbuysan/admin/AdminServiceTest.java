@@ -13,13 +13,13 @@ import static org.mockito.Mockito.when;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.util.stream.Stream;
-import librosbuysan.admin.AdminDtos.CreateOwnerRequest;
-import librosbuysan.admin.AdminDtos.OwnerCreatedResponse;
-import librosbuysan.auth.PasswordHasher;
-import librosbuysan.library.Library;
-import librosbuysan.library.LibraryRepo;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.admin.dto.AdminDtos.CreateOwnerRequest;
+import librosbuysan.admin.dto.AdminDtos.OwnerCreatedResponse;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +31,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
+import librosbuysan.admin.service.AdminService;
+import librosbuysan.admin.service.TemporaryPasswordGenerator;
 
 /**
  * R18/F18: alta de duenos por el admin.

@@ -1,8 +1,9 @@
-package librosbuysan.library;
+package librosbuysan.library.repository;
 
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import librosbuysan.library.entity.Library;
 
 public interface LibraryRepo extends JpaRepository<Library, Long> {
 

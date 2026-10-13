@@ -4,8 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashSet;
 import java.util.Set;
-import librosbuysan.auth.PasswordHasher;
+import librosbuysan.auth.service.PasswordHasher;
 import org.junit.jupiter.api.Test;
+import librosbuysan.admin.service.TemporaryPasswordGenerator;
 
 class TemporaryPasswordGeneratorTest {
 

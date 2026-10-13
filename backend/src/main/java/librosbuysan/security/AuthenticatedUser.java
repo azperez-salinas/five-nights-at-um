@@ -1,7 +1,7 @@
 package librosbuysan.security;
 
 import java.time.Instant;
-import librosbuysan.user.User;
+import librosbuysan.user.entity.User;
 
 /**
  * Principal que arma JwtAuthenticationFilter a partir de un token ya validado.

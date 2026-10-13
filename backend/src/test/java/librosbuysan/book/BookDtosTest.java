@@ -6,16 +6,17 @@ import java.lang.reflect.RecordComponent;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import librosbuysan.admin.AdminDtos.CreateOwnerRequest;
-import librosbuysan.admin.AdminDtos.OwnerCreatedResponse;
-import librosbuysan.auth.AuthDtos.AuthResponse;
-import librosbuysan.auth.AuthDtos.LoginRequest;
-import librosbuysan.auth.AuthDtos.RegisterRequest;
-import librosbuysan.book.BookDtos.BookSummary;
-import librosbuysan.library.Library;
-import librosbuysan.user.User;
-import librosbuysan.user.UserDtos.ProfileResponse;
-import librosbuysan.user.UserDtos.UpdateProfileRequest;
+import librosbuysan.admin.dto.AdminDtos.CreateOwnerRequest;
+import librosbuysan.admin.dto.AdminDtos.OwnerCreatedResponse;
+import librosbuysan.auth.dto.AuthDtos.AuthResponse;
+import librosbuysan.auth.dto.AuthDtos.LoginRequest;
+import librosbuysan.auth.dto.AuthDtos.RegisterRequest;
+import librosbuysan.book.entity.Book;
+import librosbuysan.book.dto.BookDtos.BookSummary;
+import librosbuysan.library.entity.Library;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.dto.UserDtos.ProfileResponse;
+import librosbuysan.user.dto.UserDtos.UpdateProfileRequest;
 import org.junit.jupiter.api.Test;
 
 /**

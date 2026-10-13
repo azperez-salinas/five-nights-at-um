@@ -1,4 +1,4 @@
-package librosbuysan.library;
+package librosbuysan.library.service;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import librosbuysan.library.LibraryDtos.LibraryResponse;
+import librosbuysan.library.dto.LibraryDtos.LibraryResponse;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
 
 /**
  * R14/F14: un dueno puede quitar su libreria del sistema. No hay borrado

@@ -1,4 +1,4 @@
-package librosbuysan.admin;
+package librosbuysan.admin.controller;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -10,11 +10,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import librosbuysan.admin.AdminDtos.CreateOwnerRequest;
-import librosbuysan.admin.AdminDtos.OwnerCreatedResponse;
+import librosbuysan.admin.dto.AdminDtos.CreateOwnerRequest;
+import librosbuysan.admin.dto.AdminDtos.OwnerCreatedResponse;
 import librosbuysan.security.AuthenticatedUser;
-import librosbuysan.service.UserService;
-import librosbuysan.user.UserDtos.UpdateProfileRequest;
+import librosbuysan.user.service.UserService;
+import librosbuysan.user.dto.UserDtos.UpdateProfileRequest;
+import librosbuysan.admin.service.AdminService;
 
 /**
  * R18/F18: las dos unicas acciones del panel de administrador. La

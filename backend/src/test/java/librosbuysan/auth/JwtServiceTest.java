@@ -12,7 +12,8 @@ import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
-import librosbuysan.user.User;
+import librosbuysan.security.JwtService;
+import librosbuysan.user.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 

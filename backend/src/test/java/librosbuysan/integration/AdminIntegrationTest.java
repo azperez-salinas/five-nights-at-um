@@ -16,10 +16,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
 import java.util.Date;
-import librosbuysan.auth.PasswordHasher;
-import librosbuysan.library.Library;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.library.entity.Library;
 import librosbuysan.support.IntegrationTestBase;
-import librosbuysan.user.User;
+import librosbuysan.user.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 

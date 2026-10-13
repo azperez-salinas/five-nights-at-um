@@ -1,4 +1,4 @@
-package librosbuysan.admin;
+package librosbuysan.admin.seed;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import librosbuysan.auth.PasswordHasher;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 
 /**
  * R18/F18: la cuenta de administrador se crea directamente en el sistema, no

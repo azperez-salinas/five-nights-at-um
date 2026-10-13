@@ -1,4 +1,4 @@
-package librosbuysan.admin;
+package librosbuysan.admin.service;
 
 import jakarta.validation.Validator;
 import java.util.Arrays;
@@ -10,13 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import librosbuysan.admin.AdminDtos.CreateOwnerRequest;
-import librosbuysan.admin.AdminDtos.OwnerCreatedResponse;
-import librosbuysan.auth.PasswordHasher;
-import librosbuysan.library.Library;
-import librosbuysan.library.LibraryRepo;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.admin.dto.AdminDtos.CreateOwnerRequest;
+import librosbuysan.admin.dto.AdminDtos.OwnerCreatedResponse;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 
 /**
  * R18/F18: alta de duenos desde el panel de administrador. Reemplaza al

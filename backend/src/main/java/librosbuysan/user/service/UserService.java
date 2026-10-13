@@ -1,4 +1,4 @@
-package librosbuysan.service;
+package librosbuysan.user.service;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -10,13 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import librosbuysan.auth.PasswordHasher;
-import librosbuysan.auth.TokenRevocationService;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.auth.service.TokenRevocationService;
 import librosbuysan.security.AuthenticatedUser;
-import librosbuysan.user.UserDtos.ProfileResponse;
-import librosbuysan.user.UserDtos.UpdateProfileRequest;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.user.dto.UserDtos.ProfileResponse;
+import librosbuysan.user.dto.UserDtos.UpdateProfileRequest;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 
 @Service
 public class UserService {

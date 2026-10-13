@@ -1,4 +1,6 @@
-package librosbuysan.library;
+package librosbuysan.library.dto;
+
+import librosbuysan.library.entity.Library;
 
 public final class LibraryDtos {
 

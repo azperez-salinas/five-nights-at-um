@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import librosbuysan.library.dto.LibraryDtos.LibraryMetricsResponse;
 import librosbuysan.library.dto.LibraryDtos.LibraryResponse;
 import librosbuysan.library.service.LibraryService;
 import librosbuysan.security.AuthenticatedUser;
@@ -37,5 +38,14 @@ public class LibraryController {
                                         @PathVariable Long id) {
         libraryService.disableOwnLibrary(principal.id(), id);
         return ResponseEntity.noContent().build();
+    }
+
+    // R13/F13/RS1/RS5/RS20/R6(IDOR): panel de metricas, exclusivo del DUENO
+    // (restriccion de rol en SecurityConfig). El id de libreria jamas viene
+    // de un parametro de la request: sale siempre de principal.id(), mismo
+    // criterio que getOwn() arriba y que GET /api/books/mine.
+    @GetMapping("/metricas")
+    public LibraryMetricsResponse metrics(@AuthenticationPrincipal AuthenticatedUser principal) {
+        return libraryService.getMetrics(principal.id());
     }
 }

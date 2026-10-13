@@ -98,6 +98,12 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             new Caso("GET", "/api/librerias", "/api/librerias", null, OK, OK, OK),
             new Caso("GET", "/api/users/libreria", "/api/users/libreria", null, NO_AUTH, PROHIBIDO, OK),
             new Caso("DELETE", "/api/users/libreria/{id}", "/api/users/libreria/{id}", null, NO_AUTH, PROHIBIDO, OK),
+            // R13/F13/RS1: panel de metricas, exclusivo del DUENO. Que solo
+            // cuente favoritos de la propia libreria (RS20) se prueba en
+            // LibraryMetricsIntegrationTest, no aca: esta matriz solo cubre
+            // la politica por ROL.
+            new Caso("GET", "/api/users/libreria/metricas", "/api/users/libreria/metricas", null,
+                    NO_AUTH, PROHIBIDO, OK),
 
             // Perfil propio: la unica funcionalidad compartida por ambos roles (RS5)
             new Caso("GET", "/api/users/me", "/api/users/me", null, NO_AUTH, OK, OK),

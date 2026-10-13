@@ -84,7 +84,7 @@ export default function Favorites({ session, onLogout, onNavigate }) {
 
     return (
         <div className="booksaw-page">
-            <Nav active="favoritos" session={session} />
+            <Nav active="favoritos" session={session} onLogout={onLogout} />
 
             {toastMsg && (
                 <div className="booksaw-toast">

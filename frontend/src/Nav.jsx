@@ -1,7 +1,14 @@
 import './Register.css';
 
-export default function Nav({ active, session }) {
+export default function Nav({ active, session, onLogout }) {
     const itemClass = (name) => `nav-item${active === name ? ' active' : ''}`;
+
+    const handleLogoutClick = (e) => {
+        if (onLogout) {
+            e.preventDefault();
+            onLogout();
+        }
+    };
 
     // R18: the admin only has its panel, and an owner with a temporary password only the
     // password change screen, so the regular menu is hidden for both
@@ -17,7 +24,7 @@ export default function Nav({ active, session }) {
                         {session.role === 'ADMIN' && (
                             <a href="#admin" className={itemClass('admin')}>PANEL</a>
                         )}
-                        <a href="#logout" className="nav-item">CERRAR SESIÓN</a>
+                        <a href="#logout" className="nav-item" onClick={handleLogoutClick}>CERRAR SESIÓN</a>
                     </nav>
                 </div>
             </header>
@@ -47,7 +54,7 @@ export default function Nav({ active, session }) {
                             <a href="#perfil" className={itemClass('perfil')}>
                                 {session.username.toUpperCase()}
                             </a>
-                            <a href="#logout" className="nav-item">CERRAR SESIÓN</a>
+                            <a href="#logout" className="nav-item" onClick={handleLogoutClick}>CERRAR SESIÓN</a>
                         </>
                     ) : (
                         <>

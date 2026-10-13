@@ -3,7 +3,7 @@ import BookCover from './BookCover';
 import Nav from './Nav';
 import './Catalog.css';
 
-export default function BookDetail({ bookId, backHref, backLabel, navActive, session }) {
+export default function BookDetail({ bookId, backHref, backLabel, navActive, session, onLogout }) {
     const [book, setBook] = useState(null);
     // Id whose request failed, with the reason: 'not-found' or 'error'
     const [failure, setFailure] = useState(null);
@@ -33,7 +33,7 @@ export default function BookDetail({ bookId, backHref, backLabel, navActive, ses
 
     return (
         <div className="booksaw-page">
-            <Nav active={navActive} session={session} />
+            <Nav active={navActive} session={session} onLogout={onLogout} />
 
             <main className="catalog-main">
                 <a href={backHref} className="book-detail-back">← VOLVER A {backLabel}</a>

@@ -6,7 +6,7 @@ const API_URL = 'http://localhost:8080/api/users/me';
 
 // R18: an owner created by the admin must replace the temporary password on first login.
 // The backend enforces it too: until then the token only allows changing the password.
-export default function ChangePassword({ session, onPasswordChanged, onUnauthorized }) {
+export default function ChangePassword({ session, onPasswordChanged, onUnauthorized, onLogout }) {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -64,7 +64,7 @@ export default function ChangePassword({ session, onPasswordChanged, onUnauthori
 
     return (
         <div className="booksaw-page">
-            <Nav active="cambiar-password" session={session} />
+            <Nav active="cambiar-password" session={session} onLogout={onLogout} />
 
             <main className="booksaw-main">
                 <div className="register-card">

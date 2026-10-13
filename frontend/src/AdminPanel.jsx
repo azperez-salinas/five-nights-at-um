@@ -9,10 +9,10 @@ const PASSWORD_URL = 'http://localhost:8080/api/admin/password';
 const EMPTY_OWNER = { username: '', email: '', nombreLibreria: '' };
 
 // R18: the admin panel only allows two actions, creating owners and changing the admin's own password
-export default function AdminPanel({ session, onUnauthorized }) {
+export default function AdminPanel({ session, onUnauthorized, onLogout }) {
     return (
         <div className="booksaw-page">
-            <Nav active="admin" session={session} />
+            <Nav active="admin" session={session} onLogout={onLogout} />
 
             <main className="booksaw-main">
                 <div className="admin-panel">

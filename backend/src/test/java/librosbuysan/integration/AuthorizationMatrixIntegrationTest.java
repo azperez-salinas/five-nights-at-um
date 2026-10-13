@@ -81,6 +81,14 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             // Importación masiva: exclusiva del DUENO (R17)
             new Caso("POST", "/api/books/import", "/api/books/import", null, NO_AUTH, PROHIBIDO, OK),
 
+            // R18/F18: catalogo propio, editar y borrar libros de la propia
+            // libreria — exclusivo del DUENO. Que el libro sea de SU libreria
+            // lo verifica BookService (ver BookOwnershipIntegrationTest), no
+            // esta matriz: aca solo se prueba la politica por ROL.
+            new Caso("GET", "/api/books/mine", "/api/books/mine", null, NO_AUTH, PROHIBIDO, OK),
+            new Caso("PUT", "/api/books/{id}", "/api/books/{id}", "{}", NO_AUTH, PROHIBIDO, OK),
+            new Caso("DELETE", "/api/books/{id}", "/api/books/{id}", null, NO_AUTH, PROHIBIDO, OK),
+
             // Favoritos: exclusivo del COMPRADOR (RF12, RS1, RS19)
             new Caso("GET", "/api/favorites", "/api/favorites", null, NO_AUTH, OK, PROHIBIDO),
             new Caso("POST", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null, NO_AUTH, OK, PROHIBIDO),
@@ -108,11 +116,10 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
     // deny-by-default lo bloquea; si ademas agrega una regla permisiva, este
     // test falla y obliga a decidir el rol de forma explicita.
     static final List<Caso> RUTAS_SIN_REGLA = List.of(
-            // Escritura sobre el catalogo (solo GET es publico)
+            // Escritura sobre el catalogo general (solo GET es publico; PUT
+            // y DELETE sobre /api/books/{id} ahora SI existen, ver R18 en
+            // ENDPOINTS_DE_LA_APP, pero POST y PATCH siguen sin existir)
             new Caso("POST", "/api/books", "/api/books", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("PUT", "/api/books/{id}", "/api/books/{id}", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO),
-            new Caso("DELETE", "/api/books/{id}", "/api/books/{id}", null, NO_AUTH, PROHIBIDO, PROHIBIDO),
-            // Un dueno tampoco puede escribir catalogo todavia (no esta implementado)
             new Caso("PATCH", "/api/books/{id}", "/api/books/{id}", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO),
             // Acceso a cuentas AJENAS: solo existe /me
             new Caso("GET", "/api/users/{id}", "/api/users/1", null, NO_AUTH, PROHIBIDO, PROHIBIDO),

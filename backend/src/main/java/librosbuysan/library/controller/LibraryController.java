@@ -1,4 +1,4 @@
-package librosbuysan.library;
+package librosbuysan.library.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import librosbuysan.library.LibraryDtos.LibraryResponse;
+import librosbuysan.library.dto.LibraryDtos.LibraryResponse;
+import librosbuysan.library.service.LibraryService;
 import librosbuysan.security.AuthenticatedUser;
 
 /**

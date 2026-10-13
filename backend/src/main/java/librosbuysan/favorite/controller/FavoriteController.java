@@ -1,4 +1,4 @@
-package librosbuysan.favorite;
+package librosbuysan.favorite.controller;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import librosbuysan.book.BookDtos.BookSummary;
-import librosbuysan.favorite.FavoriteService.AddResult;
+import librosbuysan.book.dto.BookDtos.BookSummary;
+import librosbuysan.favorite.service.FavoriteService;
+import librosbuysan.favorite.service.FavoriteService.AddResult;
 import librosbuysan.security.AuthenticatedUser;
 
 /**

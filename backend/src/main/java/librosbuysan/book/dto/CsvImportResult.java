@@ -1,4 +1,4 @@
-package librosbuysan.book;
+package librosbuysan.book.dto;
 
 import java.util.List;
 

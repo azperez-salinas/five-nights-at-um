@@ -13,12 +13,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import librosbuysan.auth.JwtService;
-import librosbuysan.auth.TokenRevocationService;
+import librosbuysan.auth.service.TokenRevocationService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    // java:S1192: los nombres de rol se repetian como literal muchas veces
+    // (DUENO x9, COMPRADOR x4) en las reglas de abajo. Centralizarlos en una
+    // constante evita que un typo en una de las nueve apariciones de "DUENO"
+    // quede sin detectar (el compilador no avisa de un string mal escrito).
+    private static final String ROLE_DUENO = "DUENO";
+    private static final String ROLE_COMPRADOR = "COMPRADOR";
 
     private final JwtService jwtService;
     private final TokenRevocationService revocationService;
@@ -65,7 +71,7 @@ public class SecurityConfig {
                         // antes de "/api/auth/**": Spring usa la primera que
                         // coincide, y si quedara despues el logout seria publico
                         // y el principal llegaria null al controller.
-                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").hasAnyRole("COMPRADOR", "DUENO")
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").hasAnyRole(ROLE_COMPRADOR, ROLE_DUENO)
                         .requestMatchers("/api/auth/**").permitAll()
                         // Catalogo (R7), busqueda (RF9) y detalle de libro son
                         // publicos: un visitante puede explorar sin cuenta y
@@ -73,8 +79,19 @@ public class SecurityConfig {
                         // filtro de RS34 (libreria deshabilitada) se aplica en
                         // la query, no en la autorizacion. Solo GET: cualquier
                         // otro verbo cae en el deny-by-default de abajo.
-                        .requestMatchers(HttpMethod.POST, "/api/books/import").hasRole("DUENO")
+                        .requestMatchers(HttpMethod.POST, "/api/books/import").hasRole(ROLE_DUENO)
                         // R17: importación masiva exclusiva de dueños.
+                        // R18/F18: gestion de los libros propios, exclusiva
+                        // del DUENO. GET /mine tiene que declararse ANTES del
+                        // comodin GET /api/books/** (permitAll de abajo):
+                        // Spring Security aplica la primera regla que
+                        // matchea, y /api/books/** matchearia /mine igual
+                        // (GAP-2 en KnownAuthorizationGapsIntegrationTest).
+                        // Que el libro pertenezca a la libreria del dueno lo
+                        // valida BookService, no esta regla.
+                        .requestMatchers(HttpMethod.GET, "/api/books/mine").hasRole(ROLE_DUENO)
+                        .requestMatchers(HttpMethod.PUT, "/api/books/*").hasRole(ROLE_DUENO)
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/*").hasRole(ROLE_DUENO)
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
                         // R10: el listado de librerias habilitadas alimenta el
                         // filtro del catalogo, que es publico como el catalogo.
@@ -85,17 +102,17 @@ public class SecurityConfig {
                         // metodo publico ni accesible para DUENO, por eso se
                         // restringe el prefijo completo sin distinguir por
                         // verbo HTTP.
-                        .requestMatchers("/api/favorites/**").hasRole("COMPRADOR")
+                        .requestMatchers("/api/favorites/**").hasRole(ROLE_COMPRADOR)
                         // RS5: el perfil propio es la unica funcionalidad
                         // compartida por ambos roles; se declara con los
                         // roles explicitos en lugar de "cualquier autenticado".
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole(ROLE_COMPRADOR, ROLE_DUENO)
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole(ROLE_COMPRADOR, ROLE_DUENO)
                         // R14/F14: ver y dar de baja la libreria propia es
                         // exclusivo del DUENO. Que la libreria sea suya lo
                         // valida LibraryService, no esta regla.
-                        .requestMatchers(HttpMethod.GET, "/api/users/libreria").hasRole("DUENO")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/libreria/*").hasRole("DUENO")
+                        .requestMatchers(HttpMethod.GET, "/api/users/libreria").hasRole(ROLE_DUENO)
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/libreria/*").hasRole(ROLE_DUENO)
                         // RS5/RS19/RS27: deny-by-default real. Cualquier ruta
                         // o metodo sin regla explicita arriba se rechaza,
                         // aunque el usuario este autenticado: un endpoint

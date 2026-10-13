@@ -1,4 +1,4 @@
-package librosbuysan.auth;
+package librosbuysan.auth.controller;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import librosbuysan.auth.AuthDtos.AuthResponse;
-import librosbuysan.auth.AuthDtos.LoginRequest;
-import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
-import librosbuysan.auth.AuthDtos.RegisterRequest;
+import librosbuysan.auth.dto.AuthDtos.AuthResponse;
+import librosbuysan.auth.dto.AuthDtos.LoginRequest;
+import librosbuysan.auth.dto.AuthDtos.RegisterDuenoRequest;
+import librosbuysan.auth.dto.AuthDtos.RegisterRequest;
+import librosbuysan.auth.service.AuthService;
 import librosbuysan.security.AuthenticatedUser;
 
 /**

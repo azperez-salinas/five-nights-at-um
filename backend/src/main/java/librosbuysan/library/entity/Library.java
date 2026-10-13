@@ -1,4 +1,4 @@
-package librosbuysan.library;
+package librosbuysan.library.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
-import librosbuysan.user.User;
+import librosbuysan.user.entity.User;
 import org.hibernate.annotations.ColumnDefault;
 
 /**

@@ -1,4 +1,4 @@
-package librosbuysan.book;
+package librosbuysan.book.seed;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import librosbuysan.auth.PasswordHasher;
-import librosbuysan.library.Library;
-import librosbuysan.library.LibraryRepo;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.book.entity.Book;
+import librosbuysan.book.repository.BookRepo;
+import librosbuysan.library.entity.Library;
+import librosbuysan.library.repository.LibraryRepo;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 
 /**
  * Carga el catalogo inicial de libros desde resources/data/books-seed.json

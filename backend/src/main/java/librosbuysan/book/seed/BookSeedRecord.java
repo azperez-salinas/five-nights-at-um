@@ -1,7 +1,8 @@
-package librosbuysan.book;
+package librosbuysan.book.seed;
 
 import java.time.LocalDate;
-import librosbuysan.library.Library;
+import librosbuysan.book.entity.Book;
+import librosbuysan.library.entity.Library;
 
 /**
  * Representa una fila del archivo de datos resources/data/books-seed.json.

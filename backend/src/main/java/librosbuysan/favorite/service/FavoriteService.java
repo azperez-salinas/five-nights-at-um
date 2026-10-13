@@ -1,4 +1,4 @@
-package librosbuysan.favorite;
+package librosbuysan.favorite.service;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -8,11 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import librosbuysan.book.Book;
-import librosbuysan.book.BookDtos.BookSummary;
-import librosbuysan.book.BookRepo;
-import librosbuysan.user.User;
-import librosbuysan.user.UserRepo;
+import librosbuysan.book.entity.Book;
+import librosbuysan.book.dto.BookDtos.BookSummary;
+import librosbuysan.book.repository.BookRepo;
+import librosbuysan.favorite.entity.Favorite;
+import librosbuysan.favorite.repository.FavoriteRepo;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 
 @Service
 public class FavoriteService {
@@ -57,10 +59,10 @@ public class FavoriteService {
             return AddResult.ALREADY_EXISTED;
         }
 
-        // RS34: no se puede favoritear un libro de una libreria deshabilitada;
-        // se trata igual que si el libro no existiera (mismo criterio que el
-        // detalle de libro en BookService.getDetail).
-        Book book = bookRepo.findByIdAndLibraryEnabledTrue(bookId)
+        // RS34: no se puede favoritear un libro de una libreria deshabilitada,
+        // ni uno dado de baja individualmente (R18); se trata igual que si el
+        // libro no existiera (mismo criterio que BookService.getDetail).
+        Book book = bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(bookId)
                 .orElseThrow(() -> {
                     log.warn("Alta de favorito rechazada: userId={} bookId={} motivo=libro_no_encontrado",
                             userId, bookId);
@@ -75,7 +77,7 @@ public class FavoriteService {
             favoriteRepo.save(new Favorite(user, book));
             log.info("Favorito agregado: userId={} bookId={}", userId, bookId);
             return AddResult.CREATED;
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             // Carrera entre dos POST concurrentes del mismo usuario/libro:
             // el segundo choca contra la unique constraint. Se trata igual
             // que "ya existia", no como un error.

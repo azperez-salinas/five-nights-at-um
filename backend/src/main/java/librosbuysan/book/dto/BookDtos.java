@@ -1,7 +1,8 @@
-package librosbuysan.book;
+package librosbuysan.book.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import librosbuysan.book.entity.Book;
 
 /**
  * DTOs del catalogo (R7). Separados de la entidad Book a proposito: el
@@ -54,5 +55,20 @@ public final class BookDtos {
             int limit,
             long totalItems,
             int totalPages) {
+    }
+
+    /**
+     * R18/F18: allowlist de campos editables via PUT /api/books/{id}
+     * (RS36/RS2/RS7). No incluye libreriaId ni isEnabled — el cliente nunca
+     * puede tocar esos campos a traves de este DTO, aunque el JSON los
+     * traiga (Jackson los ignora, como ya pasa en AuthDtos/UserDtos).
+     * Cada campo null significa "no modificar" (actualizacion parcial, mismo
+     * criterio que UpdateProfileRequest en UserDtos).
+     */
+    public record UpdateBookRequest(
+            String titulo,
+            String autor,
+            String isbn,
+            String portadaUrl) {
     }
 }

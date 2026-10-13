@@ -1,4 +1,4 @@
-package librosbuysan.auth;
+package librosbuysan.auth.service;
 
 import java.time.Instant;
 import java.util.Map;

@@ -1,7 +1,8 @@
-package librosbuysan.user;
+package librosbuysan.user.dto;
 
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
+import librosbuysan.user.entity.User;
 
 public final class UserDtos {
 

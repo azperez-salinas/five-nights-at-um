@@ -6,9 +6,10 @@ import java.lang.reflect.RecordComponent;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import librosbuysan.admin.dto.AdminDtos.CreateOwnerRequest;
+import librosbuysan.admin.dto.AdminDtos.OwnerCreatedResponse;
 import librosbuysan.auth.dto.AuthDtos.AuthResponse;
 import librosbuysan.auth.dto.AuthDtos.LoginRequest;
-import librosbuysan.auth.dto.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.dto.AuthDtos.RegisterRequest;
 import librosbuysan.book.entity.Book;
 import librosbuysan.book.dto.BookDtos.BookSummary;
@@ -74,7 +75,7 @@ class BookDtosTest {
 
         assertThat(new RegisterRequest("pepe", "p@test.local", clave).toString())
                 .doesNotContain("SuperSecreta123").contains("[PROTECTED]");
-        assertThat(new RegisterDuenoRequest("pepe", "p@test.local", clave, "Libreria").toString())
+        assertThat(new OwnerCreatedResponse(1L, "pepe", "p@test.local", 2L, "Libreria", clave).toString())
                 .doesNotContain("SuperSecreta123").contains("[PROTECTED]");
         assertThat(new LoginRequest("pepe", clave).toString())
                 .doesNotContain("SuperSecreta123").contains("[PROTECTED]");
@@ -91,12 +92,15 @@ class BookDtosTest {
         assertThat(r.expiresIn()).isEqualTo(3600);
         assertThat(r.username()).isEqualTo("pepe");
         assertThat(r.role()).isEqualTo(User.Role.COMPRADOR);
+        assertThat(r.mustChangePassword()).isFalse();
     }
 
     @Test
     void lasSolicitudesDeRegistroNoTienenCampoDeRolNiEnabled() {
         // RS25: el cliente no puede elegir su rol porque el DTO ni siquiera lo declara
         assertThat(campos(RegisterRequest.class)).doesNotContain("role", "enabled", "id");
-        assertThat(campos(RegisterDuenoRequest.class)).doesNotContain("role", "enabled", "id");
+        // R18: el alta de duenos del admin tampoco deja elegir rol ni contrasena
+        assertThat(campos(CreateOwnerRequest.class))
+                .doesNotContain("role", "enabled", "id", "password", "mustChangePassword");
     }
 }

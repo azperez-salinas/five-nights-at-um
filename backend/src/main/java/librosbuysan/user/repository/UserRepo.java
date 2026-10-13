@@ -11,4 +11,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     Optional<User> findByUsername(String username);
+
+    // R18: AdminSeeder solo crea el admin si todavia no hay ninguno
+    boolean existsByRole(User.Role role);
 }

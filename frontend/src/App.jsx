@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import AdminPanel from './AdminPanel';
 import BookDetail from './BookDetail';
 import Catalog from './Catalog';
 import Favorites from './Favorites';
@@ -6,6 +7,9 @@ import Login from './Login';
 import Profile from './Profile';
 import Register from './Register';
 import BookSearch from './BookSearch'
+import ChangePassword from './ChangePassword';
+
+const LOGOUT_URL = 'http://localhost:8080/api/auth/logout';
 
 // R10: no filter applied
 const EMPTY_FILTERS = { libreria: '', autor: '' };
@@ -43,12 +47,25 @@ function App() {
   // Session lives in memory only (not localStorage) so an XSS cannot read the token
   // from storage; the trade-off is that a page reload ends the session.
   const [session, setSession] = useState(null);
+  // Message shown on the login screen (e.g. after replacing a temporary password)
+  const [loginNotice, setLoginNotice] = useState('');
+  // The hashchange listener is registered once, so it reads the current session from here
+  const sessionRef = useRef(null);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   useEffect(() => {
     const onHashChange = () => {
       const newHash = window.location.hash;
       // RS18: logging out drops the token from the client
       if (newHash === '#logout') {
+        // R3: also revoke the token in the backend (best effort, the client forgets it anyway)
+        const token = sessionRef.current?.token;
+        if (token) {
+          fetch(LOGOUT_URL, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+        }
         setSession(null);
         window.location.replace('#login');
         return;
@@ -66,16 +83,42 @@ function App() {
     goTo('#catalogo');
   };
 
+  // R18: the admin goes to its panel and an owner with a temporary password must replace it first.
   // Logging in from #favoritos keeps the user there; otherwise go to the catalog
-  const handleLoginSuccess = (token, username, role) => {
-    setSession({ token, username, role });
-    if (hash !== '#favoritos') goTo('#catalogo');
+  const handleLoginSuccess = (token, username, role, mustChangePassword) => {
+    setSession({ token, username, role, mustChangePassword });
+    setLoginNotice('');
+    if (mustChangePassword) goTo('#cambiar-password');
+    else if (role === 'ADMIN') goTo('#admin');
+    else if (hash !== '#favoritos') goTo('#catalogo');
   };
 
   // Stable reference: Profile uses it as an effect dependency
   const handleUnauthorized = useCallback(() => setSession(null), []);
 
+  // R18: the backend revoked the temporary token, so the owner logs in again with the new password
+  const handlePasswordChanged = () => {
+    setSession(null);
+    setLoginNotice('Tu contraseña se actualizó. Iniciá sesión con la nueva contraseña.');
+    goTo('#login');
+  };
+
   const handleLogout = () => goTo('#logout');
+
+  // R18: these sessions are confined to a single screen whatever the hash says
+  // (the backend rejects anything else with 403 anyway)
+  if (session?.mustChangePassword) {
+    return (
+      <ChangePassword
+        session={session}
+        onPasswordChanged={handlePasswordChanged}
+        onUnauthorized={handleUnauthorized}
+      />
+    );
+  }
+  if (session?.role === 'ADMIN') {
+    return <AdminPanel session={session} onUnauthorized={handleUnauthorized} />;
+  }
 
   const catalogPage = parseCatalogPage(hash);
   if (catalogPage) {
@@ -121,9 +164,11 @@ function App() {
     );
   }
 
-  if (hash === '#login' || (hash === '#favoritos' && !session)) {
+  const needsLogin = hash === '#favoritos' || hash === '#admin' || hash === '#cambiar-password';
+  if (hash === '#login' || (needsLogin && !session)) {
     return (
       <Login
+        notice={loginNotice}
         onLoginSuccess={handleLoginSuccess}
         onNavigateToRegister={() => goTo('#registro')}
       />

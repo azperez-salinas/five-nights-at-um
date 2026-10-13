@@ -27,6 +27,13 @@ app:
     expiration-minutes:
       comprador: 60
       dueno: 15
+      admin: 15
+  # R18: datos de la cuenta de administrador que crea AdminSeeder la primera
+  # vez que arranca sin ningun admin. Despues se ignoran.
+  admin:
+    username: ${ADMIN_USERNAME:}
+    email: ${ADMIN_EMAIL:}
+    initial-password: ${ADMIN_INITIAL_PASSWORD:}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}

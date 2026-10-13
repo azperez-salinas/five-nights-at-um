@@ -25,7 +25,7 @@ class JwtServiceTest {
     private static final String OTRO_SECRET = Base64.getEncoder()
             .encodeToString("ABCDEF9876543210ABCDEF9876543210".getBytes());
 
-    private final JwtService jwtService = new JwtService(SECRET, 60, 15);
+    private final JwtService jwtService = new JwtService(SECRET, 60, 15, 10);
 
     private static User usuario(User.Role role, long id) {
         User user = role == User.Role.DUENO
@@ -81,13 +81,58 @@ class JwtServiceTest {
     void getExpirationSecondsDependeDelRol() {
         assertThat(jwtService.getExpirationSeconds(User.Role.COMPRADOR)).isEqualTo(3600);
         assertThat(jwtService.getExpirationSeconds(User.Role.DUENO)).isEqualTo(900);
+        assertThat(jwtService.getExpirationSeconds(User.Role.ADMIN)).isEqualTo(600);
+    }
+
+    // ---------- R18 ----------
+
+    @Test
+    void elTokenDelAdminLlevaElRolAdminYSuPropiaExpiracion() {
+        User admin = User.admin("root", "root@test.local", "hash");
+        ReflectionTestUtils.setField(admin, "id", 3L);
+
+        Claims claims = jwtService.parseAndValidate(jwtService.generateToken(admin));
+
+        assertThat(claims.get(JwtService.ROLE_CLAIM, String.class)).isEqualTo("ADMIN");
+        assertThat(claims.getExpiration().getTime() - claims.getIssuedAt().getTime()).isEqualTo(10 * 60 * 1000L);
+        assertThat(claims.get(JwtService.PASSWORD_CHANGE_CLAIM)).isNull();
+    }
+
+    @Test
+    void elTokenDeUnDuenoConPasswordTemporalLlevaLaMarcaDeCambioObligatorio() {
+        User pendiente = User.duenoConPasswordTemporal("nuevo", "nuevo@test.local", "hash");
+        ReflectionTestUtils.setField(pendiente, "id", 4L);
+
+        Claims claims = jwtService.parseAndValidate(jwtService.generateToken(pendiente));
+
+        assertThat(claims.get(JwtService.PASSWORD_CHANGE_CLAIM, Boolean.class)).isTrue();
+        assertThat(claims.get(JwtService.ROLE_CLAIM, String.class)).isEqualTo("DUENO");
+    }
+
+    @Test
+    void trasCambiarLaPasswordElTokenYaNoLlevaLaMarca() {
+        User pendiente = User.duenoConPasswordTemporal("nuevo", "nuevo@test.local", "hash");
+        ReflectionTestUtils.setField(pendiente, "id", 4L);
+        pendiente.changePasswordHash("otro-hash");
+
+        Claims claims = jwtService.parseAndValidate(jwtService.generateToken(pendiente));
+
+        assertThat(claims.get(JwtService.PASSWORD_CHANGE_CLAIM)).isNull();
+    }
+
+    @Test
+    void losTokensDeCompradoresYDuenosNormalesNoLlevanLaMarca() {
+        assertThat(jwtService.parseAndValidate(jwtService.generateToken(usuario(User.Role.COMPRADOR, 1L)))
+                .get(JwtService.PASSWORD_CHANGE_CLAIM)).isNull();
+        assertThat(jwtService.parseAndValidate(jwtService.generateToken(usuario(User.Role.DUENO, 2L)))
+                .get(JwtService.PASSWORD_CHANGE_CLAIM)).isNull();
     }
 
     // ---------- validacion ----------
 
     @Test
     void rechazaUnTokenFirmadoConOtraClave() {
-        JwtService otro = new JwtService(OTRO_SECRET, 60, 15);
+        JwtService otro = new JwtService(OTRO_SECRET, 60, 15, 15);
         String token = otro.generateToken(usuario(User.Role.COMPRADOR, 1L));
 
         assertThatThrownBy(() -> jwtService.parseAndValidate(token)).isInstanceOf(JwtException.class);
@@ -122,15 +167,15 @@ class JwtServiceTest {
 
     @Test
     void elConstructorRechazaSecretoNuloOEnBlanco() {
-        assertThatThrownBy(() -> new JwtService(null, 60, 15)).isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> new JwtService("   ", 60, 15)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new JwtService(null, 60, 15, 15)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new JwtService("   ", 60, 15, 15)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void elConstructorRechazaSecretoDeMenosDe32BytesSinFiltrarloEnElMensaje() {
         String corto = Base64.getEncoder().encodeToString("0123456789abcdef".getBytes());
 
-        assertThatThrownBy(() -> new JwtService(corto, 60, 15))
+        assertThatThrownBy(() -> new JwtService(corto, 60, 15, 15))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("32")
                 .satisfies(e -> assertThat(e.getMessage()).doesNotContain(corto));
@@ -140,15 +185,16 @@ class JwtServiceTest {
     void elConstructorRechazaSecretoQueNoEsBase64SinFiltrarloEnElMensaje() {
         String invalido = "###no-es-base64-valido###";
 
-        assertThatThrownBy(() -> new JwtService(invalido, 60, 15))
+        assertThatThrownBy(() -> new JwtService(invalido, 60, 15, 15))
                 .isInstanceOf(IllegalStateException.class)
                 .satisfies(e -> assertThat(e.getMessage()).doesNotContain(invalido));
     }
 
     @Test
     void elConstructorRechazaExpiracionesNoPositivas() {
-        assertThatThrownBy(() -> new JwtService(SECRET, 0, 15)).isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> new JwtService(SECRET, 60, 0)).isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> new JwtService(SECRET, -5, 15)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new JwtService(SECRET, 0, 15, 15)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new JwtService(SECRET, 60, 0, 15)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new JwtService(SECRET, -5, 15, 15)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new JwtService(SECRET, 60, 15, 0)).isInstanceOf(IllegalStateException.class);
     }
 }

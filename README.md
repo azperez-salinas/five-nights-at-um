@@ -38,7 +38,22 @@ curl -X POST http://localhost:8080/api/auth/register \
   -d '{"username":"tu_usuario","email":"tu@email.com","password":"tu_password"}'
 ```
 
-### 4. Reiniciar desde cero
+### 4. Cuenta de administrador (R18)
+
+No existe registro público de dueños ni de administradores. La cuenta de administrador se crea por seed la primera vez que el backend arranca sin ningún admin, con estas variables del `.env`:
+
+```
+ADMIN_USERNAME=admin
+ADMIN_EMAIL=admin@librosbuysan.local
+ADMIN_INITIAL_PASSWORD=<8 a 64 caracteres>
+```
+
+- Si falta alguna, no se crea el admin (se avisa en el log). Si están mal formadas, el backend no arranca.
+- Una vez creado, las variables se ignoran: la contraseña se cambia desde el panel de administrador.
+- El admin entra por el login común y el frontend lo lleva a su panel, donde solo puede crear dueños (cada uno con su librería; se muestra una contraseña temporal una única vez) y cambiar su propia contraseña.
+- El dueño creado debe cambiar la contraseña temporal en su primer inicio de sesión; hasta entonces su token solo permite eso.
+
+### 5. Reiniciar desde cero
 
 Si cambia el modelo de datos y hace falta recrear la base:
 

@@ -12,21 +12,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import librosbuysan.auth.dto.AuthDtos.AuthResponse;
 import librosbuysan.auth.dto.AuthDtos.LoginRequest;
-import librosbuysan.auth.dto.AuthDtos.RegisterDuenoRequest;
 import librosbuysan.auth.dto.AuthDtos.RegisterRequest;
-import librosbuysan.library.entity.Library;
-import librosbuysan.library.repository.LibraryRepo;
 import librosbuysan.security.AuthenticatedUser;
 import librosbuysan.security.JwtService;
 import librosbuysan.user.entity.User;
 import librosbuysan.user.repository.UserRepo;
 
 /**
- * Registro (R1 + R8), login (R2) y logout (R3).
+ * Registro de compradores (R1 + R8), login (R2) y logout (R3).
  *
  * <p>La contrasena se maneja siempre como char[] y nunca se convierte a String.
  * Todo el cuerpo de register y login esta dentro de un try/finally que la
@@ -50,7 +46,6 @@ public class AuthService {
     private static final String INVALID_CREDENTIALS = "Credenciales invalidas";
 
     private final UserRepo userRepo;
-    private final LibraryRepo libraryRepo;
     private final JwtService jwtService;
     private final TokenRevocationService revocationService;
     private final Validator validator;
@@ -60,11 +55,9 @@ public class AuthService {
     // tiempo de respuesta no permita enumerar usuarios
     private final String dummyHash;
 
-    public AuthService(UserRepo userRepo, LibraryRepo libraryRepo,
-                       JwtService jwtService, TokenRevocationService revocationService,
-                       Validator validator) {
+    public AuthService(UserRepo userRepo, JwtService jwtService,
+                       TokenRevocationService revocationService, Validator validator) {
         this.userRepo = userRepo;
-        this.libraryRepo = libraryRepo;
         this.jwtService = jwtService;
         this.revocationService = revocationService;
         this.validator = validator;
@@ -78,8 +71,7 @@ public class AuthService {
             String username = normalize(request.username());
             String email = normalize(request.email());
 
-            User user = createAndSaveUser(username, email, password,
-                    (u, e, hash) -> new User(u, e, hash));
+            User user = createAndSaveUser(username, email, password);
 
             log.info("Registro exitoso: username={}", username);
             // R8: auto-login, el token va en la misma respuesta del registro
@@ -92,46 +84,16 @@ public class AuthService {
     }
 
     /**
-     * Alta de un dueno de libreria. Va en su propio metodo (y no como una
-     * rama de register()) porque ademas de crear el User necesita crear la
-     * Libreria asociada: @Transactional asegura que si el insert de la
-     * libreria falla, el insert del usuario tambien se revierte, evitando un
-     * dueno "huerfano" sin libreria.
+     * Chequea duplicados y guarda el User. El registro publico solo crea
+     * compradores: los duenos los da de alta el admin (R18, AdminService).
      */
-    @Transactional
-    public AuthResponse registerDueno(RegisterDuenoRequest request) {
-        char[] password = request == null ? null : request.password();
-        try {
-            validate(request, request == null ? null : request.username(), "Registro de dueno");
-            String username = normalize(request.username());
-            String email = normalize(request.email());
-            String nombreLibrary = request.nombreLibrary().trim();
-
-            User user = createAndSaveUser(username, email, password,
-                    (u, e, hash) -> User.dueno(u, e, hash));
-            libraryRepo.saveAndFlush(new Library(user, nombreLibrary));
-
-            log.info("Registro de dueno exitoso: username={}", username);
-            return buildResponse(user);
-        } finally {
-            if (password != null) {
-                Arrays.fill(password, '\0');
-            }
-        }
-    }
-
-    /**
-     * Chequea duplicados y guarda el User. Se parametriza con la forma de
-     * construirlo (comprador vs. dueno) para no duplicar la logica de
-     * duplicado/hash/manejo de la carrera entre register() y registerDueno().
-     */
-    private User createAndSaveUser(String username, String email, char[] password, UserFactory factory) {
+    private User createAndSaveUser(String username, String email, char[] password) {
         if (userRepo.existsByUsername(username) || userRepo.existsByEmail(email)) {
             log.warn("Registro fallido: username={} motivo=duplicado", username);
             throw new ResponseStatusException(HttpStatus.CONFLICT, ALREADY_REGISTERED);
         }
 
-        User user = factory.create(username, email, hashPassword(password));
+        User user = new User(username, email, hashPassword(password));
         try {
             return userRepo.saveAndFlush(user);
         } catch (DataIntegrityViolationException e) {
@@ -139,11 +101,6 @@ public class AuthService {
             log.warn("Registro fallido: username={} motivo=duplicado_concurrente", username);
             throw new ResponseStatusException(HttpStatus.CONFLICT, ALREADY_REGISTERED);
         }
-    }
-
-    @FunctionalInterface
-    private interface UserFactory {
-        User create(String username, String email, String passwordHash);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -205,7 +162,6 @@ public class AuthService {
         }
         char[] password = switch (request) {
             case RegisterRequest r -> r.password();
-            case RegisterDuenoRequest r -> r.password();
             case LoginRequest r -> r.password();
             default -> throw new IllegalArgumentException("Tipo de request no soportado: " + request.getClass());
         };
@@ -266,7 +222,8 @@ public class AuthService {
     private AuthResponse buildResponse(User user) {
         String token = jwtService.generateToken(user);
         long expiresIn = jwtService.getExpirationSeconds(user.getRole());
-        return new AuthResponse(token, expiresIn, user.getUsername(), user.getRole());
+        return new AuthResponse(token, expiresIn, user.getUsername(), user.getRole(),
+                user.isMustChangePassword());
     }
 
     private static String normalize(String value) {

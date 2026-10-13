@@ -99,6 +99,45 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    void tokenDeAdminOtorgaSoloElRolAdmin() throws Exception {
+        when(jwtService.parseAndValidate("token-admin")).thenReturn(claims("1", "ADMIN"));
+        request.addHeader("Authorization", "Bearer token-admin");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion().getAuthorities()).extracting(GrantedAuthority::getAuthority).containsExactly("ROLE_ADMIN");
+        assertThat(((AuthenticatedUser) autenticacion().getPrincipal()).passwordChangeRequired()).isFalse();
+    }
+
+    @Test
+    void tokenConPasswordTemporalNoOtorgaElRolRealSinoElDeCambioDePassword() throws Exception {
+        // R18: con la marca, el dueno NO recibe ROLE_DUENO hasta cambiar la contrasena
+        when(jwtService.parseAndValidate("token-pendiente"))
+                .thenReturn(base("9", "DUENO").add(JwtService.PASSWORD_CHANGE_CLAIM, true)
+                        .id(JTI).expiration(Date.from(EXPIRA)).build());
+        request.addHeader("Authorization", "Bearer token-pendiente");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion().getAuthorities()).extracting(GrantedAuthority::getAuthority)
+                .containsExactly("ROLE_" + JwtAuthenticationFilter.PASSWORD_CHANGE_ROLE);
+        assertThat(autenticacion().getPrincipal())
+                .isEqualTo(new AuthenticatedUser(9L, User.Role.DUENO, JTI, EXPIRA, true));
+    }
+
+    @Test
+    void marcaDeCambioEnFalseNoRestringeElRol() throws Exception {
+        when(jwtService.parseAndValidate("token-dueno"))
+                .thenReturn(base("9", "DUENO").add(JwtService.PASSWORD_CHANGE_CLAIM, false)
+                        .id(JTI).expiration(Date.from(EXPIRA)).build());
+        request.addHeader("Authorization", "Bearer token-dueno");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion().getAuthorities()).extracting(GrantedAuthority::getAuthority).containsExactly("ROLE_DUENO");
+    }
+
+    @Test
     void sinHeaderNoAutenticaPeroLaCadenaContinua() throws Exception {
         filter.doFilter(request, response, chain);
 
@@ -141,7 +180,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void rolDesconocidoNoAutentica() throws Exception {
-        when(jwtService.parseAndValidate("raro")).thenReturn(claims("5", "ADMIN"));
+        when(jwtService.parseAndValidate("raro")).thenReturn(claims("5", "SUPERADMIN"));
         request.addHeader("Authorization", "Bearer raro");
 
         filter.doFilter(request, response, chain);

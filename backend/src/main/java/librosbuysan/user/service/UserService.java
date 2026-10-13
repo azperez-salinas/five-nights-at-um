@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.auth.service.TokenRevocationService;
+import librosbuysan.security.AuthenticatedUser;
 import librosbuysan.user.dto.UserDtos.ProfileResponse;
 import librosbuysan.user.dto.UserDtos.UpdateProfileRequest;
 import librosbuysan.user.entity.User;
@@ -29,19 +31,39 @@ public class UserService {
     private final UserRepo userRepo;
     private final Validator validator;
     private final PasswordHasher passwordHasher;
+    private final TokenRevocationService revocationService;
 
-    public UserService(UserRepo userRepo, Validator validator, PasswordHasher passwordHasher) {
+    public UserService(UserRepo userRepo, Validator validator, PasswordHasher passwordHasher,
+                       TokenRevocationService revocationService) {
         this.userRepo = userRepo;
         this.validator = validator;
         this.passwordHasher = passwordHasher;
+        this.revocationService = revocationService;
     }
 
     public ProfileResponse getProfile(Long userId) {
         return ProfileResponse.from(loadActiveUser(userId));
     }
 
+    /**
+     * Cambia la contrasena de la cuenta del token. Lo usan el perfil
+     * (comprador/dueno) y el panel de admin (R18).
+     *
+     * <p>R18: si el token era de un dueno con contrasena temporal, se revoca
+     * despues del cambio. Ese token tenia el permiso acotado PWD_CHANGE; para
+     * usar su rol real el dueno vuelve a iniciar sesion con la contrasena nueva.
+     */
     @Transactional
-    public ProfileResponse updateProfile(Long userId, UpdateProfileRequest request) {
+    public ProfileResponse updateProfile(AuthenticatedUser principal, UpdateProfileRequest request) {
+        ProfileResponse response = updateProfile(principal.id(), request);
+        if (principal.passwordChangeRequired()) {
+            revocationService.revoke(principal.tokenId(), principal.tokenExpiresAt());
+            log.info("Contrasena temporal reemplazada, token revocado: userId={}", principal.id());
+        }
+        return response;
+    }
+
+    private ProfileResponse updateProfile(Long userId, UpdateProfileRequest request) {
         char[] currentPassword = request == null ? null : request.currentPassword();
         char[] newPassword = request == null ? null : request.newPassword();
         try {
@@ -77,6 +99,11 @@ public class UserService {
         if (!passwordHasher.matches(currentPassword, user.getPasswordHash())) {
             log.warn("Actualizacion de perfil fallida: userId={} motivo=password_actual_incorrecta", user.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, WRONG_CURRENT_PASSWORD);
+        }
+        // R18: el cambio obligatorio tiene que reemplazar de verdad la temporal
+        if (user.isMustChangePassword() && passwordHasher.matches(newPassword, user.getPasswordHash())) {
+            log.warn("Actualizacion de perfil fallida: userId={} motivo=password_nueva_igual_a_temporal", user.getId());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
         }
         user.changePasswordHash(passwordHasher.hash(newPassword));
     }

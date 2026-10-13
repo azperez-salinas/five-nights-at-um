@@ -16,7 +16,7 @@ const buildCatalogQuery = (page, filters) => {
 
 // The page lives in the URL (#catalogo/N) so returning from a book detail keeps it.
 // Filters live in App for the same reason.
-export default function Catalog({ page, session, filters, onFiltersChange }) {
+export default function Catalog({ page, session, filters, onFiltersChange, onLogout }) {
     const query = buildCatalogQuery(page, filters);
     // { query, result } so a response is only shown for the request that produced it
     const [data, setData] = useState(null);
@@ -108,7 +108,7 @@ export default function Catalog({ page, session, filters, onFiltersChange }) {
 
     return (
         <div className="booksaw-page">
-            <Nav active="catalogo" session={session} />
+            <Nav active="catalogo" session={session} onLogout={onLogout} />
 
             <main className="catalog-main">
                 <h1 className="catalog-title">Destacados</h1>

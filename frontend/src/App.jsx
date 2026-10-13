@@ -56,18 +56,29 @@ function App() {
     sessionRef.current = session;
   }, [session]);
 
+  const handleLogout = useCallback(async () => {
+    // R3: revoca el token en el backend y limpia la sesion en el cliente
+    const token = sessionRef.current?.token;
+    if (token) {
+      try {
+        await fetch(LOGOUT_URL, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (err) {
+        console.error('Error al revocar token en backend:', err);
+      }
+    }
+    setSession(null);
+    goTo('#login');
+  }, []);
+
   useEffect(() => {
     const onHashChange = () => {
       const newHash = window.location.hash;
       // RS18: logging out drops the token from the client
       if (newHash === '#logout') {
-        // R3: also revoke the token in the backend (best effort, the client forgets it anyway)
-        const token = sessionRef.current?.token;
-        if (token) {
-          fetch(LOGOUT_URL, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
-        }
-        setSession(null);
-        window.location.replace('#login');
+        handleLogout();
         return;
       }
       setHash(newHash);
@@ -76,7 +87,7 @@ function App() {
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
+  }, [handleLogout]);
 
   const handleAuthenticated = (auth) => {
     setSession(auth);
@@ -103,8 +114,6 @@ function App() {
     goTo('#login');
   };
 
-  const handleLogout = () => goTo('#logout');
-
   // R18: these sessions are confined to a single screen whatever the hash says
   // (the backend rejects anything else with 403 anyway)
   if (session?.mustChangePassword) {
@@ -113,11 +122,18 @@ function App() {
         session={session}
         onPasswordChanged={handlePasswordChanged}
         onUnauthorized={handleUnauthorized}
+        onLogout={handleLogout}
       />
     );
   }
   if (session?.role === 'ADMIN') {
-    return <AdminPanel session={session} onUnauthorized={handleUnauthorized} />;
+    return (
+      <AdminPanel
+        session={session}
+        onUnauthorized={handleUnauthorized}
+        onLogout={handleLogout}
+      />
+    );
   }
 
   const catalogPage = parseCatalogPage(hash);
@@ -128,6 +144,7 @@ function App() {
         session={session}
         filters={catalogFilters}
         onFiltersChange={setCatalogFilters}
+        onLogout={handleLogout}
       />
     );
   }
@@ -142,6 +159,7 @@ function App() {
         backLabel={back.label}
         navActive={back.nav}
         session={session}
+        onLogout={handleLogout}
       />
     );
   }
@@ -150,6 +168,7 @@ function App() {
       <Profile
         session={session}
         onUnauthorized={handleUnauthorized}
+        onLogout={handleLogout}
       />
     );
   }
@@ -191,6 +210,7 @@ function App() {
       session={session}
       filters={catalogFilters}
       onFiltersChange={setCatalogFilters}
+      onLogout={handleLogout}
     />
   );
 }

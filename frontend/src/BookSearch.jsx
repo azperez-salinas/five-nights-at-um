@@ -150,7 +150,7 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
 
     return (
         <div className="booksaw-page">
-            <Nav active="buscar" session={session} />
+            <Nav active="buscar" session={session} onLogout={onLogout} />
 
             {/* Toast flotante */}
             {toastMsg && (

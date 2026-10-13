@@ -5,7 +5,7 @@ import './Register.css';
 
 const API_URL = 'http://localhost:8080/api/users/me';
 
-export default function Profile({ session, onUnauthorized }) {
+export default function Profile({ session, onUnauthorized, onLogout }) {
     const [profile, setProfile] = useState(null);
     const [loadFailed, setLoadFailed] = useState(false);
     const [editing, setEditing] = useState(false);
@@ -117,7 +117,7 @@ export default function Profile({ session, onUnauthorized }) {
 
     return (
         <div className="booksaw-page">
-            <Nav active="perfil" session={session} />
+            <Nav active="perfil" session={session} onLogout={onLogout} />
 
             <main className="booksaw-main">
                 <div className="register-card">

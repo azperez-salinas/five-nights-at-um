@@ -113,7 +113,7 @@ export default function Catalog({ page, session, filters, onFiltersChange, onLog
             <main className="catalog-main">
                 <h1 className="catalog-title">Destacados</h1>
 
-                <CatalogFilters filters={filters} onApply={applyFilters} />
+                <CatalogFilters filters={filters} onApply={applyFilters} loading={loading} />
 
                 {errorMsg && (
                     <div className="alert-box alert-error" role="alert">
@@ -121,9 +121,17 @@ export default function Catalog({ page, session, filters, onFiltersChange, onLog
                     </div>
                 )}
 
-                {loading && !books && <p className="catalog-status">Cargando libros...</p>}
+                {filtered && books && books.items.length > 0 && !loading && (
+                    <p className="catalog-results-count">
+                        {books.totalItems === 1
+                            ? '1 libro encontrado con los filtros seleccionados.'
+                            : `${books.totalItems} libros encontrados con los filtros seleccionados.`}
+                    </p>
+                )}
 
-                {books && books.items.length === 0 && (
+                {loading && <p className="catalog-status">Cargando libros...</p>}
+
+                {!loading && books && books.items.length === 0 && (
                     <p className="catalog-status">
                         {filtered
                             ? 'No hay libros que coincidan con los filtros elegidos.'

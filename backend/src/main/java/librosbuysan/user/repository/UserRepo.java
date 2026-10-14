@@ -14,4 +14,8 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     // R18: AdminSeeder solo crea el admin si todavia no hay ninguno
     boolean existsByRole(User.Role role);
+
+    // R22: JwtAuthenticationFilter la consulta en cada request autenticado.
+    // Devuelve false tanto si la cuenta esta deshabilitada como si ya no existe.
+    boolean existsByIdAndEnabledTrue(Long id);
 }

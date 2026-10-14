@@ -26,6 +26,11 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
+import librosbuysan.user.repository.UserRepo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * El filtro es la primera linea de la autorizacion: si deja pasar una
@@ -40,6 +45,7 @@ class JwtAuthenticationFilterTest {
 
     @Mock private JwtService jwtService;
     @Mock private TokenRevocationService revocationService;
+    @Mock private UserRepo userRepo;
 
     private JwtAuthenticationFilter filter;
     private MockHttpServletRequest request;
@@ -49,7 +55,8 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
-        filter = new JwtAuthenticationFilter(jwtService, revocationService);
+        lenient().when(userRepo.existsByIdAndEnabledTrue(anyLong())).thenReturn(true);
+        filter = new JwtAuthenticationFilter(jwtService, revocationService, userRepo);
         request = new MockHttpServletRequest("GET", "/api/favorites");
         response = new MockHttpServletResponse();
         chain = new MockFilterChain();
@@ -265,5 +272,98 @@ class JwtAuthenticationFilterTest {
         filter.doFilter(request, response, chain);
 
         assertThat(autenticacion()).isNull();
+    }
+
+    @Test
+    void consultaElEstadoDeLaCuentaConElIdDelToken() throws Exception {
+        when(jwtService.parseAndValidate("token-ok")).thenReturn(claims("5", "COMPRADOR"));
+        request.addHeader("Authorization", "Bearer token-ok");
+
+        filter.doFilter(request, response, chain);
+
+        verify(userRepo).existsByIdAndEnabledTrue(5L);
+    }
+
+    @Test
+    void tokenValidoDeUnaCuentaDeshabilitadaNoAutenticaPeroLaCadenaContinua() throws Exception {
+        // Firma, expiracion y jti son validos: lo unico que cambio es el estado de la cuenta.
+        // La cadena sigue para que SecurityConfig responda 401 (o deje pasar si la ruta es publica)
+        when(jwtService.parseAndValidate("token-ok")).thenReturn(claims("5", "COMPRADOR"));
+        when(userRepo.existsByIdAndEnabledTrue(5L)).thenReturn(false);
+        request.addHeader("Authorization", "Bearer token-ok");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).isNull();
+        assertThat(chain.getRequest()).as("la cadena debe continuar").isNotNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"COMPRADOR", "DUENO", "ADMIN"})
+    void ningunRolConservaAccesoSiSuCuentaSeDeshabilita(String rol) throws Exception {
+        when(jwtService.parseAndValidate("token-ok")).thenReturn(claims("5", rol));
+        when(userRepo.existsByIdAndEnabledTrue(5L)).thenReturn(false);
+        request.addHeader("Authorization", "Bearer token-ok");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).as("rol " + rol).isNull();
+    }
+
+    @Test
+    void tokenConPasswordTemporalDeUnaCuentaDeshabilitadaTampocoAutentica() throws Exception {
+        // El rol acotado PWD_CHANGE tampoco sobrevive a la deshabilitacion
+        when(jwtService.parseAndValidate("token-pendiente"))
+                .thenReturn(base("9", "DUENO").add(JwtService.PASSWORD_CHANGE_CLAIM, true)
+                        .id(JTI).expiration(Date.from(EXPIRA)).build());
+        when(userRepo.existsByIdAndEnabledTrue(9L)).thenReturn(false);
+        request.addHeader("Authorization", "Bearer token-pendiente");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).isNull();
+    }
+
+    @Test
+    void tokenRevocadoSeRechazaSinConsultarLaBaseDeDatos() throws Exception {
+        // Orden de las validaciones: primero las baratas (memoria), despues la base
+        when(jwtService.parseAndValidate("token-cerrado")).thenReturn(claims("5", "COMPRADOR"));
+        when(revocationService.isRevoked(JTI)).thenReturn(true);
+        request.addHeader("Authorization", "Bearer token-cerrado");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).isNull();
+        verifyNoInteractions(userRepo);
+    }
+
+    @Test
+    void tokenInvalidoNoConsultaLaBaseDeDatos() throws Exception {
+        when(jwtService.parseAndValidate("basura")).thenThrow(new JwtException("firma invalida"));
+        request.addHeader("Authorization", "Bearer basura");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).isNull();
+        verifyNoInteractions(userRepo);
+    }
+
+    @Test
+    void tokenConRolInexistenteNoConsultaLaBaseDeDatos() throws Exception {
+        when(jwtService.parseAndValidate("rol-raro")).thenReturn(claims("5", "SUPERADMIN"));
+        request.addHeader("Authorization", "Bearer rol-raro");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).isNull();
+        verifyNoInteractions(userRepo);
+    }
+
+    @Test
+    void sinHeaderAuthorizationNoConsultaLaBaseDeDatos() throws Exception {
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).isNull();
+        verifyNoInteractions(userRepo);
     }
 }

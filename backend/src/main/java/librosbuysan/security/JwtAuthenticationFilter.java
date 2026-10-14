@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import librosbuysan.auth.service.TokenRevocationService;
 import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 
 // Sin @Component a proposito: Spring Boot registraria este filtro dos veces
 // (una vez solo en el contenedor servlet, otra via addFilterBefore en
@@ -31,10 +32,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final TokenRevocationService revocationService;
+    private final UserRepo userRepo;
 
-    public JwtAuthenticationFilter(JwtService jwtService, TokenRevocationService revocationService) {
+    public JwtAuthenticationFilter(JwtService jwtService, TokenRevocationService revocationService,
+                                   UserRepo userRepo) {
         this.jwtService = jwtService;
         this.revocationService = revocationService;
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -67,6 +71,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Long userId = Long.valueOf(claims.getSubject());
         User.Role role = User.Role.valueOf(claims.get(JwtService.ROLE_CLAIM, String.class));
+
+        // R22: el token es stateless y solo "recuerda" el estado de la cuenta al
+        // momento de emitirse. Si la cuenta se deshabilito despues, la firma y la
+        // expiracion siguen siendo validas, asi que hay que consultar el estado
+        // actual. Va despues de las validaciones baratas (firma, revocacion,
+        // claims) para que un token invalido nunca llegue a la base de datos.
+        if (!userRepo.existsByIdAndEnabledTrue(userId)) {
+            log.warn("Token de cuenta deshabilitada o inexistente rechazado: userId={}", userId);
+            return;
+        }
 
         // R18: con la contrasena temporal todavia vigente, el token NO lleva el
         // rol real sino uno acotado que SecurityConfig solo deja usar para

@@ -14,6 +14,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import librosbuysan.auth.service.TokenRevocationService;
+import librosbuysan.user.repository.UserRepo;
+
 
 @Configuration
 @EnableWebSecurity
@@ -29,17 +31,20 @@ public class SecurityConfig {
 
     private final JwtService jwtService;
     private final TokenRevocationService revocationService;
+    private final UserRepo userRepo;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
     private final List<String> allowedOrigins;
 
     public SecurityConfig(JwtService jwtService,
                           TokenRevocationService revocationService,
+                          UserRepo userRepo,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
                           @Value("${cors.allowed-origins}") List<String> allowedOrigins) {
         this.jwtService = jwtService;
         this.revocationService = revocationService;
+        this.userRepo = userRepo;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.allowedOrigins = allowedOrigins;
@@ -139,7 +144,7 @@ public class SecurityConfig {
                         // nuevo queda inaccesible hasta que se le asigne un
                         // rol aca. Sin token responde 401; con token, 403.
                         .anyRequest().denyAll())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocationService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocationService, userRepo), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

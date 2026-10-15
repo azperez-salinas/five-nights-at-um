@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import static org.mockito.Mockito.lenient;
 
 /**
  * R15/F15 a nivel de service: toda operacion sobre favoritos queda acotada al
@@ -72,6 +73,7 @@ class FavoriteServiceTest {
 
     @Test
     void agregarUnFavoritoQueYaTieneElUsuarioEsIdempotenteYNoDuplica() {
+        when(bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.of(libro));   // <-- agregar
         when(favoriteRepo.existsByUserIdAndBookId(USER_A, BOOK_ID)).thenReturn(true);
 
         assertThat(service.add(USER_A, BOOK_ID)).isEqualTo(AddResult.ALREADY_EXISTED);
@@ -93,7 +95,6 @@ class FavoriteServiceTest {
 
     @Test
     void agregarUnLibroInexistenteODeLibreriaDeshabilitadaEs404() {
-        when(favoriteRepo.existsByUserIdAndBookId(USER_A, BOOK_ID)).thenReturn(false);
         when(bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.empty());
 
         assertThrowsStatus(HttpStatus.NOT_FOUND, () -> service.add(USER_A, BOOK_ID));
@@ -102,13 +103,16 @@ class FavoriteServiceTest {
     }
 
     @Test
-    void quitarBuscaElFavoritoAcotadoAlUsuarioYLoElimina() {
-        Favorite favorito = new Favorite(new User("a", "a@test.local", "hash"), libro);
-        when(favoriteRepo.findByUserIdAndBookId(USER_A, BOOK_ID)).thenReturn(Optional.of(favorito));
+    void agregarUnLibroQueYaEraFavoritoPeroDejoDeEstarDisponibleEs404YNoIdempotente() {
+        // R23 (ABAC): el atributo del recurso (libro/libreria habilitados) se evalua ANTES
+        // que la idempotencia. El favorito viejo existe, pero el libro ya no es accesible.
+        // lenient: el punto es que no importa lo que diga el repo de favoritos
+        lenient().when(favoriteRepo.existsByUserIdAndBookId(USER_A, BOOK_ID)).thenReturn(true);
+        when(bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(BOOK_ID)).thenReturn(Optional.empty());
 
-        service.remove(USER_A, BOOK_ID);
+        assertThrowsStatus(HttpStatus.NOT_FOUND, () -> service.add(USER_A, BOOK_ID));
 
-        verify(favoriteRepo).delete(favorito);
+        verify(favoriteRepo, never()).save(any());
     }
 
     @Test

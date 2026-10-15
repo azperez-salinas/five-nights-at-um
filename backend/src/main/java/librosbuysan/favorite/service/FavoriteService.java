@@ -54,20 +54,23 @@ public class FavoriteService {
      */
     @Transactional
     public AddResult add(Long userId, Long bookId) {
-        // Idempotencia (POST repetido no es error ni duplica la fila).
-        if (favoriteRepo.existsByUserIdAndBookId(userId, bookId)) {
-            return AddResult.ALREADY_EXISTED;
-        }
-
-        // RS34: no se puede favoritear un libro de una libreria deshabilitada,
-        // ni uno dado de baja individualmente (R18); se trata igual que si el
-        // libro no existiera (mismo criterio que BookService.getDetail).
+        // RS34/R23 (ABAC): primero se evaluan los atributos del RECURSO. No se puede
+        // favoritear un libro de una libreria deshabilitada, ni uno dado de baja
+        // individualmente (R18); se trata igual que si el libro no existiera (mismo
+        // criterio que BookService.getDetail). Va antes de la idempotencia: si no,
+        // un libro que el usuario ya tenia en favoritos y que despues dejo de estar
+        // disponible respondia 200 en vez de 404, ignorando el atributo del recurso.
         Book book = bookRepo.findByIdAndEnabledTrueAndLibraryEnabledTrue(bookId)
                 .orElseThrow(() -> {
                     log.warn("Alta de favorito rechazada: userId={} bookId={} motivo=libro_no_encontrado",
                             userId, bookId);
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, BOOK_NOT_FOUND);
                 });
+
+        // Idempotencia (POST repetido no es error ni duplica la fila).
+        if (favoriteRepo.existsByUserIdAndBookId(userId, bookId)) {
+            return AddResult.ALREADY_EXISTED;
+        }
 
         // getReferenceById: no hace falta traer el User completo, ya esta
         // autenticado (el JWT ya lo valido); solo se usa para la FK.

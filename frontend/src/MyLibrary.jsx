@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import BookCover from './BookCover';
 import CsvImport from './CsvImport';
+import LibraryMetrics from './LibraryMetrics';
 import Nav from './Nav';
 import './Catalog.css';
 import './MyLibrary.css';
@@ -228,6 +229,7 @@ export default function MyLibrary({ session, onUnauthorized, onLogout }) {
             <main className="catalog-main">
                 <h1 className="catalog-title">Mi librería</h1>
 
+                <LibraryMetrics token={token} onUnauthorized={onUnauthorized} refreshKey={reloadKey} />
                 <CsvImport token={token} onUnauthorized={onUnauthorized} onImported={showImported} />
 
                 {errorMsg && (

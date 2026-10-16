@@ -18,7 +18,7 @@ class RestSecurityHandlersTest {
     void entryPointResponde401ConJsonUniforme() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        new RestAuthenticationEntryPoint().commence(new MockHttpServletRequest(), response,
+        new RestAuthenticationEntryPoint(new AuthorizationAuditLogger()).commence(new MockHttpServletRequest(), response,
                 new BadCredentialsException("detalle interno que no debe filtrarse"));
 
         assertThat(response.getStatus()).isEqualTo(401);
@@ -31,7 +31,7 @@ class RestSecurityHandlersTest {
     void accessDeniedHandlerResponde403ConJsonUniforme() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        new RestAccessDeniedHandler().handle(new MockHttpServletRequest(), response,
+        new RestAccessDeniedHandler(new AuthorizationAuditLogger()).handle(new MockHttpServletRequest(), response,
                 new AccessDeniedException("detalle interno que no debe filtrarse"));
 
         assertThat(response.getStatus()).isEqualTo(403);

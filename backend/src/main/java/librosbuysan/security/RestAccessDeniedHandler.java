@@ -17,9 +17,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
+    private final AuthorizationAuditLogger auditLogger;
+
+    public RestAccessDeniedHandler(AuthorizationAuditLogger auditLogger) {
+        this.auditLogger = auditLogger;
+    }
+
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        // RS23: rol sin permiso para la ruta (o ruta bloqueada por denyAll)
+        auditLogger.denied(request, "FORBIDDEN_ROLE", HttpServletResponse.SC_FORBIDDEN);
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write("{\"message\":\"Acceso denegado\"}");

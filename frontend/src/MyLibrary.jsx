@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import BookCover from './BookCover';
+import CsvImport from './CsvImport';
 import Nav from './Nav';
 import './Catalog.css';
 import './MyLibrary.css';
@@ -211,6 +212,13 @@ export default function MyLibrary({ session, onUnauthorized, onLogout }) {
         }
     };
 
+    // R17: new books show up from page 1
+    const showImported = () => {
+        clearAlerts();
+        setPage(1);
+        setReloadKey((k) => k + 1);
+    };
+
     const unchanged = editing && Object.keys(changedFields(editing, form)).length === 0;
 
     return (
@@ -219,6 +227,8 @@ export default function MyLibrary({ session, onUnauthorized, onLogout }) {
 
             <main className="catalog-main">
                 <h1 className="catalog-title">Mi librería</h1>
+
+                <CsvImport token={token} onUnauthorized={onUnauthorized} onImported={showImported} />
 
                 {errorMsg && (
                     <div className="alert-box alert-error" role="alert">

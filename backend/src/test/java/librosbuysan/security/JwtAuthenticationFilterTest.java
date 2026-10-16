@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import librosbuysan.user.repository.UserRepo;
@@ -55,7 +56,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
-        lenient().when(userRepo.existsByIdAndEnabledTrue(anyLong())).thenReturn(true);
+        lenient().when(userRepo.existsByIdAndEnabledTrueAndTokenVersion(anyLong(), anyInt())).thenReturn(true);
         filter = new JwtAuthenticationFilter(jwtService, revocationService, userRepo);
         request = new MockHttpServletRequest("GET", "/api/favorites");
         response = new MockHttpServletResponse();
@@ -281,7 +282,35 @@ class JwtAuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(userRepo).existsByIdAndEnabledTrue(5L);
+        verify(userRepo).existsByIdAndEnabledTrueAndTokenVersion(5L, 0);
+    }
+
+    @Test
+    void consultaLaVersionDeCredencialesQueLlevaElToken() throws Exception {
+        // RS28: el filtro compara la version del token con la vigente en la base
+        when(jwtService.parseAndValidate("token-v2"))
+                .thenReturn(base("5", "COMPRADOR").add(JwtService.TOKEN_VERSION_CLAIM, 2)
+                        .id(JTI).expiration(Date.from(EXPIRA)).build());
+        request.addHeader("Authorization", "Bearer token-v2");
+
+        filter.doFilter(request, response, chain);
+
+        verify(userRepo).existsByIdAndEnabledTrueAndTokenVersion(5L, 2);
+    }
+
+    @Test
+    void tokenEmitidoAntesDeUnCambioDePasswordNoAutentica() throws Exception {
+        // RS28: firma, expiracion y jti validos, pero la version del token ya no es la vigente
+        when(jwtService.parseAndValidate("token-viejo"))
+                .thenReturn(base("5", "COMPRADOR").add(JwtService.TOKEN_VERSION_CLAIM, 0)
+                        .id(JTI).expiration(Date.from(EXPIRA)).build());
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersion(5L, 0)).thenReturn(false);
+        request.addHeader("Authorization", "Bearer token-viejo");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).isNull();
+        assertThat(chain.getRequest()).as("la cadena debe continuar").isNotNull();
     }
 
     @Test
@@ -289,7 +318,7 @@ class JwtAuthenticationFilterTest {
         // Firma, expiracion y jti son validos: lo unico que cambio es el estado de la cuenta.
         // La cadena sigue para que SecurityConfig responda 401 (o deje pasar si la ruta es publica)
         when(jwtService.parseAndValidate("token-ok")).thenReturn(claims("5", "COMPRADOR"));
-        when(userRepo.existsByIdAndEnabledTrue(5L)).thenReturn(false);
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersion(5L, 0)).thenReturn(false);
         request.addHeader("Authorization", "Bearer token-ok");
 
         filter.doFilter(request, response, chain);
@@ -302,7 +331,7 @@ class JwtAuthenticationFilterTest {
     @ValueSource(strings = {"COMPRADOR", "DUENO", "ADMIN"})
     void ningunRolConservaAccesoSiSuCuentaSeDeshabilita(String rol) throws Exception {
         when(jwtService.parseAndValidate("token-ok")).thenReturn(claims("5", rol));
-        when(userRepo.existsByIdAndEnabledTrue(5L)).thenReturn(false);
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersion(5L, 0)).thenReturn(false);
         request.addHeader("Authorization", "Bearer token-ok");
 
         filter.doFilter(request, response, chain);
@@ -316,7 +345,7 @@ class JwtAuthenticationFilterTest {
         when(jwtService.parseAndValidate("token-pendiente"))
                 .thenReturn(base("9", "DUENO").add(JwtService.PASSWORD_CHANGE_CLAIM, true)
                         .id(JTI).expiration(Date.from(EXPIRA)).build());
-        when(userRepo.existsByIdAndEnabledTrue(9L)).thenReturn(false);
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersion(9L, 0)).thenReturn(false);
         request.addHeader("Authorization", "Bearer token-pendiente");
 
         filter.doFilter(request, response, chain);

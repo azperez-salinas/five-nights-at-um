@@ -17,5 +17,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     // R22: JwtAuthenticationFilter la consulta en cada request autenticado.
     // Devuelve false tanto si la cuenta esta deshabilitada como si ya no existe.
-    boolean existsByIdAndEnabledTrue(Long id);
+    // RS28: tambien si la contrasena cambio despues de emitirse el token
+    // (la version del token ya no es la vigente). Una sola consulta para ambos.
+    boolean existsByIdAndEnabledTrueAndTokenVersion(Long id, int tokenVersion);
 }

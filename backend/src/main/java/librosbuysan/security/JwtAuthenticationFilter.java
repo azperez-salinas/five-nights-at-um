@@ -77,8 +77,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // expiracion siguen siendo validas, asi que hay que consultar el estado
         // actual. Va despues de las validaciones baratas (firma, revocacion,
         // claims) para que un token invalido nunca llegue a la base de datos.
-        if (!userRepo.existsByIdAndEnabledTrue(userId)) {
-            log.warn("Token de cuenta deshabilitada o inexistente rechazado: userId={}", userId);
+        // RS28: en la misma consulta se exige que la version del token sea la
+        // vigente; si la contrasena cambio despues de emitirlo, ya no coincide.
+        // Los tokens sin el claim (emitidos antes de RS28) cuentan como version 0.
+        Integer tokenVersion = claims.get(JwtService.TOKEN_VERSION_CLAIM, Integer.class);
+        int version = tokenVersion == null ? 0 : tokenVersion;
+        if (!userRepo.existsByIdAndEnabledTrueAndTokenVersion(userId, version)) {
+            log.warn("Token de cuenta deshabilitada, inexistente o con credenciales viejas rechazado: userId={}",
+                    userId);
             return;
         }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useEffectEvent } from 'react';
 import BookCover from './BookCover';
 import Nav from './Nav';
 import './BookSearch.css';
@@ -9,30 +9,13 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
     const [books, setBooks] = useState([]);
     const [allCatalog, setAllCatalog] = useState([]);
     const [favorites, setFavorites] = useState([]);
-    const [loading, setLoading] = useState(false);
+    // Arranca en true: el catálogo inicial se pide apenas se monta
+    const [loading, setLoading] = useState(true);
     const [toastMsg, setToastMsg] = useState('');
 
     const showToast = (msg) => {
         setToastMsg(msg);
         setTimeout(() => setToastMsg(''), 3000);
-    };
-
-    // Carga lista de favoritos del comprador
-    const fetchFavorites = async () => {
-        if (!token) return;
-        try {
-            const res = await fetch('http://localhost:8080/api/favorites', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setFavorites(data);
-            } else if (res.status === 401) {
-                onLogout();
-            }
-        } catch (err) {
-            console.error(err);
-        }
     };
 
     // Ejecutar búsqueda por texto libre contra el endpoint real del backend
@@ -72,30 +55,48 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
         }
     };
 
-    // Carga catálogo inicial
-    const fetchInitialCatalog = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch('http://localhost:8080/api/books?page=1');
-            if (res.ok) {
-                const data = await res.json();
+    // Volviendo del detalle de un libro se restaura la búsqueda anterior.
+    // useEffectEvent: usa initialQuery/executeSearch actuales sin que vuelvan a disparar la carga
+    const showInitialResults = useEffectEvent((items) => {
+        if (initialQuery.trim()) executeSearch(initialQuery);
+        else setBooks(items);
+    });
+
+    // Carga catálogo inicial y favoritos del comprador. El estado se actualiza
+    // solo en los callbacks del fetch, y los requests se cancelan si cambia el token
+    useEffect(() => {
+        const controller = new AbortController();
+        const logError = (err) => {
+            if (err.name !== 'AbortError') console.error(err);
+        };
+
+        fetch('http://localhost:8080/api/books?page=1', { signal: controller.signal })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (!data) return;
                 const items = data.items || data || [];
                 setAllCatalog(items);
-                // Coming back from a book detail: restore the previous search results
-                if (initialQuery.trim()) executeSearch(initialQuery);
-                else setBooks(items);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+                showInitialResults(items);
+            })
+            .catch(logError)
+            .finally(() => setLoading(false));
 
-    useEffect(() => {
-        fetchInitialCatalog();
-        fetchFavorites();
-    }, [token]);
+        if (token) {
+            fetch('http://localhost:8080/api/favorites', {
+                headers: { 'Authorization': `Bearer ${token}` },
+                signal: controller.signal,
+            })
+                .then((res) => {
+                    if (res.ok) return res.json();
+                    if (res.status === 401) onLogout();
+                    return null;
+                })
+                .then((data) => data && setFavorites(data))
+                .catch(logError);
+        }
+
+        return () => controller.abort();
+    }, [token, onLogout]);
 
     const handleInputChange = (e) => {
         const val = e.target.value;

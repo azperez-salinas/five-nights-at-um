@@ -14,32 +14,28 @@ export default function Favorites({ session, onLogout, onNavigate }) {
         setTimeout(() => setToastMsg(''), 3000);
     };
 
-    const fetchFavorites = async () => {
-        try {
-            const res = await fetch('http://localhost:8080/api/favorites', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setFavorites(data);
-            } else if (res.status === 401) {
-                onLogout();
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
+    // El estado se actualiza solo en los callbacks del fetch (nunca de forma
+    // sincrona en el efecto) y el request se cancela si cambia el token
     useEffect(() => {
-        const init = async () => {
-            setLoading(true);
-            await fetchFavorites();
-            setLoading(false);
-        };
-        init();
-    }, [token]);
+        const controller = new AbortController();
+
+        fetch('http://localhost:8080/api/favorites', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            signal: controller.signal,
+        })
+            .then((res) => {
+                if (res.ok) return res.json();
+                if (res.status === 401) onLogout();
+                return null;
+            })
+            .then((data) => data && setFavorites(data))
+            .catch((err) => {
+                if (err.name !== 'AbortError') console.error(err);
+            })
+            .finally(() => setLoading(false));
+
+        return () => controller.abort();
+    }, [token, onLogout]);
 
     const handleToggleFavorite = async (book) => {
         const isFav = favorites.some((f) => f.id === book.id);

@@ -4,6 +4,7 @@ import BookDetail from './BookDetail';
 import Catalog from './Catalog';
 import Favorites from './Favorites';
 import Login from './Login';
+import MyLibrary from './MyLibrary';
 import Profile from './Profile';
 import Register from './Register';
 import BookSearch from './BookSearch'
@@ -172,6 +173,16 @@ function App() {
       />
     );
   }
+  // R19: owners only; any other role falls through to the default screen
+  if (hash === '#mi-libreria' && session?.role === 'DUENO') {
+    return (
+      <MyLibrary
+        session={session}
+        onUnauthorized={handleUnauthorized}
+        onLogout={handleLogout}
+      />
+    );
+  }
   if (hash === '#buscar') {
     return (
       <BookSearch
@@ -183,7 +194,7 @@ function App() {
     );
   }
 
-  const needsLogin = hash === '#favoritos' || hash === '#admin' || hash === '#cambiar-password';
+  const needsLogin = hash === '#favoritos' || hash === '#admin' || hash === '#cambiar-password' || hash === '#mi-libreria';
   if (hash === '#login' || (needsLogin && !session)) {
     return (
       <Login

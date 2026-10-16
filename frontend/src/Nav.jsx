@@ -51,6 +51,9 @@ export default function Nav({ active, session, onLogout }) {
                     {session ? (
                         <>
                             <a href="#favoritos" className={itemClass('favoritos')}>FAVORITOS</a>
+                            {session.role === 'DUENO' && (
+                                <a href="#mi-libreria" className={itemClass('mi-libreria')}>MI LIBRERÍA</a>
+                            )}
                             <a href="#perfil" className={itemClass('perfil')}>
                                 {session.username.toUpperCase()}
                             </a>

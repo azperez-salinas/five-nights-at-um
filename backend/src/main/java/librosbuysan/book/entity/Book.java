@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import librosbuysan.library.entity.Library;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * Catalogo de libros disponibles en la plataforma.
@@ -26,6 +27,7 @@ import org.hibernate.annotations.ColumnDefault;
  * ya que el dueño debera cargar los datos por csv
  */
 @Entity
+@DynamicUpdate
 @Table(name = "books")
 public class Book {
 

@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import librosbuysan.user.entity.User;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * Una libreria pertenece a un unico dueno (relacion 1 a 1).
@@ -24,6 +25,7 @@ import org.hibernate.annotations.ColumnDefault;
  * ademas dejaria esas columnas siempre en null para los usuarios COMPRADOR.
  */
 @Entity
+@DynamicUpdate
 @Table(name = "librarys")
 public class Library {
 

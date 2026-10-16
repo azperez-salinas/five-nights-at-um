@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import BookCover from './BookCover';
 import Nav from './Nav';
+import { useLanguage } from './language';
 import './Catalog.css';
 
 export default function BookDetail({ bookId, backHref, backLabel, navActive, session, onLogout }) {
+    const { t } = useLanguage();
     const [book, setBook] = useState(null);
     // Id whose request failed, with the reason: 'not-found' or 'error'
     const [failure, setFailure] = useState(null);
@@ -36,7 +38,9 @@ export default function BookDetail({ bookId, backHref, backLabel, navActive, ses
             <Nav active={navActive} session={session} onLogout={onLogout} />
 
             <main className="catalog-main">
-                <a href={backHref} className="book-detail-back">← VOLVER A {backLabel}</a>
+                <a href={backHref} className="book-detail-back">
+                    {t('book_back_to')} {navActive === 'buscar' ? t('nav_search') : navActive === 'favoritos' ? t('nav_favorites') : t('nav_featured')}
+                </a>
 
                 {failed === 'not-found' && (
                     <p className="catalog-status">El libro que buscás no existe o no está disponible.</p>
@@ -48,7 +52,7 @@ export default function BookDetail({ bookId, backHref, backLabel, navActive, ses
                     </div>
                 )}
 
-                {!failed && !current && <p className="catalog-status">Cargando libro...</p>}
+                {!failed && !current && <p className="catalog-status">{t('book_loading')}</p>}
 
                 {current && (
                     <article className="book-detail">
@@ -61,11 +65,11 @@ export default function BookDetail({ bookId, backHref, backLabel, navActive, ses
                             <dl className="book-detail-meta">
                                 <div>
                                     {/* Seed dates are year-only (YYYY-01-01) */}
-                                    <dt>Año</dt>
+                                    <dt>{t('book_year')}</dt>
                                     <dd>{current.fechaPublicacion?.slice(0, 4)}</dd>
                                 </div>
                                 <div>
-                                    <dt>Páginas</dt>
+                                    <dt>{t('book_pages')}</dt>
                                     <dd>{current.cantidadPaginas}</dd>
                                 </div>
                                 <div>

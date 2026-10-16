@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import BookCover from './BookCover';
 import Nav from './Nav';
+import { useLanguage } from './language';
 import './Favorites.css';
 
 export default function Favorites({ session, onLogout, onNavigate }) {
+    const { t } = useLanguage();
     const token = session.token;
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -95,9 +97,9 @@ export default function Favorites({ session, onLogout, onNavigate }) {
                 <div className="favorites-editorial-wrapper">
 
                     <div className="favorites-header-section">
-                        <h1 className="favorites-main-headline">Mis Libros Favoritos</h1>
+                        <h1 className="favorites-main-headline">{t('fav_title')}</h1>
                         <p className="favorites-lead-desc">
-                            Tus obras seleccionadas y lecturas pendientes guardadas en tu cuenta.
+                            {t('fav_desc')}
                         </p>
 
                     </div>
@@ -105,7 +107,7 @@ export default function Favorites({ session, onLogout, onNavigate }) {
                     {loading && (
                         <div className="favorites-loading-state">
                             <div className="editorial-spinner"></div>
-                            <p>Consultando catálogo editorial...</p>
+                            <p>{t('fav_loading')}</p>
                         </div>
                     )}
 
@@ -113,15 +115,15 @@ export default function Favorites({ session, onLogout, onNavigate }) {
                         <div>
                             {favorites.length === 0 ? (
                                 <div className="favorites-empty-card">
-                                    <h3 className="empty-title">Aún no tenés libros guardados</h3>
+                                    <h3 className="empty-title">{t('fav_empty_title')}</h3>
                                     <p className="empty-desc">
-                                        Mirá los destacados y tocá el corazón para armar tu lista de lecturas preferidas.
+                                        {t('fav_empty_desc')}
                                     </p>
                                     <button
                                         className="editorial-action-btn"
                                         onClick={() => onNavigate('catalogo')}
                                     >
-                                        VER DESTACADOS
+                                        {t('fav_btn_catalog')}
                                     </button>
                                 </div>
                             ) : (

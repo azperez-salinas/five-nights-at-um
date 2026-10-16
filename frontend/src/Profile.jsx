@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import Nav from './Nav';
+import { useLanguage } from './language';
 import './Register.css';
 
 const API_URL = 'http://localhost:8080/api/users/me';
 
 export default function Profile({ session, onUnauthorized, onLogout }) {
+    const { t } = useLanguage();
     const [profile, setProfile] = useState(null);
     const [loadFailed, setLoadFailed] = useState(false);
     const [editing, setEditing] = useState(false);
@@ -121,7 +123,7 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
             <main className="booksaw-main">
                 <div className="register-card">
                     <div className="card-header">
-                        <h2 className="card-title">Mi perfil</h2>
+                        <h2 className="card-title">{t('profile_title')}</h2>
                     </div>
 
                     {!session && (
@@ -136,7 +138,7 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
                         </div>
                     )}
 
-                    {session && !profile && !loadFailed && <p className="card-subtitle">Cargando perfil...</p>}
+                    {session && !profile && !loadFailed && <p className="card-subtitle">{t('profile_loading')}</p>}
 
                     {errorMsg && (
                         <div className="alert-box alert-error" role="alert">
@@ -153,10 +155,10 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
 
                     {profile && !editing && (
                         <div className="register-form">
-                            <p><strong>Usuario:</strong> {profile.username}</p>
-                            <p><strong>Correo electrónico:</strong> {profile.email}</p>
+                            <p><strong>{t('profile_user')}</strong> {profile.username}</p>
+                            <p><strong>{t('profile_email')}</strong> {profile.email}</p>
                             <button type="button" className="btn-submit-pill" onClick={startEditing}>
-                                CAMBIAR CONTRASEÑA
+                                {t('profile_change_pass')}
                             </button>
                         </div>
                     )}
@@ -164,7 +166,7 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
                     {profile && editing && (
                         <form onSubmit={handleSubmit} className="register-form" noValidate>
                             <div className="input-group">
-                                <label htmlFor="currentPassword">Contraseña actual</label>
+                                <label htmlFor="currentPassword">{t('profile_current_pass')}</label>
                                 <input
                                     id="currentPassword"
                                     type="password"
@@ -175,11 +177,11 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
                             </div>
 
                             <div className="input-group">
-                                <label htmlFor="newPassword">Nueva contraseña</label>
+                                <label htmlFor="newPassword">{t('profile_new_pass')}</label>
                                 <input
                                     id="newPassword"
                                     type="password"
-                                    placeholder="Mínimo 8 caracteres"
+                                    placeholder={t('profile_min_chars')}
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     autoComplete="new-password"
@@ -187,7 +189,7 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
                             </div>
 
                             <div className="input-group">
-                                <label htmlFor="confirmPassword">Confirmar nueva contraseña</label>
+                                <label htmlFor="confirmPassword">{t('profile_confirm_pass')}</label>
                                 <input
                                     id="confirmPassword"
                                     type="password"
@@ -198,10 +200,10 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
                             </div>
 
                             <button type="submit" className="btn-submit-pill" disabled={saving}>
-                                {saving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                                {saving ? t('profile_saving') : t('profile_save_btn')}
                             </button>
                             <button type="button" className="btn-cancel" onClick={cancelEditing} disabled={saving}>
-                                Cancelar
+                                {t('profile_cancel')}
                             </button>
                         </form>
                     )}

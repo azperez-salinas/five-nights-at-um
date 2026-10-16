@@ -20,7 +20,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 class KnownAuthorizationGapsIntegrationTest extends IntegrationTestBase {
 
 
-//    //TODO esto ya esta solucionado
 //    @Disabled("GAP-1: JwtAuthenticationFilter no consulta User.enabled; un token de una cuenta "
 //            + "deshabilitada sigue valido hasta que expira (60 min para COMPRADOR). "
 //            + "Fix: validar enabled en el filtro, o acortar/revocar tokens.")
@@ -36,7 +35,6 @@ class KnownAuthorizationGapsIntegrationTest extends IntegrationTestBase {
                 .andExpect(status().isUnauthorized());
     }
 
-    //TODO esto ya esta solucionado
 //    @Disabled("GAP-2: SecurityConfig usa GET /api/books/** (comodin). Cualquier GET futuro bajo "
 //            + "/api/books/ nacera publico sin que nadie lo decida. Fix: listar rutas exactas "
 //            + "(/api/books, /api/books/search, /api/books/{id}).")

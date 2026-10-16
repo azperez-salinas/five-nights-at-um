@@ -121,6 +121,19 @@ class JwtServiceTest {
     }
 
     @Test
+    void elTokenLlevaLaVersionDeCredencialesYCambiaConLaPassword() {
+        // RS28: con la version el filtro detecta tokens emitidos antes de un cambio de contrasena
+        User comprador = usuario(User.Role.COMPRADOR, 1L);
+        Claims antes = jwtService.parseAndValidate(jwtService.generateToken(comprador));
+
+        comprador.changePasswordHash("otro-hash");
+        Claims despues = jwtService.parseAndValidate(jwtService.generateToken(comprador));
+
+        assertThat(antes.get(JwtService.TOKEN_VERSION_CLAIM, Integer.class)).isZero();
+        assertThat(despues.get(JwtService.TOKEN_VERSION_CLAIM, Integer.class)).isEqualTo(1);
+    }
+
+    @Test
     void losTokensDeCompradoresYDuenosNormalesNoLlevanLaMarca() {
         assertThat(jwtService.parseAndValidate(jwtService.generateToken(usuario(User.Role.COMPRADOR, 1L)))
                 .get(JwtService.PASSWORD_CHANGE_CLAIM)).isNull();

@@ -75,6 +75,18 @@ class DisabledAccountIntegrationTest extends IntegrationTestBase {
         mvc.perform(get("/api/books/mine").header(AUTHORIZATION, tokenDueno)).andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void elTokenDeUnCompradorDeshabilitadoNoLeeNiModificaFavoritos() throws Exception {
+        // Ex GAP-1 de KnownAuthorizationGapsIntegrationTest, resuelto por R22
+        String token = bearer(compradorA);
+        deshabilitar(compradorA);
+
+        mvc.perform(get(FAVORITOS).header(AUTHORIZATION, token)).andExpect(status().isUnauthorized());
+        mvc.perform(post(FAVORITOS + "/{id}", libroCentral.getId()).header(AUTHORIZATION, token))
+                .andExpect(status().isUnauthorized());
+        assertThat(favoriteRepo.count()).as("no se debe haber agregado el favorito").isZero();
+    }
+
     // ---------- cada rol ----------
 
     @Test

@@ -49,6 +49,17 @@ public class User {
     @Column(nullable = false)
     private boolean mustChangePassword = false;
 
+    // RS28: version de las credenciales. Cada token lleva la version vigente al
+    // emitirse (claim "tv" en JwtService) y JwtAuthenticationFilter rechaza los
+    // que no coinciden con la actual. Al cambiar la contrasena se incrementa, asi
+    // que todos los tokens emitidos ANTES del cambio dejan de servir aunque no
+    // hayan expirado. Se usa un contador y no un instante porque el iat del JWT
+    // tiene precision de segundos: un token emitido en el mismo segundo que el
+    // cambio no se podria distinguir.
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private int tokenVersion = 0;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -124,9 +135,15 @@ public class User {
         return mustChangePassword;
     }
 
-    // Una contrasena elegida por el propio usuario deja de ser temporal (R18)
+    public int getTokenVersion() {
+        return tokenVersion;
+    }
+
+    // Una contrasena elegida por el propio usuario deja de ser temporal (R18).
+    // RS28: ademas invalida todos los tokens emitidos con la contrasena anterior.
     public void changePasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
         this.mustChangePassword = false;
+        this.tokenVersion++;
     }
 }

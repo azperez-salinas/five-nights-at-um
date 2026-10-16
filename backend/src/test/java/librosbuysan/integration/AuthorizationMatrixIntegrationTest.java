@@ -57,6 +57,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * endpoints protegidos con tokens mal formados, mal firmados, sin firma,
  * expirados, revocados por logout y emitidos antes de un cambio de contrasena,
  * y exige 401 en todos.
+ *
+ * RX40: esta matriz es la base de las pruebas de control de acceso (roles,
+ * rechazo sin autorizacion valida y completitud de rutas). Los intentos de
+ * esquivar el control con variantes de la ruta o del verbo estan en
+ * AccessControlBypassIntegrationTest.
  */
 class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
 

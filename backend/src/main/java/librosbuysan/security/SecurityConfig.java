@@ -149,7 +149,11 @@ public class SecurityConfig {
                         // nuevo queda inaccesible hasta que se le asigne un
                         // rol aca. Sin token responde 401; con token, 403.
                         .anyRequest().denyAll())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocationService, userRepo), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocationService, userRepo), UsernamePasswordAuthenticationFilter.class)
+                // RS11: justo despues del JWT, cuando el principal ya esta
+                // resuelto, para que la identidad quede en el MDC de los logs
+                // de todas las capas siguientes (incluidos los 401/403).
+                .addFilterAfter(new RequestIdentityMdcFilter(), JwtAuthenticationFilter.class);
         return http.build();
     }
 

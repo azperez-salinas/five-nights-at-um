@@ -1,0 +1,4 @@
+# Los scripts de db/ corren dentro de un contenedor Linux: con finales de linea
+# CRLF (Windows) fallan con "\r: command not found". Forzar LF siempre.
+*.sh        text eol=lf
+db/**       text eol=lf

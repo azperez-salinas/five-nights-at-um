@@ -3,24 +3,20 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_ADMIN_USER:?Falta DB_ADMIN_USER en .env}
+      POSTGRES_PASSWORD: ${DB_ADMIN_PASSWORD:?Falta DB_ADMIN_PASSWORD en .env}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 10
-    # Puerto expuesto solo para desarrollo local (poder conectarse con
-    # DBeaver/psql desde el host). En un ambiente real esto no deberia
-    # exponerse: la base solo tendria que ser alcanzable desde la red
-    # interna de compose.
-    #
-    # El puerto del HOST es configurable via DB_PORT (default 5445, no el
-    # 5432 estandar de Postgres) 
     ports:
-      - "${DB_PORT:-5445}:5432"
+      - "127.0.0.1:${DB_PORT:-5445}:5432"
   backend:
     build: ./backend
     environment:
@@ -39,7 +35,7 @@ services:
       - audit_logs:/var/log/app/audit
     ports:
       - "8080:8080"
-      - "5005:5005"
+      - "127.0.0.1:5005:5005"
     depends_on:
       db:
         condition: service_healthy

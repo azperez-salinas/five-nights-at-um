@@ -4,19 +4,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Stream;
+import javax.crypto.SecretKey;
+import librosbuysan.security.JwtService;
 import librosbuysan.support.IntegrationTestBase;
+import librosbuysan.user.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -39,6 +52,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * ultima oracion de R37 ("detectar que una operacion protegida quede
  * accesible sin verificacion"): lee los controllers reales y falla si alguien
  * agrega un endpoint sin escribir aca su politica esperada.
+ *
+ * RS30: "unTokenInvalidoEsRechazadoEnCadaEndpointProtegido" recorre todos los
+ * endpoints protegidos con tokens mal formados, mal firmados, sin firma,
+ * expirados, revocados por logout y emitidos antes de un cambio de contrasena,
+ * y exige 401 en todos.
  */
 class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
 
@@ -149,6 +167,14 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             new Caso("POST", "/api/books", "/api/books", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("PATCH", "/api/books/{id}", "/api/books/{id}", "{}",
                     NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            // RS30 (ex GAP-2): solo los GET publicos declarados uno por uno son
+            // publicos. Un GET nuevo bajo /api/books no hereda el permitAll.
+            new Caso("GET", "/api/books/{id}/reservas", "/api/books/{id}/reservas", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/books/search/avanzada", "/api/books/search/avanzada", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/books/mine/exportar", "/api/books/mine/exportar", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             // Acceso a cuentas AJENAS: solo existe /me (ni siquiera el admin puede listar usuarios)
             new Caso("GET", "/api/users/{id}", "/api/users/1", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("GET", "/api/users", "/api/users", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
@@ -209,6 +235,105 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             case NO_AUTENTICADO_401 -> assertThat(status).as(contexto + " (esperaba 401)").isEqualTo(401);
             case PROHIBIDO_403 -> assertThat(status).as(contexto + " (esperaba 403)").isEqualTo(403);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // RS30: token invalido en CADA endpoint protegido
+    // ------------------------------------------------------------------
+
+    /**
+     * Formas de presentar un token que NO debe autorizar nada. VALIDO es el
+     * control positivo: el mismo token armado a mano pero sin ataque tiene que
+     * pasar la autorizacion; si no, los demas casos no probarian nada.
+     */
+    enum TokenPresentado {
+        VALIDO, MAL_FORMADO, FIRMADO_CON_OTRA_CLAVE, SIN_FIRMA_ALG_NONE, EXPIRADO,
+        REVOCADO_POR_LOGOUT, EMITIDO_ANTES_DE_CAMBIAR_LA_PASSWORD
+    }
+
+    @Value("${app.jwt.secret}")
+    private String secret;
+
+    // Endpoints protegidos = los que rechazan al anonimo. Para cada uno se usa
+    // un usuario cuyo ROL si tiene permiso: asi el 401 se debe solo al token.
+    static Stream<Arguments> endpointsProtegidosPorToken() {
+        return ENDPOINTS_DE_LA_APP.stream()
+                .filter(caso -> caso.anonimo() == NO_AUTH)
+                .flatMap(caso -> Stream.of(TokenPresentado.values()).map(token -> Arguments.of(caso, token)));
+    }
+
+    @ParameterizedTest(name = "{0} con token {1}")
+    @MethodSource("endpointsProtegidosPorToken")
+    void unTokenInvalidoEsRechazadoEnCadaEndpointProtegido(Caso caso, TokenPresentado tipo) throws Exception {
+        Quien quien = Stream.of(Quien.COMPRADOR, Quien.DUENO, Quien.DUENO_PENDIENTE, Quien.ADMIN)
+                .filter(q -> caso.para(q) == OK).findFirst().orElseThrow();
+        User usuario = switch (quien) {
+            case COMPRADOR -> compradorA;
+            case DUENO -> duenoCentral;
+            case DUENO_PENDIENTE -> duenoPendiente;
+            default -> admin;
+        };
+        Instant ahora = Instant.now();
+        String token = switch (tipo) {
+            case VALIDO, REVOCADO_POR_LOGOUT, EMITIDO_ANTES_DE_CAMBIAR_LA_PASSWORD ->
+                    tokenFirmado(usuario, claveReal(), ahora.plusSeconds(600));
+            case MAL_FORMADO -> "esto.no.es-un-jwt";
+            case FIRMADO_CON_OTRA_CLAVE -> tokenFirmado(usuario, Keys.hmacShaKeyFor(new byte[48]), ahora.plusSeconds(600));
+            case SIN_FIRMA_ALG_NONE -> b64("{\"alg\":\"none\"}") + "." + b64("{\"sub\":\"" + usuario.getId()
+                    + "\",\"role\":\"" + usuario.getRole() + "\",\"jti\":\"x\",\"exp\":"
+                    + ahora.plusSeconds(600).getEpochSecond() + "}") + ".";
+            case EXPIRADO -> tokenFirmado(usuario, claveReal(), ahora.minusSeconds(60));
+        };
+        if (tipo == TokenPresentado.REVOCADO_POR_LOGOUT) {
+            int logout = mvc.perform(request(HttpMethod.POST, "/api/auth/logout")
+                    .header(AUTHORIZATION, "Bearer " + token)).andReturn().getResponse().getStatus();
+            assertThat(logout).as("el logout previo debe funcionar").isEqualTo(204);
+        }
+        if (tipo == TokenPresentado.EMITIDO_ANTES_DE_CAMBIAR_LA_PASSWORD) {
+            // Mismo efecto que User.changePasswordHash: la version vigente avanza (RS28)
+            ReflectionTestUtils.setField(usuario, "tokenVersion", usuario.getTokenVersion() + 1);
+            userRepo.saveAndFlush(usuario);
+        }
+
+        String idLibro = String.valueOf(libroCentral.getId());
+        MockHttpServletRequestBuilder req = request(HttpMethod.valueOf(caso.metodo()),
+                caso.ruta().replace("{id}", idLibro).replace("{bookId}", idLibro))
+                .header(AUTHORIZATION, "Bearer " + token);
+        if (caso.body() != null) {
+            req.contentType(MediaType.APPLICATION_JSON).content(caso.body());
+        }
+
+        int status = mvc.perform(req).andReturn().getResponse().getStatus();
+        String contexto = caso + " como " + quien + " con token " + tipo + " devolvio " + status;
+        if (tipo == TokenPresentado.VALIDO) {
+            assertThat(status).as(contexto + " (control positivo: esperaba pasar la autorizacion)")
+                    .isNotIn(401, 403);
+        } else {
+            assertThat(status).as(contexto + " (esperaba 401)").isEqualTo(401);
+        }
+    }
+
+    private SecretKey claveReal() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    }
+
+    // Mismos claims que JwtService.generateToken, con clave y expiracion a eleccion
+    private static String tokenFirmado(User usuario, SecretKey clave, Instant expiracion) {
+        var builder = Jwts.builder()
+                .subject(String.valueOf(usuario.getId()))
+                .claim(JwtService.ROLE_CLAIM, usuario.getRole().name())
+                .claim(JwtService.TOKEN_VERSION_CLAIM, usuario.getTokenVersion())
+                .id(UUID.randomUUID().toString())
+                .issuedAt(Date.from(expiracion.minusSeconds(900)))
+                .expiration(Date.from(expiracion));
+        if (usuario.isMustChangePassword()) {
+            builder.claim(JwtService.PASSWORD_CHANGE_CLAIM, true);
+        }
+        return builder.signWith(clave, Jwts.SIG.HS256).compact();
+    }
+
+    private static String b64(String json) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
     }
 
     // ------------------------------------------------------------------

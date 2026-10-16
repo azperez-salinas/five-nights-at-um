@@ -2,7 +2,6 @@ package librosbuysan.book.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -79,11 +78,10 @@ public class BookController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CsvImportResult importCsv(
             @RequestPart("file") MultipartFile file,
-            Authentication authentication) {
-        AuthenticatedUser user =
-                (AuthenticatedUser) authentication.getPrincipal();
-
-        return csvImportService.importCsv(user.id(), file);
+            @AuthenticationPrincipal AuthenticatedUser principal) {
+        // RS11: mismo criterio que el resto de los endpoints, la libreria
+        // destino sale del principal del token.
+        return csvImportService.importCsv(principal.id(), file);
     }
 
     // R18/F18: catalogo propio del dueno autenticado. La libreria sale del

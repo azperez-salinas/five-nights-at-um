@@ -1,0 +1,109 @@
+.my-library-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.my-library-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--booksaw-border);
+}
+
+/* Shrinks the shared 3D cover into a thumbnail */
+.my-library-cover {
+    flex: 0 0 72px;
+}
+
+.my-library-cover .book-3d-cover {
+    height: 100px;
+    margin-bottom: 0;
+}
+
+.my-library-cover .book-3d-body,
+.my-library-cover .book-3d-border {
+    padding: 4px;
+}
+
+.my-library-cover .book-3d-tag,
+.my-library-cover .book-3d-author {
+    display: none;
+}
+
+.my-library-cover .book-3d-title {
+    font-size: 8px;
+}
+
+.my-library-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.my-library-isbn {
+    font-size: 12px;
+    color: var(--booksaw-muted);
+    margin: 4px 0 0;
+}
+
+.my-library-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.my-library-actions .btn-submit-pill {
+    margin-top: 0;
+    padding: 10px 20px;
+}
+
+.btn-danger {
+    background-color: #9B2121;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: #7A1919;
+}
+
+.btn-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.my-library-dialog {
+    width: min(480px, calc(100vw - 32px));
+    /* the global "* { margin: 0 }" reset kills the native dialog centering */
+    margin: auto;
+    border: none;
+    border-radius: 10px;
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+.my-library-dialog::backdrop {
+    background: rgba(30, 27, 24, 0.5);
+}
+
+.my-library-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+@media (max-width: 640px) {
+    .my-library-row {
+        flex-wrap: wrap;
+    }
+
+    .my-library-actions {
+        width: 100%;
+    }
+}

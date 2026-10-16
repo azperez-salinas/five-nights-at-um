@@ -9,6 +9,7 @@ import java.util.Set;
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import librosbuysan.auth.dto.AuthDtos.AuthResponse;
 import librosbuysan.auth.dto.AuthDtos.LoginRequest;
 import librosbuysan.auth.dto.AuthDtos.RegisterRequest;
 import librosbuysan.security.AuthenticatedUser;
+import librosbuysan.security.AuthenticationAuditLogger;
 import librosbuysan.security.JwtService;
 import librosbuysan.user.entity.User;
 import librosbuysan.user.repository.UserRepo;
@@ -49,6 +51,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final TokenRevocationService revocationService;
     private final Validator validator;
+    private final AuthenticationAuditLogger auditLogger;
     private final SecureRandom secureRandom = new SecureRandom();
 
     // Hash contra el que se verifica cuando el usuario no existe, para que el
@@ -57,10 +60,18 @@ public class AuthService {
 
     public AuthService(UserRepo userRepo, JwtService jwtService,
                        TokenRevocationService revocationService, Validator validator) {
+        this(userRepo, jwtService, revocationService, validator, new AuthenticationAuditLogger());
+    }
+
+    @Autowired
+    public AuthService(UserRepo userRepo, JwtService jwtService,
+                       TokenRevocationService revocationService, Validator validator,
+                       AuthenticationAuditLogger auditLogger) {
         this.userRepo = userRepo;
         this.jwtService = jwtService;
         this.revocationService = revocationService;
         this.validator = validator;
+        this.auditLogger = auditLogger;
         this.dummyHash = createDummyHash();
     }
 
@@ -119,11 +130,13 @@ public class AuthService {
                 String reason = user == null ? "usuario_inexistente"
                         : !user.isEnabled() ? "usuario_deshabilitado" : "password_incorrecta";
                 log.warn("Login fallido: username={} motivo={}", username, reason);
+                auditLogger.loginFailed(username, reason);
                 // Mismo mensaje generico en los tres casos
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, INVALID_CREDENTIALS);
             }
 
             log.info("Login exitoso: username={}", username);
+            auditLogger.loginSuccess(user.getUsername(), user.getRole().name());
             return buildResponse(user);
         } finally {
             if (password != null) {
@@ -144,6 +157,7 @@ public class AuthService {
         }
         revocationService.revoke(principal.tokenId(), principal.tokenExpiresAt());
         log.info("Logout exitoso: userId={}", principal.id());
+        auditLogger.logout(principal.id());
     }
 
     /**

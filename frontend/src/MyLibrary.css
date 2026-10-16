@@ -243,3 +243,131 @@
     color: #7A5410;
     border: 1px solid #F1DDB4;
 }
+
+/* R13: library metrics */
+.library-metrics {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--booksaw-border);
+}
+
+.library-metrics-grid {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 3fr;
+    gap: 24px;
+    align-items: start;
+    margin-top: 16px;
+}
+
+.metric-tile {
+    align-self: start;
+    padding: 20px 24px;
+    border: 1px solid var(--booksaw-border);
+    border-radius: 10px;
+    background: var(--booksaw-card-bg);
+}
+
+.metric-tile p {
+    margin: 0;
+}
+
+.metric-tile-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--booksaw-muted);
+}
+
+.metric-tile .metric-tile-value {
+    margin: 8px 0 4px;
+    font-family: var(--font-serif);
+    font-size: 44px;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--booksaw-dark);
+}
+
+.metric-tile-hint {
+    font-size: 13px;
+    color: var(--booksaw-muted);
+}
+
+.metric-ranking-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--booksaw-muted);
+    margin: 0 0 12px;
+}
+
+.metric-bars {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.metric-bar-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) 3fr;
+    gap: 16px;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.metric-bar-label {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.metric-bar-title,
+.metric-bar-author {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.metric-bar-title {
+    font-size: 14px;
+    color: var(--booksaw-dark);
+}
+
+.metric-bar-author {
+    font-size: 12px;
+    color: var(--booksaw-muted);
+}
+
+.metric-bar-track {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.metric-bar {
+    height: 14px;
+    min-width: 2px;
+    border-radius: 0 4px 4px 0;
+    background: var(--booksaw-gold-dark);
+}
+
+.metric-bar-row:hover .metric-bar {
+    background: var(--booksaw-dark);
+}
+
+.metric-bar-value {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--booksaw-dark);
+}
+
+@media (max-width: 640px) {
+    .library-metrics-grid,
+    .metric-bar-row {
+        grid-template-columns: 1fr;
+    }
+}

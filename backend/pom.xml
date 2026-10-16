@@ -103,33 +103,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <!-- Flag de preview features del compilador: el proyecto usa
-                 "unnamed variables" (catch (Excepcion _)) en varios catch
-                 donde no hace falta leer la excepcion. Esa sintaxis es
-                 preview feature hasta Java 22; en Java 21 (java.version de
-                 arriba) hay que habilitarla explicitamente, tanto para
-                 compilar como para correr los tests (ver
-                 maven-surefire-plugin mas abajo) y el jar final (ver
-                 Dockerfile). -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <compilerArgs>
-                        <arg>--enable-preview</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <!-- @{argLine} (no ${argLine}): asi se combina con el
-                         argLine que jacoco-maven-plugin inyecta para el
-                         agente de cobertura, en vez de pisarlo. -->
-                    <argLine>@{argLine} --enable-preview</argLine>
-                </configuration>
-            </plugin>
             <plugin> <!-- para testing -->
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>

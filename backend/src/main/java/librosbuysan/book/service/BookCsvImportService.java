@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -139,7 +138,7 @@ public class BookCsvImportService {
                 }
             }
 
-        } catch (IOException | IllegalArgumentException _) {
+        } catch (IOException | IllegalArgumentException ignored) {
             throw badRequest("No se pudo procesar el archivo CSV");
         }
 
@@ -266,7 +265,7 @@ public class BookCsvImportService {
             if (pages < 1) {
                 throw new NumberFormatException();
             }
-        } catch (NumberFormatException _) {
+        } catch (NumberFormatException ignored) {
             errors.add("Fila " + rowNumber
                     + ": cantidad_paginas debe ser un entero positivo");
             valid = false;
@@ -278,7 +277,7 @@ public class BookCsvImportService {
             if (year < 1 || year > LocalDate.now(ZoneId.systemDefault()).getYear()) {
                 throw new NumberFormatException();
             }
-        } catch (NumberFormatException _) {
+        } catch (NumberFormatException ignored) {
             errors.add("Fila " + rowNumber
                     + ": anio debe ser un año válido no futuro");
             valid = false;

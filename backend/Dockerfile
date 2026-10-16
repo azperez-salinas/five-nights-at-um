@@ -19,7 +19,4 @@ COPY --from=build --chown=app:app /build/target/*.jar /app/app.jar
 
 USER app
 EXPOSE 8080
-# --enable-preview: el jar se compilo con preview features habilitadas
-# (ver pom.xml, "unnamed variables" en varios catch). Un jar compilado con
-# el preview bit activado no arranca sin este flag en runtime tambien.
-ENTRYPOINT ["java", "--enable-preview", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

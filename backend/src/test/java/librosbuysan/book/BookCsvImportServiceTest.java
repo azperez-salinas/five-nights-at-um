@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,6 +37,10 @@ class BookCsvImportServiceTest {
 
     @Mock
     private Library library;
+
+    // @Captor tipa el genérico sin el cast unchecked de ArgumentCaptor.forClass(List.class)
+    @Captor
+    private ArgumentCaptor<List<Book>> captor;
 
     @InjectMocks
     private BookCsvImportService service;
@@ -111,9 +116,6 @@ class BookCsvImportServiceTest {
                 + "9780156012195;200;\"Descripción B\";2001\n";
 
         service.importCsv(10L, csv(content));
-
-        ArgumentCaptor<List<Book>> captor =
-                ArgumentCaptor.forClass(List.class);
 
         verify(bookRepo).saveAll(captor.capture());
 

@@ -80,7 +80,7 @@ public class FavoriteService {
             favoriteRepo.save(new Favorite(user, book));
             log.info("Favorito agregado: userId={} bookId={}", userId, bookId);
             return AddResult.CREATED;
-        } catch (DataIntegrityViolationException _) {
+        } catch (DataIntegrityViolationException ignored) {
             // Carrera entre dos POST concurrentes del mismo usuario/libro:
             // el segundo choca contra la unique constraint. Se trata igual
             // que "ya existia", no como un error.

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import Nav from './Nav';
-import OwnLibrary from './OwnLibrary';
 import './Register.css';
 
 const API_URL = 'http://localhost:8080/api/users/me';
@@ -205,10 +204,6 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
                                 Cancelar
                             </button>
                         </form>
-                    )}
-
-                    {profile && session.role === 'DUENO' && (
-                        <OwnLibrary token={token} onUnauthorized={onUnauthorized} />
                     )}
                 </div>
             </main>

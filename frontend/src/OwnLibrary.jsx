@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const API_URL = 'http://localhost:8080/api/users/libreria';
 
-// R14: shown inside the profile for DUENO accounts only
-export default function OwnLibrary({ token, onUnauthorized }) {
+// R14: section at the bottom of MyLibrary to remove the owner's library (soft delete)
+export default function OwnLibrary({ token, onUnauthorized, onRemoved }) {
     const [library, setLibrary] = useState(null);
-    // 'loading' | 'ready' | 'none' | 'error'
-    const [status, setStatus] = useState('loading');
+    const [failed, setFailed] = useState(false);
+    const [confirmText, setConfirmText] = useState('');
     const [removing, setRemoving] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
-    const [successMsg, setSuccessMsg] = useState('');
+    const dialogRef = useRef(null);
+    const cancelRef = useRef(null);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -23,33 +24,28 @@ export default function OwnLibrary({ token, onUnauthorized }) {
                     onUnauthorized();
                     return null;
                 }
-                // 404: the owner has no enabled library (already removed)
-                if (response.status === 404) {
-                    setStatus('none');
-                    return null;
-                }
+                // 404: no active library, MyLibrary already explains it
+                if (response.status === 404) return null;
                 if (!response.ok) throw new Error();
                 return response.json();
             })
-            .then((data) => {
-                if (data) {
-                    setLibrary(data);
-                    setStatus('ready');
-                }
-            })
+            .then((data) => data && setLibrary(data))
             .catch((err) => {
-                if (err.name !== 'AbortError') setStatus('error');
+                if (err.name !== 'AbortError') setFailed(true);
             });
 
         return () => controller.abort();
     }, [token, onUnauthorized]);
 
-    const handleRemove = async () => {
-        const confirmed = window.confirm(
-            `¿Seguro que querés quitar "${library.nombre}" del sistema? Sus libros dejarán de verse en el catálogo.`
-        );
-        if (!confirmed) return;
+    const openDialog = () => {
+        setConfirmText('');
+        setErrorMsg('');
+        dialogRef.current.showModal();
+        cancelRef.current.focus();
+    };
 
+    const handleRemove = async (e) => {
+        e.preventDefault();
         setErrorMsg('');
         setRemoving(true);
         try {
@@ -58,14 +54,14 @@ export default function OwnLibrary({ token, onUnauthorized }) {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            if (response.status === 204) {
-                setLibrary(null);
-                setStatus('none');
-                setSuccessMsg('Tu librería se quitó del sistema.');
+            if (response.status === 204 || response.status === 404) {
+                // 404: it was already removed (e.g. from another tab), same end state
+                dialogRef.current.close();
+                onRemoved();
             } else if (response.status === 401) {
                 onUnauthorized();
             } else {
-                setErrorMsg('No pudimos quitar la librería. Intentalo de nuevo.');
+                setErrorMsg('No pudimos dar de baja la librería. Intentalo de nuevo.');
             }
         } catch {
             setErrorMsg('No pudimos conectar con el servicio. Por favor, intentá nuevamente en unos momentos.');
@@ -74,35 +70,66 @@ export default function OwnLibrary({ token, onUnauthorized }) {
         }
     };
 
+    if (failed) {
+        return <p className="card-subtitle">No pudimos cargar los datos de tu librería.</p>;
+    }
+    if (!library) return null;
+
+    const matches = confirmText.trim() === library.nombre;
+
     return (
-        <div className="register-form own-library">
-            <h3 className="card-title">Mi librería</h3>
+        <section className="remove-library" aria-labelledby="remove-library-section">
+            <div>
+                <h2 id="remove-library-section" className="csv-import-title">Dar de baja la librería</h2>
+                <p className="card-subtitle">Tu librería dejará de estar disponible en el sitio.</p>
+            </div>
+            <button type="button" className="btn-danger-outline" onClick={openDialog}>
+                Dar de baja
+            </button>
 
-            {errorMsg && (
-                <div className="alert-box alert-error" role="alert">
-                    <span>{errorMsg}</span>
-                </div>
-            )}
+            <dialog ref={dialogRef} className="my-library-dialog" aria-labelledby="remove-library-title">
+                <form onSubmit={handleRemove} className="register-form">
+                    <h2 id="remove-library-title" className="card-title">¿Dar de baja "{library.nombre}"?</h2>
+                    <p className="card-subtitle">
+                        Tu librería y sus libros dejarán de mostrarse. Esta acción no se puede deshacer.
+                    </p>
 
-            {successMsg && (
-                <div className="alert-box alert-success" role="alert">
-                    <span className="alert-icon">✓</span>
-                    <span>{successMsg}</span>
-                </div>
-            )}
+                    {errorMsg && (
+                        <div className="alert-box alert-error" role="alert">
+                            <span>{errorMsg}</span>
+                        </div>
+                    )}
 
-            {status === 'loading' && <p className="card-subtitle">Cargando librería...</p>}
-            {status === 'error' && <p className="card-subtitle">No pudimos cargar tu librería.</p>}
-            {status === 'none' && !successMsg && <p className="card-subtitle">No tenés una librería activa.</p>}
+                    <div className="input-group">
+                        <label htmlFor="confirm-library-name">
+                            Para confirmar, escribí <strong>{library.nombre}</strong>
+                        </label>
+                        <input
+                            id="confirm-library-name"
+                            type="text"
+                            autoComplete="off"
+                            value={confirmText}
+                            onChange={(e) => setConfirmText(e.target.value)}
+                            disabled={removing}
+                        />
+                    </div>
 
-            {status === 'ready' && library && (
-                <>
-                    <p><strong>Nombre:</strong> {library.nombre}</p>
-                    <button type="button" className="btn-cancel" onClick={handleRemove} disabled={removing}>
-                        {removing ? 'QUITANDO...' : 'QUITAR MI LIBRERÍA'}
-                    </button>
-                </>
-            )}
-        </div>
+                    <div className="my-library-dialog-actions">
+                        <button
+                            type="button"
+                            ref={cancelRef}
+                            className="btn-cancel"
+                            onClick={() => dialogRef.current.close()}
+                            disabled={removing}
+                        >
+                            Cancelar
+                        </button>
+                        <button type="submit" className="btn-danger" disabled={!matches || removing}>
+                            {removing ? 'DANDO DE BAJA...' : 'DAR DE BAJA'}
+                        </button>
+                    </div>
+                </form>
+            </dialog>
+        </section>
     );
 }

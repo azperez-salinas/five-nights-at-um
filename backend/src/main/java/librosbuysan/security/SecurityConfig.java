@@ -100,21 +100,21 @@ public class SecurityConfig {
                         // R17: importación masiva exclusiva de dueños.
                         // R18/F18: gestion de los libros propios, exclusiva
                         // del DUENO. GET /mine tiene que declararse ANTES de
-                        // las rutas publicas de abajo: Spring Security aplica
-                        // la primera regla que matchea. Que el libro
-                        // pertenezca a la libreria del dueno lo valida
-                        // BookService, no esta regla.
+                        // GET /api/books/{id} (permitAll de abajo): Spring
+                        // Security aplica la primera regla que matchea, y
+                        // {id} matchearia "mine" igual.
+                        // Que el libro pertenezca a la libreria del dueno lo
+                        // valida BookService, no esta regla.
                         .requestMatchers(HttpMethod.GET, "/api/books/mine").hasRole(ROLE_DUENO)
                         .requestMatchers(HttpMethod.PUT, "/api/books/*").hasRole(ROLE_DUENO)
                         .requestMatchers(HttpMethod.DELETE, "/api/books/*").hasRole(ROLE_DUENO)
-                        // GAP-2 (ya solucionado): antes era un comodin GET
-                        // /api/books/** que tambien dejaba publico cualquier
-                        // GET anidado futuro (ej. /api/books/1/reservas) sin
-                        // que nadie lo decidiera. Ahora son las tres rutas
-                        // exactas que expone BookController.
-                        .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/search").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/{id}").permitAll()
+                        // RS30 (ex GAP-2): las rutas GET publicas se listan una
+                        // por una en lugar de usar el comodin /api/books/**.
+                        // Asi un GET nuevo bajo /api/books (ej. /{id}/reservas)
+                        // cae en el denyAll de abajo hasta que alguien decida
+                        // explicitamente quien puede usarlo.
+                        .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/search", "/api/books/{id}")
+                                .permitAll()
                         // R10: el listado de librerias habilitadas alimenta el
                         // filtro del catalogo, que es publico como el catalogo.
                         .requestMatchers(HttpMethod.GET, "/api/librerias").permitAll()

@@ -72,20 +72,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Long userId = Long.valueOf(claims.getSubject());
         User.Role role = User.Role.valueOf(claims.get(JwtService.ROLE_CLAIM, String.class));
 
-        // R10/R22: el token es stateless y solo "recuerda" el estado de la cuenta
-        // y el rol al momento de emitirse. Si la cuenta se deshabilito o el rol
-        // cambio despues, la firma y la expiracion siguen siendo validas, asi que
-        // hay que consultar el estado actual. Va despues de las validaciones
-        // baratas (firma, revocacion, claims) para que un token invalido nunca
-        // llegue a la base de datos.
-        User.Role currentRole = userRepo.findRoleByIdAndEnabledTrue(userId).orElse(null);
-        if (currentRole == null) {
-            log.warn("Token de cuenta deshabilitada o inexistente rechazado: userId={}", userId);
-            return;
-        }
-        if (currentRole != role) {
-            log.warn("Token con rol ya no vigente rechazado: userId={}, rolToken={}, rolActual={}",
-                    userId, role, currentRole);
+        // R10/R22/RS28: el token es stateless y solo "recuerda" el rol, el
+        // estado de la cuenta y la version de las credenciales al momento de
+        // emitirse. Si el rol cambio (R10), la cuenta se deshabilito (R22), o
+        // la contrasena cambio despues (RS28), la firma y la expiracion siguen
+        // siendo validas, asi que hay que consultar el estado actual. Va
+        // despues de las validaciones baratas (firma, revocacion, claims) para
+        // que un token invalido nunca llegue a la base de datos. Los tokens
+        // sin el claim de version (emitidos antes de RS28) cuentan como
+        // version 0.
+        Integer tokenVersion = claims.get(JwtService.TOKEN_VERSION_CLAIM, Integer.class);
+        int version = tokenVersion == null ? 0 : tokenVersion;
+        if (!userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(userId, version, role)) {
+            log.warn("Token de cuenta deshabilitada, inexistente, con credenciales o rol ya no vigentes rechazado: "
+                    + "userId={}", userId);
             return;
         }
 

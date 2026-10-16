@@ -20,6 +20,9 @@ public class JwtService {
     // R18: presente (true) solo en tokens de duenos que todavia tienen la
     // contrasena temporal; JwtAuthenticationFilter les da un permiso acotado
     public static final String PASSWORD_CHANGE_CLAIM = "pwdChange";
+    // RS28: version de las credenciales del usuario al emitir el token
+    // (User.tokenVersion). Si cambia la contrasena, el token queda invalido.
+    public static final String TOKEN_VERSION_CLAIM = "tv";
 
     private static final int MIN_SECRET_BYTES = 32;
 
@@ -69,6 +72,7 @@ public class JwtService {
         var builder = Jwts.builder()
                 .subject(Long.toString(user.getId()))
                 .claim(ROLE_CLAIM, user.getRole().name())
+                .claim(TOKEN_VERSION_CLAIM, user.getTokenVersion())
                 .id(UUID.randomUUID().toString())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration));

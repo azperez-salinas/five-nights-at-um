@@ -27,7 +27,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import static org.mockito.Mockito.lenient;
-import java.util.Optional;
 import librosbuysan.user.repository.UserRepo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -55,11 +54,15 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
-        // Por defecto cada cuenta esta habilitada y su rol vigente coincide con
-        // el que usan los tokens "normales" de estos tests (ids 1/5/9)
-        lenient().when(userRepo.findRoleByIdAndEnabledTrue(1L)).thenReturn(Optional.of(User.Role.ADMIN));
-        lenient().when(userRepo.findRoleByIdAndEnabledTrue(5L)).thenReturn(Optional.of(User.Role.COMPRADOR));
-        lenient().when(userRepo.findRoleByIdAndEnabledTrue(9L)).thenReturn(Optional.of(User.Role.DUENO));
+        // Por defecto cada cuenta esta habilitada, con version 0 (sin cambios
+        // de contrasena, RS28) y su rol vigente coincide con el que usan los
+        // tokens "normales" de estos tests (ids 1/5/9)
+        lenient().when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(1L, 0, User.Role.ADMIN))
+                .thenReturn(true);
+        lenient().when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(5L, 0, User.Role.COMPRADOR))
+                .thenReturn(true);
+        lenient().when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(9L, 0, User.Role.DUENO))
+                .thenReturn(true);
         filter = new JwtAuthenticationFilter(jwtService, revocationService, userRepo);
         request = new MockHttpServletRequest("GET", "/api/favorites");
         response = new MockHttpServletResponse();
@@ -285,7 +288,36 @@ class JwtAuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(userRepo).findRoleByIdAndEnabledTrue(5L);
+        verify(userRepo).existsByIdAndEnabledTrueAndTokenVersionAndRole(5L, 0, User.Role.COMPRADOR);
+    }
+
+    @Test
+    void consultaLaVersionDeCredencialesQueLlevaElToken() throws Exception {
+        // RS28: el filtro compara la version del token con la vigente en la base
+        when(jwtService.parseAndValidate("token-v2"))
+                .thenReturn(base("5", "COMPRADOR").add(JwtService.TOKEN_VERSION_CLAIM, 2)
+                        .id(JTI).expiration(Date.from(EXPIRA)).build());
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(5L, 2, User.Role.COMPRADOR)).thenReturn(true);
+        request.addHeader("Authorization", "Bearer token-v2");
+
+        filter.doFilter(request, response, chain);
+
+        verify(userRepo).existsByIdAndEnabledTrueAndTokenVersionAndRole(5L, 2, User.Role.COMPRADOR);
+    }
+
+    @Test
+    void tokenEmitidoAntesDeUnCambioDePasswordNoAutentica() throws Exception {
+        // RS28: firma, expiracion y jti validos, pero la version del token ya no es la vigente
+        when(jwtService.parseAndValidate("token-viejo"))
+                .thenReturn(base("5", "COMPRADOR").add(JwtService.TOKEN_VERSION_CLAIM, 0)
+                        .id(JTI).expiration(Date.from(EXPIRA)).build());
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(5L, 0, User.Role.COMPRADOR)).thenReturn(false);
+        request.addHeader("Authorization", "Bearer token-viejo");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(autenticacion()).isNull();
+        assertThat(chain.getRequest()).as("la cadena debe continuar").isNotNull();
     }
 
     @Test
@@ -293,7 +325,7 @@ class JwtAuthenticationFilterTest {
         // Firma, expiracion y jti son validos: lo unico que cambio es el estado de la cuenta.
         // La cadena sigue para que SecurityConfig responda 401 (o deje pasar si la ruta es publica)
         when(jwtService.parseAndValidate("token-ok")).thenReturn(claims("5", "COMPRADOR"));
-        when(userRepo.findRoleByIdAndEnabledTrue(5L)).thenReturn(Optional.empty());
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(5L, 0, User.Role.COMPRADOR)).thenReturn(false);
         request.addHeader("Authorization", "Bearer token-ok");
 
         filter.doFilter(request, response, chain);
@@ -306,7 +338,7 @@ class JwtAuthenticationFilterTest {
     @ValueSource(strings = {"COMPRADOR", "DUENO", "ADMIN"})
     void ningunRolConservaAccesoSiSuCuentaSeDeshabilita(String rol) throws Exception {
         when(jwtService.parseAndValidate("token-ok")).thenReturn(claims("5", rol));
-        when(userRepo.findRoleByIdAndEnabledTrue(5L)).thenReturn(Optional.empty());
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(5L, 0, User.Role.valueOf(rol))).thenReturn(false);
         request.addHeader("Authorization", "Bearer token-ok");
 
         filter.doFilter(request, response, chain);
@@ -320,7 +352,7 @@ class JwtAuthenticationFilterTest {
         when(jwtService.parseAndValidate("token-pendiente"))
                 .thenReturn(base("9", "DUENO").add(JwtService.PASSWORD_CHANGE_CLAIM, true)
                         .id(JTI).expiration(Date.from(EXPIRA)).build());
-        when(userRepo.findRoleByIdAndEnabledTrue(9L)).thenReturn(Optional.empty());
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(9L, 0, User.Role.DUENO)).thenReturn(false);
         request.addHeader("Authorization", "Bearer token-pendiente");
 
         filter.doFilter(request, response, chain);
@@ -334,7 +366,7 @@ class JwtAuthenticationFilterTest {
     void tokenConRolDesactualizadoNoAutenticaPeroLaCadenaContinua() throws Exception {
         // El token todavia dice COMPRADOR, pero el rol vigente en la base ya es otro
         when(jwtService.parseAndValidate("token-viejo")).thenReturn(claims("5", "COMPRADOR"));
-        when(userRepo.findRoleByIdAndEnabledTrue(5L)).thenReturn(Optional.of(User.Role.DUENO));
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(5L, 0, User.Role.COMPRADOR)).thenReturn(false);
         request.addHeader("Authorization", "Bearer token-viejo");
 
         filter.doFilter(request, response, chain);
@@ -345,11 +377,11 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void unAscensoDeRolTampocoDejaUsarElTokenViejoConElRolAnterior() throws Exception {
-        // Mismo chequeo, en la otra direccion: el token todavia dice COMPRADOR
-        // pero el usuario ya fue promovido a DUENO. El claim desactualizado no
-        // debe autenticar con el rol viejo (ni con el nuevo, que no esta en el token)
+        // Mismo chequeo, en la otra direccion: el token todavia dice DUENO pero
+        // el usuario ya fue promovido a ADMIN. El claim desactualizado no debe
+        // autenticar con el rol viejo (ni con el nuevo, que no esta en el token)
         when(jwtService.parseAndValidate("token-viejo")).thenReturn(claims("9", "DUENO"));
-        when(userRepo.findRoleByIdAndEnabledTrue(9L)).thenReturn(Optional.of(User.Role.ADMIN));
+        when(userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(9L, 0, User.Role.DUENO)).thenReturn(false);
         request.addHeader("Authorization", "Bearer token-viejo");
 
         filter.doFilter(request, response, chain);
@@ -361,7 +393,6 @@ class JwtAuthenticationFilterTest {
     void elRolVigenteCoincidenteSiAutenticaNormalmente() throws Exception {
         // Control: si el rol de la base sigue igual al del token, nada cambia
         when(jwtService.parseAndValidate("token-ok")).thenReturn(claims("5", "COMPRADOR"));
-        when(userRepo.findRoleByIdAndEnabledTrue(5L)).thenReturn(Optional.of(User.Role.COMPRADOR));
         request.addHeader("Authorization", "Bearer token-ok");
 
         filter.doFilter(request, response, chain);

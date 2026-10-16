@@ -1,3 +1,96 @@
+:root {
+  --booksaw-bg: #FAF8F5;
+  --booksaw-card-bg: #FFFFFF;
+  --booksaw-input-bg: #F4EFEA;
+  --booksaw-input-border: #E5DFC5;
+  --search-border: #958B7F;
+  --booksaw-input-focus-bg: #FFFFFF;
+  --booksaw-dark: #2B2520;
+  --booksaw-dark-hover: #36312B;
+  --booksaw-gold: #C5A980;
+  --booksaw-gold-dark: #A68658;
+  --booksaw-muted: #736A61;
+  --booksaw-label: #4A443D;
+  --booksaw-placeholder: #A39D94;
+  --booksaw-subtle: #9E978E;
+  --booksaw-border: #E8E2D9;
+  --booksaw-badge-bg: #FAF4EB;
+  /* text on var(--booksaw-dark) fills */
+  --color-on-dark: #FAF8F5;
+  --color-danger: #9B2121;
+  --color-danger-hover: #7A1919;
+  --color-danger-text: #9B2121;
+  --color-on-danger: #FFFFFF;
+  --color-error-bg: #FDF2F2;
+  --color-error-border: #F9D7D7;
+  --color-success-bg: #F0FBF4;
+  --color-success-text: #196C38;
+  --color-success-border: #CEECD6;
+  --color-warning-bg: #FFF8EC;
+  --color-warning-text: #7A5410;
+  --color-warning-border: #F1DDB4;
+  --overlay: rgba(30, 27, 24, 0.5);
+  /* editorial 3D book cover */
+  --cover-paper-start: #F0EAD8;
+  --cover-paper-end: #E8DFCC;
+  --cover-spine-edge: #3A3228;
+  --cover-spine-mid: #54493B;
+  --cover-spine-start: #4A3E31;
+  --cover-spine-end: #2D251D;
+  --cover-title: #352B20;
+  --cover-sub: #6C5D4B;
+  --cover-sheen: rgba(255, 255, 255, 0.25);
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --booksaw-bg: #171412;
+  --booksaw-card-bg: #211D1A;
+  --booksaw-input-bg: #2A2521;
+  --booksaw-input-border: #7A6F63;
+  --search-border: #7A6F63;
+  --booksaw-input-focus-bg: #2E2924;
+  --booksaw-dark: #EDE6DC;
+  --booksaw-dark-hover: #D9D0C4;
+  --booksaw-gold: #D4B98F;
+  --booksaw-gold-dark: #C8A877;
+  --booksaw-muted: #A39A8F;
+  --booksaw-label: #CFC6BA;
+  --booksaw-placeholder: #8A8177;
+  --booksaw-subtle: #8F867B;
+  --booksaw-border: #3A332D;
+  --booksaw-badge-bg: #2E2720;
+  --color-on-dark: #171412;
+  --color-danger: #B23A3A;
+  --color-danger-hover: #C24A4A;
+  --color-danger-text: #E06A6A;
+  --color-on-danger: #FFFFFF;
+  --color-error-bg: #3A1E1E;
+  --color-error-border: #5C2B2B;
+  --color-success-bg: #1A2E22;
+  --color-success-text: #7FCB98;
+  --color-success-border: #2C4A36;
+  --color-warning-bg: #3A2F1A;
+  --color-warning-text: #E3B865;
+  --color-warning-border: #5A4626;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --cover-paper-start: #3A322A;
+  --cover-paper-end: #2E2722;
+  --cover-spine-edge: #15110E;
+  --cover-spine-mid: #2A231D;
+  --cover-spine-start: #2A231D;
+  --cover-spine-end: #120F0C;
+  --cover-title: #EDE6DC;
+  --cover-sub: #B5A898;
+  --cover-sheen: rgba(255, 255, 255, 0.03);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,6 +104,8 @@ body {
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  background-color: var(--booksaw-bg);
+  color: var(--booksaw-dark);
 }
 
 #root {
@@ -28,4 +123,16 @@ body {
 .nav-search-item svg {
   flex-shrink: 0;
   margin-bottom: 1px;
+}
+.nav-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+dialog {
+  background-color: var(--booksaw-card-bg);
+  color: var(--booksaw-dark);
 }

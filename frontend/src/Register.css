@@ -1,21 +1,6 @@
 /* Google Fonts: Playfair Display (Serif Editorial) + Plus Jakarta Sans (Moderna y limpia) */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-/* Variables de Color e Identidad */
-:root {
-    --booksaw-bg: #FAF8F5;
-    --booksaw-card-bg: #FFFFFF;
-    --booksaw-input-bg: #F4F1EC;
-    --booksaw-input-border: #E5DFC5;
-    --booksaw-dark: #1E1B18;
-    --booksaw-gold: #C5A980;
-    --booksaw-gold-dark: #A68658;
-    --booksaw-muted: #7E7870;
-    --booksaw-border: #EAE6DE;
-    --font-serif: 'Playfair Display', Georgia, serif;
-    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
 /* Contenedor general */
 .booksaw-page {
     min-height: 100vh;
@@ -134,7 +119,7 @@
 .book-cover-3d {
     width: 200px;
     height: 290px;
-    background: linear-gradient(135deg, #F0EAD8 0%, #E8DFCC 100%);
+    background: linear-gradient(135deg, var(--cover-paper-start) 0%, var(--cover-paper-end) 100%);
     border-radius: 4px 10px 10px 4px;
     box-shadow:
         -8px 8px 18px rgba(0, 0, 0, 0.12),
@@ -156,7 +141,7 @@
 .book-spine {
     width: 14px;
     height: 100%;
-    background: linear-gradient(90deg, #3A3228 0%, #54493B 60%, #3A3228 100%);
+    background: linear-gradient(90deg, var(--cover-spine-edge) 0%, var(--cover-spine-mid) 60%, var(--cover-spine-edge) 100%);
     border-radius: 4px 0 0 4px;
 }
 
@@ -191,7 +176,7 @@
     font-family: var(--font-serif);
     font-size: 17px;
     line-height: 1.25;
-    color: #352B20;
+    color: var(--cover-title);
     text-align: center;
     letter-spacing: 1.5px;
     font-weight: 700;
@@ -206,7 +191,7 @@
 .book-front-sub {
     font-size: 8px;
     letter-spacing: 2px;
-    color: #6C5D4B;
+    color: var(--cover-sub);
     font-weight: 600;
 }
 
@@ -281,7 +266,7 @@
     font-weight: 700;
     letter-spacing: 2px;
     color: var(--booksaw-gold-dark);
-    background-color: #FAF4EB;
+    background-color: var(--booksaw-badge-bg);
     padding: 4px 10px;
     border-radius: 4px;
     margin-bottom: 12px;
@@ -318,7 +303,7 @@
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    color: #4A443D;
+    color: var(--booksaw-label);
 }
 
 .input-group input {
@@ -334,13 +319,13 @@
 
 .input-group input:focus {
     outline: none;
-    background-color: #FFFFFF;
+    background-color: var(--booksaw-input-focus-bg);
     border-color: var(--booksaw-gold-dark);
     box-shadow: 0 0 0 3px rgba(197, 169, 128, 0.2);
 }
 
 .input-group input::placeholder {
-    color: #A39D94;
+    color: var(--booksaw-placeholder);
     font-size: 13px;
 }
 
@@ -399,7 +384,7 @@
 .btn-submit-pill {
     margin-top: 8px;
     background-color: var(--booksaw-dark);
-    color: #FAF8F5;
+    color: var(--color-on-dark);
     border: none;
     border-radius: 50px;
     padding: 15px 24px;
@@ -412,7 +397,7 @@
 }
 
 .btn-submit-pill:hover:not(:disabled) {
-    background-color: #36312B;
+    background-color: var(--booksaw-dark-hover);
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(30, 27, 24, 0.25);
 }
@@ -439,15 +424,15 @@
 }
 
 .alert-error {
-    background-color: #FDF2F2;
-    color: #9B2121;
-    border: 1px solid #F9D7D7;
+    background-color: var(--color-error-bg);
+    color: var(--color-danger-text);
+    border: 1px solid var(--color-error-border);
 }
 
 .alert-success {
-    background-color: #F0FBF4;
-    color: #196C38;
-    border: 1px solid #CEECD6;
+    background-color: var(--color-success-bg);
+    color: var(--color-success-text);
+    border: 1px solid var(--color-success-border);
 }
 
 .alert-icon {
@@ -519,7 +504,7 @@
 
 .footer-copy {
     font-size: 12px;
-    color: #9E978E;
+    color: var(--booksaw-subtle);
 }
 
 /* Adaptación Responsive */

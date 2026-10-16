@@ -57,8 +57,8 @@
     font-family: var(--font-sans);
     font-size: 15px;
     color: var(--booksaw-dark);
-    background-color: #FFFFFF;
-    border: 1px solid var(--booksaw-border);
+    background-color: var(--booksaw-card-bg);
+    border: 1px solid var(--search-border);
     border-radius: 50px;
     outline: none;
     transition: all 0.25s ease;
@@ -66,14 +66,14 @@
 }
 
 .search-input-field::placeholder {
-    color: #A39B91;
+    color: var(--booksaw-placeholder);
     font-weight: 400;
 }
 
 .search-input-field:focus {
     border-color: var(--booksaw-gold);
     box-shadow: 0 6px 20px rgba(197, 169, 128, 0.15);
-    background-color: #FFFDF9;
+    background-color: var(--booksaw-input-focus-bg);
 }
 
 .search-clear-btn {
@@ -116,7 +116,7 @@
 .search-empty-box {
     text-align: center;
     padding: 64px 24px;
-    background-color: #FFFFFF;
+    background-color: var(--booksaw-card-bg);
     border: 1px solid var(--booksaw-border);
     border-radius: 8px;
     max-width: 520px;

@@ -1,9 +1,11 @@
 import './Register.css';
 import { useTheme } from './theme';
+import { useLanguage, LanguageToggle } from './language';
 
 function ThemeToggle() {
     const [theme, toggle] = useTheme();
-    const label = theme === 'dark' ? 'Activar tema claro' : 'Activar tema oscuro';
+    const { t } = useLanguage();
+    const label = theme === 'dark' ? t('theme_light') : t('theme_dark');
 
     return (
         <button type="button" className="nav-item nav-theme-toggle" onClick={toggle} aria-label={label} title={label}>
@@ -22,6 +24,7 @@ function ThemeToggle() {
 }
 
 export default function Nav({ active, session, onLogout }) {
+    const { t } = useLanguage();
     const itemClass = (name) => `nav-item${active === name ? ' active' : ''}`;
 
     const handleLogoutClick = (e) => {
@@ -39,14 +42,15 @@ export default function Nav({ active, session, onLogout }) {
                 <div className="booksaw-nav-container">
                     <div className="booksaw-logo">
                         <span className="logo-title">LOS LIBROS DE BUYSAN</span>
-                        <span className="logo-tagline">LIBRERÍA & EDITORIAL</span>
+                        <span className="logo-tagline">{t('nav_tagline')}</span>
                     </div>
                     <nav className="booksaw-menu">
                         {session.role === 'ADMIN' && (
-                            <a href="#admin" className={itemClass('admin')}>PANEL</a>
+                            <a href="#admin" className={itemClass('admin')}>{t('nav_admin')}</a>
                         )}
+                        <LanguageToggle />
                         <ThemeToggle />
-                        <a href="#logout" className="nav-item" onClick={handleLogoutClick}>CERRAR SESIÓN</a>
+                        <a href="#logout" className="nav-item" onClick={handleLogoutClick}>{t('nav_logout')}</a>
                     </nav>
                 </div>
             </header>
@@ -58,34 +62,35 @@ export default function Nav({ active, session, onLogout }) {
             <div className="booksaw-nav-container">
                 <div className="booksaw-logo">
                     <span className="logo-title">LOS LIBROS DE BUYSAN</span>
-                    <span className="logo-tagline">LIBRERÍA & EDITORIAL</span>
+                    <span className="logo-tagline">{t('nav_tagline')}</span>
                 </div>
                 <nav className="booksaw-menu">
-                    <a href="#catalogo" className={itemClass('catalogo')}>DESTACADOS</a>
+                    <a href="#catalogo" className={itemClass('catalogo')}>{t('nav_featured')}</a>
                     <a href="#buscar" className={`${itemClass('buscar')} nav-search-item`}>
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="11" cy="11" r="7.5"></circle>
                             <line x1="21" y1="21" x2="16.5" y2="16.5"></line>
                         </svg>
-                        <span>BUSCAR</span>
+                        <span>{t('nav_search')}</span>
                     </a>
 
                     {session ? (
                         <>
-                            <a href="#favoritos" className={itemClass('favoritos')}>FAVORITOS</a>
+                            <a href="#favoritos" className={itemClass('favoritos')}>{t('nav_favorites')}</a>
                             {session.role === 'DUENO' && (
-                                <a href="#mi-libreria" className={itemClass('mi-libreria')}>MI LIBRERÍA</a>
+                                <a href="#mi-libreria" className={itemClass('mi-libreria')}>{t('nav_my_library')}</a>
                             )}
                             <a href="#perfil" className={itemClass('perfil')}>
                                 {session.username.toUpperCase()}
                             </a>
+                            <LanguageToggle />
                             <ThemeToggle />
-                            <a href="#logout" className="nav-item" onClick={handleLogoutClick}>CERRAR SESIÓN</a>
+                            <a href="#logout" className="nav-item" onClick={handleLogoutClick}>{t('nav_logout')}</a>
                         </>
                     ) : (
                         <>
-                            <a href="#login" className={itemClass('login')}>INICIAR SESIÓN</a>
-                            <a href="#registro" className={itemClass('registro')}>REGISTRARSE</a>
+                            <a href="#login" className={itemClass('login')}>{t('nav_login')}</a>
+                            <a href="#registro" className={itemClass('registro')}>{t('nav_register')}</a>
                         </>
                     )}
                 </nav>

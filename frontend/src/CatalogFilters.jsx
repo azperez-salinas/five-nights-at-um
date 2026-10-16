@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLanguage } from './language';
 
 const LIBRARIES_URL = 'http://localhost:8080/api/librerias';
 
@@ -6,6 +7,7 @@ const EMPTY_FILTERS = { libreria: '', autor: '' };
 
 // R10: library and author filters, combinable. They apply on submit, not on every keystroke
 export default function CatalogFilters({ filters, onApply, loading = false }) {
+    const { t } = useLanguage();
     const [libraries, setLibraries] = useState([]);
     const [libreria, setLibreria] = useState(filters.libreria);
     const [autor, setAutor] = useState(filters.autor);
@@ -45,9 +47,9 @@ export default function CatalogFilters({ filters, onApply, loading = false }) {
     return (
         <form className="catalog-filters" onSubmit={handleSubmit}>
             <div className="input-group">
-                <label htmlFor="filter-libreria">Librería</label>
+                <label htmlFor="filter-libreria">{t('filter_library')}</label>
                 <select id="filter-libreria" value={libreria} onChange={(e) => setLibreria(e.target.value)}>
-                    <option value="">Todas</option>
+                    <option value="">{t('filter_all')}</option>
                     {libraries.map((lib) => (
                         <option key={lib.id} value={String(lib.id)}>{lib.nombre}</option>
                     ))}
@@ -55,11 +57,11 @@ export default function CatalogFilters({ filters, onApply, loading = false }) {
             </div>
 
             <div className="input-group">
-                <label htmlFor="filter-autor">Autor</label>
+                <label htmlFor="filter-autor">{t('filter_author')}</label>
                 <input
                     id="filter-autor"
                     type="text"
-                    placeholder="Ej: Cervantes"
+                    placeholder={t('filter_author_placeholder')}
                     maxLength={150}
                     value={autor}
                     onChange={(e) => setAutor(e.target.value)}
@@ -67,11 +69,11 @@ export default function CatalogFilters({ filters, onApply, loading = false }) {
             </div>
 
             <button type="submit" className="btn-submit-pill" disabled={loading}>
-                {loading ? 'FILTRANDO...' : 'FILTRAR'}
+                {loading ? t('filter_btn_loading') : t('filter_btn')}
             </button>
             {active && (
                 <button type="button" className="btn-cancel" onClick={handleClear} disabled={loading}>
-                    Limpiar filtros
+                    {t('filter_clear')}
                 </button>
             )}
         </form>

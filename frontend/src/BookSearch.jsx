@@ -1,9 +1,11 @@
 import { useState, useEffect, useEffectEvent } from 'react';
 import BookCover from './BookCover';
 import Nav from './Nav';
+import { useLanguage } from './language';
 import './BookSearch.css';
 
 export default function BookSearch({ session, onLogout, initialQuery = '', onQueryChange }) {
+    const { t } = useLanguage();
     const token = session?.token;
     const [searchTerm, setSearchTerm] = useState(initialQuery);
     const [books, setBooks] = useState([]);
@@ -168,9 +170,9 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                 <div className="search-container">
 
                     <div className="search-header-box">
-                        <h1 className="search-main-headline">Búsqueda en Catálogo</h1>
+                        <h1 className="search-main-headline">{t('search_main_title')}</h1>
                         <p className="search-lead-desc">
-                            Encontrá obras de nuestra colección ingresando título, nombre de autor o número de ISBN.
+                            {t('search_subtitle')}
                         </p>
 
                         {/* Barra de Búsqueda */}
@@ -183,7 +185,7 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                                 id="search-input-field"
                                 type="text"
                                 className="search-input-field"
-                                placeholder="Buscar por título, autor o ISBN..."
+                                placeholder={t('search_placeholder')}
                                 value={searchTerm}
                                 onChange={handleInputChange}
                                 maxLength={100}
@@ -194,8 +196,8 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                                     type="button"
                                     className="search-clear-btn"
                                     onClick={handleClearSearch}
-                                    title="Limpiar búsqueda"
-                                    aria-label="Limpiar búsqueda"
+                                    title={t('search_clear')}
+                                    aria-label={t('search_clear')}
                                 >
                                     ✕
                                 </button>
@@ -206,10 +208,10 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                         <div className="search-status-bar">
                             {searchTerm.trim() ? (
                                 <span>
-                                    Resultados para <strong>"{searchTerm}"</strong>: {books.length} {books.length === 1 ? 'libro encontrado' : 'libros encontrados'}
+                                    {t('search_results_for')} <strong>"{searchTerm}"</strong>: {books.length} {books.length === 1 ? t('search_book_found') : t('search_books_found')}
                                 </span>
                             ) : (
-                                <span>Explorando catálogo editorial ({books.length} títulos disponibles)</span>
+                                <span>{t('search_exploring')} ({books.length} {t('search_titles_available')})</span>
                             )}
                         </div>
                     </div>
@@ -218,19 +220,19 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                     {loading && (
                         <div className="search-loading-state">
                             <div className="editorial-spinner"></div>
-                            <p>Buscando en los registros editoriales...</p>
+                            <p>{t('search_loading')}</p>
                         </div>
                     )}
 
                     {/* Sin resultados */}
                     {!loading && books.length === 0 && (
                         <div className="search-empty-box">
-                            <h3 className="empty-title">Sin coincidencias</h3>
+                            <h3 className="empty-title">{t('search_no_matches')}</h3>
                             <p className="empty-desc">
                                 No encontramos libros que coincidan con <strong>"{searchTerm}"</strong>. Probá verificando la ortografía, buscando solo el apellido del autor o limpiando el filtro.
                             </p>
                             <button className="editorial-action-btn" onClick={handleClearSearch}>
-                                VER TODO EL CATÁLOGO
+                                {t('search_view_all')}
                             </button>
                         </div>
                     )}

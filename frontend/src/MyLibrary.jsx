@@ -3,6 +3,7 @@ import BookCover from './BookCover';
 import CsvImport from './CsvImport';
 import LibraryMetrics from './LibraryMetrics';
 import Nav from './Nav';
+import OwnLibrary from './OwnLibrary';
 import './Catalog.css';
 import './MyLibrary.css';
 
@@ -50,6 +51,7 @@ export default function MyLibrary({ session, onUnauthorized, onLogout }) {
     const [failure, setFailure] = useState(null);
     const [errorMsg, setErrorMsg] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
+    const [removed, setRemoved] = useState(false);
 
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(null);
@@ -105,7 +107,8 @@ export default function MyLibrary({ session, onUnauthorized, onLogout }) {
 
     const failed = failure?.key === requestKey;
     const loading = data?.key !== requestKey && !failed;
-    const books = data?.result;
+    const noLibrary = removed || (failed && failure.none);
+    const books = noLibrary ? null : data?.result;
     const totalPages = books?.totalPages ?? 1;
 
     const updateItems = (fn) => setData((prev) => ({
@@ -229,8 +232,23 @@ export default function MyLibrary({ session, onUnauthorized, onLogout }) {
             <main className="catalog-main">
                 <h1 className="catalog-title">Mi librería</h1>
 
-                <LibraryMetrics token={token} onUnauthorized={onUnauthorized} refreshKey={reloadKey} />
-                <CsvImport token={token} onUnauthorized={onUnauthorized} onImported={showImported} />
+                {noLibrary && (
+                    <div className="library-removed" role="status">
+                        <p className="library-removed-title">
+                            {removed ? 'Tu librería fue dada de baja.' : 'No tenés una librería activa.'}
+                        </p>
+                        <p className="card-subtitle">
+                            Sus libros ya no se muestran en el catálogo. Si fue un error, contactá a un administrador.
+                        </p>
+                    </div>
+                )}
+
+                {!noLibrary && (
+                    <>
+                        <LibraryMetrics token={token} onUnauthorized={onUnauthorized} refreshKey={reloadKey} />
+                        <CsvImport token={token} onUnauthorized={onUnauthorized} onImported={showImported} />
+                    </>
+                )}
 
                 {errorMsg && (
                     <div className="alert-box alert-error" role="alert">
@@ -246,8 +264,6 @@ export default function MyLibrary({ session, onUnauthorized, onLogout }) {
                 )}
 
                 {loading && !books && <p className="catalog-status">Cargando libros...</p>}
-
-                {failed && failure.none && <p className="catalog-status">No tenés una librería activa.</p>}
 
                 {failed && !failure.none && (
                     <div className="alert-box alert-error" role="alert">
@@ -316,7 +332,16 @@ export default function MyLibrary({ session, onUnauthorized, onLogout }) {
                     </nav>
                 )}
 
-                {/* R14: future "Zona de peligro" (library removal) goes here, below the book list */}
+                {!noLibrary && books && (
+                    <OwnLibrary
+                        token={token}
+                        onUnauthorized={onUnauthorized}
+                        onRemoved={() => {
+                            clearAlerts();
+                            setRemoved(true);
+                        }}
+                    />
+                )}
             </main>
 
             <dialog

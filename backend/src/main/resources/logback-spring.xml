@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Directorio configurable para auditoría (RS32) con valor por defecto ./logs/audit -->
+    <property name="AUDIT_LOG_DIR" value="${AUDIT_LOG_PATH:-./logs/audit}"/>
+
+    <!-- 1. Appender estándar de consola para logs de la aplicación -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p [req=%X{requestId:-} user=%X{userId:-} role=%X{role:-}] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 2. Appender dedicado y separado para la auditoría de seguridad (RS32) -->
+    <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${AUDIT_LOG_DIR}/security-audit.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${AUDIT_LOG_DIR}/security-audit.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 3. Logger AUDIT: escribe en el archivo separado de auditoría y en consola -->
+    <logger name="AUDIT" level="INFO" additivity="true">
+        <appender-ref ref="AUDIT_FILE"/>
+    </logger>
+
+    <!-- Silenciar mensajes detallados del resolver para no filtrar tokens (RS31) -->
+    <logger name="org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver" level="ERROR"/>
+
+    <!-- Configuración raíz -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

@@ -124,12 +124,13 @@ class AuthorizationAuditIntegrationTest extends IntegrationTestBase {
         mvc.perform(get("/api/books")).andExpect(status().isOk());
         mvc.perform(get("/api/books/{id}", libroCentral.getId())).andExpect(status().isOk());
         mvc.perform(get("/api/books/mine").header(AUTHORIZATION, bearer(duenoCentral))).andExpect(status().isOk());
-        // Login: autenticacion, no una decision de autorizacion
+        // Login: autenticacion (RS32 registra event=AUTHN), no una decision de autorizacion (event=AUTHZ)
         mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"comprador_a\",\"password\":\"" + PASSWORD + "\"}"))
                 .andExpect(status().isOk());
 
-        assertThat(appender.list).isEmpty();
+        // No debe haberse registrado ninguna decision de autorizacion (AUTHZ)
+        assertThat(lineas()).noneMatch(l -> l.contains("event=AUTHZ"));
     }
 
     @Test

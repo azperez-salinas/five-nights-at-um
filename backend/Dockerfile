@@ -13,7 +13,8 @@ RUN mvn -B -q package -DskipTests
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-RUN groupadd --system app && useradd --system --gid app --no-create-home --shell /usr/sbin/nologin app
+RUN groupadd --system app && useradd --system --gid app --no-create-home --shell /usr/sbin/nologin app && \
+    mkdir -p /var/log/app/audit && chown -R app:app /var/log/app/audit
 
 COPY --from=build --chown=app:app /build/target/*.jar /app/app.jar
 

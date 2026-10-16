@@ -143,7 +143,7 @@ export default function Register({ onAuthenticated }) {
                                     <input
                                         id="username"
                                         type="text"
-                                        placeholder="Ej. belen_lector"
+                                        placeholder="Ingresá tu nombre de usuario"
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
                                         autoComplete="username"

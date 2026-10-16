@@ -9,7 +9,7 @@ const PASSWORD_URL = 'http://localhost:8080/api/admin/password';
 const EMPTY_OWNER = { username: '', email: '', nombreLibreria: '' };
 
 // R18: the admin panel only allows two actions, creating owners and changing the admin's own password
-export default function AdminPanel({ session, onUnauthorized, onLogout }) {
+export default function AdminPanel({ session, onUnauthorized, onLogout, onPasswordChanged }) {
     return (
         <div className="booksaw-page">
             <Nav active="admin" session={session} onLogout={onLogout} />
@@ -17,7 +17,11 @@ export default function AdminPanel({ session, onUnauthorized, onLogout }) {
             <main className="booksaw-main">
                 <div className="admin-panel">
                     <CreateOwnerCard token={session.token} onUnauthorized={onUnauthorized} />
-                    <ChangeAdminPasswordCard token={session.token} onUnauthorized={onUnauthorized} />
+                    <ChangeAdminPasswordCard
+                        token={session.token}
+                        onUnauthorized={onUnauthorized}
+                        onPasswordChanged={onPasswordChanged}
+                    />
                 </div>
             </main>
         </div>
@@ -177,7 +181,7 @@ function CreateOwnerCard({ token, onUnauthorized }) {
     );
 }
 
-function ChangeAdminPasswordCard({ token, onUnauthorized }) {
+function ChangeAdminPasswordCard({ token, onUnauthorized, onPasswordChanged }) {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -215,10 +219,14 @@ function ChangeAdminPasswordCard({ token, onUnauthorized }) {
             });
 
             if (response.ok) {
-                setCurrentPassword('');
-                setNewPassword('');
-                setConfirmPassword('');
-                setSuccessMsg('Tu contraseña se actualizó correctamente.');
+                if (onPasswordChanged) {
+                    onPasswordChanged();
+                } else {
+                    setCurrentPassword('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setSuccessMsg('Tu contraseña se actualizó correctamente.');
+                }
             } else if (response.status === 401) {
                 onUnauthorized();
             } else if (response.status === 400) {

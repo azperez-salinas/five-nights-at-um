@@ -133,6 +133,7 @@ function App() {
         session={session}
         onUnauthorized={handleUnauthorized}
         onLogout={handleLogout}
+        onPasswordChanged={handlePasswordChanged}
       />
     );
   }

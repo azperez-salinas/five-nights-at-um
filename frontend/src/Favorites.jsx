@@ -32,7 +32,10 @@ export default function Favorites({ session, onLogout, onNavigate }) {
             .catch((err) => {
                 if (err.name !== 'AbortError') console.error(err);
             })
-            .finally(() => setLoading(false));
+            // Un request cancelado (desmontaje o StrictMode) no debe apagar el loading del siguiente
+            .finally(() => {
+                if (!controller.signal.aborted) setLoading(false);
+            });
 
         return () => controller.abort();
     }, [token, onLogout]);

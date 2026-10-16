@@ -79,7 +79,10 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                 showInitialResults(items);
             })
             .catch(logError)
-            .finally(() => setLoading(false));
+            // Un request cancelado (desmontaje o StrictMode) no debe apagar el loading del siguiente
+            .finally(() => {
+                if (!controller.signal.aborted) setLoading(false);
+            });
 
         if (token) {
             fetch('http://localhost:8080/api/favorites', {

@@ -99,3 +99,25 @@ Abrir el archivo que guste seguir, coloque el breakpoint **dentro del cuerpo del
 - **No aparece "Connected to the target VM":** verificá que el contenedor esté arriba (`docker compose ps`) y que el puerto 5005 esté publicado. Si el puerto está ocupado, cambialo en `docker-compose.yml`.
 - **Actualizó los breakpoints:** seleccione el "stop" de la consola de debug y luego el "Rerun"
 ![img_2.png](img_2.png)
+
+
+## ¿Cómo correr los test unitarios y de integración?
+
+Para correrlo por primera vez debe ejecutar el siguiente comando en la terminal, ¡Debe tener el programa corriendo en Docker! 
+
+```bash
+ docker compose run --rm --build test
+```
+
+Luego, si precisa volverlo a ejecutar puede evitar el `--build`
+```bash
+ docker compose run --rm test
+```
+
+> Si realiza algun cambio en los escenarios de test, debe volver a ejecutar el primer comando, para que considere sus cambios
+
+
+Debe considerar el resultado final, no se "deja llevar" por los comentarios que aparecen en algunas líneas como "inválido" o "duplicado", esos en general son los resultados esperados:
+
+_Ejemplo de resultado de la ejecución:_
+![img_3.png](img_3.png)

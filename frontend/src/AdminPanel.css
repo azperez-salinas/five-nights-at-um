@@ -46,6 +46,6 @@
 }
 
 .temp-password-warning {
-    color: #9B2121;
+    color: var(--color-danger-text);
     font-weight: 600;
 }

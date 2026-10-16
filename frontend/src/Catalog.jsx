@@ -163,7 +163,7 @@ export default function Catalog({ page, session, filters, onFiltersChange, onLog
                                                 title={fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                                                 aria-label={fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                                             >
-                                                <svg viewBox="0 0 24 24" width="19" height="19" fill={fav ? '#A68658' : 'none'} stroke={fav ? '#A68658' : '#8C827A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                                <svg viewBox="0 0 24 24" width="19" height="19" style={{ fill: fav ? 'var(--booksaw-gold-dark)' : 'none', stroke: fav ? 'var(--booksaw-gold-dark)' : 'var(--booksaw-muted)' }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                                     <path d="M12 6.8 C10.8 4.2 7.8 2.6 4.8 3.6 C1.8 4.6 1.2 8.8 3 12.2 C5 16 11.2 20.8 12 21.4 C12.8 20.8 19 16 21 12.2 C22.8 8.8 22.2 4.6 19.2 3.6 C16.2 2.6 13.2 4.2 12 6.8 Z" />
                                                 </svg>
                                             </button>

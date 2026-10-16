@@ -19,9 +19,11 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 class KnownAuthorizationGapsIntegrationTest extends IntegrationTestBase {
 
-    @Disabled("GAP-1: JwtAuthenticationFilter no consulta User.enabled; un token de una cuenta "
-            + "deshabilitada sigue valido hasta que expira (60 min para COMPRADOR). "
-            + "Fix: validar enabled en el filtro, o acortar/revocar tokens.")
+
+//    //TODO esto ya esta solucionado
+//    @Disabled("GAP-1: JwtAuthenticationFilter no consulta User.enabled; un token de una cuenta "
+//            + "deshabilitada sigue valido hasta que expira (60 min para COMPRADOR). "
+//            + "Fix: validar enabled en el filtro, o acortar/revocar tokens.")
     @Test
     void tokenDeUsuarioDeshabilitadoNoDebeAccederAFavoritos() throws Exception {
         String token = bearer(compradorA);
@@ -34,9 +36,10 @@ class KnownAuthorizationGapsIntegrationTest extends IntegrationTestBase {
                 .andExpect(status().isUnauthorized());
     }
 
-    @Disabled("GAP-2: SecurityConfig usa GET /api/books/** (comodin). Cualquier GET futuro bajo "
-            + "/api/books/ nacera publico sin que nadie lo decida. Fix: listar rutas exactas "
-            + "(/api/books, /api/books/search, /api/books/{id}).")
+    //TODO esto ya esta solucionado
+//    @Disabled("GAP-2: SecurityConfig usa GET /api/books/** (comodin). Cualquier GET futuro bajo "
+//            + "/api/books/ nacera publico sin que nadie lo decida. Fix: listar rutas exactas "
+//            + "(/api/books, /api/books/search, /api/books/{id}).")
     @Test
     void rutaNoDeclaradaBajoApiBooksNoDebeSerPublica() throws Exception {
         mvc.perform(get("/api/books/1/reservas")).andExpect(status().isUnauthorized());

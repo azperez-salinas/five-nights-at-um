@@ -9,12 +9,15 @@ export default function CatalogFilters({ filters, onApply, loading = false }) {
     const [libraries, setLibraries] = useState([]);
     const [libreria, setLibreria] = useState(filters.libreria);
     const [autor, setAutor] = useState(filters.autor);
+    const [prevFilters, setPrevFilters] = useState(filters);
 
-    // Mantiene los inputs sincronizados si los filtros cambian desde afuera (ej. navegación)
-    useEffect(() => {
+    // Mantiene los inputs sincronizados si los filtros cambian desde afuera (ej. navegación).
+    // Se ajusta durante el render, no en un efecto, para evitar un render extra
+    if (prevFilters.libreria !== filters.libreria || prevFilters.autor !== filters.autor) {
+        setPrevFilters(filters);
         setLibreria(filters.libreria);
         setAutor(filters.autor);
-    }, [filters.libreria, filters.autor]);
+    }
 
     useEffect(() => {
         const controller = new AbortController();

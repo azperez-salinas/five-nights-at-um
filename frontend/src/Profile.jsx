@@ -78,15 +78,15 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
         setSuccessMsg('');
 
         if (!currentPassword || !newPassword || !confirmPassword) {
-            setErrorMsg('Por favor, completá todos los campos.');
+            setErrorMsg(t('profile_err_required'));
             return;
         }
         if (newPassword.length < 8) {
-            setErrorMsg('La nueva contraseña debe tener al menos 8 caracteres.');
+            setErrorMsg(t('profile_err_min'));
             return;
         }
         if (newPassword !== confirmPassword) {
-            setErrorMsg('Las contraseñas nuevas no coinciden.');
+            setErrorMsg(t('profile_err_mismatch'));
             return;
         }
 
@@ -112,17 +112,17 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
                 }
                 clearPasswords();
                 setEditing(false);
-                setSuccessMsg('Tu contraseña se actualizó correctamente.');
+                setSuccessMsg(t('profile_success'));
             } else if (response.status === 401) {
                 onUnauthorized();
             } else if (response.status === 400) {
                 // The backend does not say which field failed (RS31)
-                setErrorMsg('No pudimos cambiar la contraseña. Verificá que la contraseña actual sea correcta.');
+                setErrorMsg(t('profile_err_bad_request'));
             } else {
-                setErrorMsg('Ocurrió un error al guardar los cambios. Intentalo de nuevo.');
+                setErrorMsg(t('profile_err_generic'));
             }
         } catch {
-            setErrorMsg('No pudimos conectar con el servicio. Por favor, intentá nuevamente en unos momentos.');
+            setErrorMsg(t('profile_err_network'));
         } finally {
             setSaving(false);
         }
@@ -140,13 +140,16 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
 
                     {!session && (
                         <p className="card-subtitle">
-                            Tenés que iniciar sesión para ver tu perfil. <a href="#registro" className="login-link">Crear cuenta</a>
+                            {t('profile_need_login')}{' '}
+                            <a href="#registro" className="login-link">
+                                {t('profile_create_account')}
+                            </a>
                         </p>
                     )}
 
                     {session && loadFailed && (
                         <div className="alert-box alert-error" role="alert">
-                            <span>No pudimos cargar tu perfil. Por favor, intentá nuevamente en unos momentos.</span>
+                            <span>{t('profile_load_failed')}</span>
                         </div>
                     )}
 

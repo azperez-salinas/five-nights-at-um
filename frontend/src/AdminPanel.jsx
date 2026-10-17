@@ -4,12 +4,11 @@ import './Register.css';
 import './AdminPanel.css';
 
 const OWNERS_URL = 'http://localhost:8080/api/admin/owners';
-const PASSWORD_URL = 'http://localhost:8080/api/admin/password';
 
 const EMPTY_OWNER = { username: '', email: '', nombreLibreria: '' };
 
-// R18: the admin panel only allows two actions, creating owners and changing the admin's own password
-export default function AdminPanel({ session, onUnauthorized, onLogout, onPasswordChanged }) {
+// R18: el panel de administrador muestra únicamente la creación de dueños
+export default function AdminPanel({ session, onUnauthorized, onLogout }) {
     return (
         <div className="booksaw-page">
             <Nav active="admin" session={session} onLogout={onLogout} />
@@ -17,11 +16,6 @@ export default function AdminPanel({ session, onUnauthorized, onLogout, onPasswo
             <main className="booksaw-main">
                 <div className="admin-panel">
                     <CreateOwnerCard token={session.token} onUnauthorized={onUnauthorized} />
-                    <ChangeAdminPasswordCard
-                        token={session.token}
-                        onUnauthorized={onUnauthorized}
-                        onPasswordChanged={onPasswordChanged}
-                    />
                 </div>
             </main>
         </div>
@@ -177,130 +171,6 @@ function CreateOwnerCard({ token, onUnauthorized }) {
                     </button>
                 </form>
             )}
-        </section>
-    );
-}
-
-function ChangeAdminPasswordCard({ token, onUnauthorized, onPasswordChanged }) {
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [saving, setSaving] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
-    const [successMsg, setSuccessMsg] = useState('');
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setErrorMsg('');
-        setSuccessMsg('');
-
-        if (!currentPassword || !newPassword || !confirmPassword) {
-            setErrorMsg('Por favor, completá todos los campos.');
-            return;
-        }
-        if (newPassword.length < 8) {
-            setErrorMsg('La nueva contraseña debe tener al menos 8 caracteres.');
-            return;
-        }
-        if (newPassword !== confirmPassword) {
-            setErrorMsg('Las contraseñas nuevas no coinciden.');
-            return;
-        }
-
-        setSaving(true);
-        try {
-            const response = await fetch(PASSWORD_URL, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ currentPassword, newPassword }),
-            });
-
-            if (response.ok) {
-                if (onPasswordChanged) {
-                    onPasswordChanged();
-                } else {
-                    setCurrentPassword('');
-                    setNewPassword('');
-                    setConfirmPassword('');
-                    setSuccessMsg('Tu contraseña se actualizó correctamente.');
-                }
-            } else if (response.status === 401) {
-                onUnauthorized();
-            } else if (response.status === 400) {
-                // The backend does not say which field failed (RS31)
-                setErrorMsg('No pudimos cambiar la contraseña. Verificá que la contraseña actual sea correcta.');
-            } else {
-                setErrorMsg('Ocurrió un error al guardar los cambios. Intentalo de nuevo.');
-            }
-        } catch {
-            setErrorMsg('No pudimos conectar con el servicio. Por favor, intentá nuevamente en unos momentos.');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    return (
-        <section className="register-card">
-            <div className="card-header">
-                <h2 className="card-title">Cambiar mi contraseña</h2>
-                <p className="card-subtitle">Por seguridad, se exige la contraseña actual.</p>
-            </div>
-
-            {errorMsg && (
-                <div className="alert-box alert-error" role="alert">
-                    <span>{errorMsg}</span>
-                </div>
-            )}
-
-            {successMsg && (
-                <div className="alert-box alert-success" role="alert">
-                    <span className="alert-icon">✓</span>
-                    <span>{successMsg}</span>
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="register-form" noValidate>
-                <div className="input-group">
-                    <label htmlFor="admin-current-password">Contraseña actual</label>
-                    <input
-                        id="admin-current-password"
-                        type="password"
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        autoComplete="current-password"
-                    />
-                </div>
-
-                <div className="input-group">
-                    <label htmlFor="admin-new-password">Nueva contraseña</label>
-                    <input
-                        id="admin-new-password"
-                        type="password"
-                        placeholder="Mínimo 8 caracteres"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        autoComplete="new-password"
-                    />
-                </div>
-
-                <div className="input-group">
-                    <label htmlFor="admin-confirm-password">Confirmar nueva contraseña</label>
-                    <input
-                        id="admin-confirm-password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        autoComplete="new-password"
-                    />
-                </div>
-
-                <button type="submit" className="btn-submit-pill" disabled={saving}>
-                    {saving ? 'GUARDANDO...' : 'CAMBIAR CONTRASEÑA'}
-                </button>
-            </form>
         </section>
     );
 }

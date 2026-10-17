@@ -4,6 +4,7 @@ import { useLanguage } from './language';
 import './Register.css';
 
 const API_URL = 'http://localhost:8080/api/users/me';
+const ADMIN_PASSWORD_URL = 'http://localhost:8080/api/admin/password';
 
 export default function Profile({ session, onUnauthorized, onLogout }) {
     const { t } = useLanguage();
@@ -22,6 +23,14 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
 
     useEffect(() => {
         if (!token) return;
+
+        // R18: el administrador no tiene endpoint /api/users/me (403 por matriz de seguridad);
+        // sus datos se toman directamente de la sesion activa.
+        if (session?.role === 'ADMIN') {
+            setProfile({ username: session.username });
+            return;
+        }
+
         const controller = new AbortController();
 
         fetch(API_URL, {
@@ -42,7 +51,7 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
             });
 
         return () => controller.abort();
-    }, [token, onUnauthorized]);
+    }, [token, session?.role, session?.username, onUnauthorized]);
 
     const clearPasswords = () => {
         setCurrentPassword('');
@@ -83,10 +92,11 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
 
         // Username is not editable: only the password fields are sent
         const body = { currentPassword, newPassword };
+        const targetUrl = session?.role === 'ADMIN' ? ADMIN_PASSWORD_URL : API_URL;
 
         setSaving(true);
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(targetUrl, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -96,8 +106,10 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
             });
 
             if (response.ok) {
-                const updated = await response.json();
-                setProfile(updated);
+                if (session?.role !== 'ADMIN') {
+                    const updated = await response.json();
+                    setProfile(updated);
+                }
                 clearPasswords();
                 setEditing(false);
                 setSuccessMsg('Tu contraseña se actualizó correctamente.');
@@ -156,7 +168,7 @@ export default function Profile({ session, onUnauthorized, onLogout }) {
                     {profile && !editing && (
                         <div className="register-form">
                             <p><strong>{t('profile_user')}</strong> {profile.username}</p>
-                            <p><strong>{t('profile_email')}</strong> {profile.email}</p>
+                            {profile.email && <p><strong>{t('profile_email')}</strong> {profile.email}</p>}
                             <button type="button" className="btn-submit-pill" onClick={startEditing}>
                                 {t('profile_change_pass')}
                             </button>

@@ -43,7 +43,12 @@ export default function Nav({ active, session, onLogout }) {
                     </div>
                     <nav className="booksaw-menu">
                         {session.role === 'ADMIN' && (
-                            <a href="#admin" className={itemClass('admin')}>PANEL</a>
+                            <>
+                                <a href="#admin" className={itemClass('admin')}>PANEL</a>
+                                <a href="#perfil" className={itemClass('perfil')}>
+                                    {session.username.toUpperCase()}
+                                </a>
+                            </>
                         )}
                         <ThemeToggle />
                         <a href="#logout" className="nav-item" onClick={handleLogoutClick}>CERRAR SESIÓN</a>

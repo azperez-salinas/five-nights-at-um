@@ -1,0 +1,132 @@
+package librosbuysan.user.service;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import java.util.Arrays;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import librosbuysan.auth.service.PasswordHasher;
+import librosbuysan.auth.service.TokenRevocationService;
+import librosbuysan.security.AuthenticatedUser;
+import librosbuysan.user.dto.UserDtos.ProfileResponse;
+import librosbuysan.user.dto.UserDtos.UpdateProfileRequest;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
+
+@Service
+public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
+    private static final String INVALID_REQUEST = "Solicitud invalida";
+    private static final String NOTHING_TO_UPDATE = "No hay cambios para aplicar";
+    private static final String WRONG_CURRENT_PASSWORD = "La contrasena actual es incorrecta";
+    private static final String UNAUTHORIZED = "No autenticado";
+
+    private final UserRepo userRepo;
+    private final Validator validator;
+    private final PasswordHasher passwordHasher;
+    private final TokenRevocationService revocationService;
+
+    public UserService(UserRepo userRepo, Validator validator, PasswordHasher passwordHasher,
+                       TokenRevocationService revocationService) {
+        this.userRepo = userRepo;
+        this.validator = validator;
+        this.passwordHasher = passwordHasher;
+        this.revocationService = revocationService;
+    }
+
+    public ProfileResponse getProfile(Long userId) {
+        return ProfileResponse.from(loadActiveUser(userId));
+    }
+
+    /**
+     * Cambia la contrasena de la cuenta del token. Lo usan el perfil
+     * (comprador/dueno) y el panel de admin (R18).
+     *
+     * <p>R18: si el token era de un dueno con contrasena temporal, se revoca
+     * despues del cambio. Ese token tenia el permiso acotado PWD_CHANGE; para
+     * usar su rol real el dueno vuelve a iniciar sesion con la contrasena nueva.
+     */
+    @Transactional
+    public ProfileResponse updateProfile(AuthenticatedUser principal, UpdateProfileRequest request) {
+        ProfileResponse response = updateProfile(principal.id(), request);
+        if (principal.passwordChangeRequired()) {
+            revocationService.revoke(principal.tokenId(), principal.tokenExpiresAt());
+            log.info("Contrasena temporal reemplazada, token revocado: userId={}", principal.id());
+        }
+        return response;
+    }
+
+    private ProfileResponse updateProfile(Long userId, UpdateProfileRequest request) {
+        char[] currentPassword = request == null ? null : request.currentPassword();
+        char[] newPassword = request == null ? null : request.newPassword();
+        try {
+            validate(request);
+
+            User user = loadActiveUser(userId);
+
+            // RS7: la contrasena es el unico campo modificable del perfil
+            applyPasswordChange(user, currentPassword, newPassword);
+
+            User saved = userRepo.saveAndFlush(user);
+            log.info("Perfil actualizado: userId={}", userId);
+            return ProfileResponse.from(saved);
+        } finally {
+            if (currentPassword != null) {
+                Arrays.fill(currentPassword, '\0');
+            }
+            if (newPassword != null) {
+                Arrays.fill(newPassword, '\0');
+            }
+        }
+    }
+
+    private void applyPasswordChange(User user, char[] currentPassword, char[] newPassword) {
+        if (currentPassword == null || currentPassword.length == 0) {
+            log.warn("Actualizacion de perfil fallida: userId={} motivo=falta_password_actual", user.getId());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
+        }
+        if (!PasswordHasher.isValidLength(newPassword)) {
+            log.warn("Actualizacion de perfil fallida: userId={} motivo=password_nueva_invalida", user.getId());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
+        }
+        if (!passwordHasher.matches(currentPassword, user.getPasswordHash())) {
+            log.warn("Actualizacion de perfil fallida: userId={} motivo=password_actual_incorrecta", user.getId());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, WRONG_CURRENT_PASSWORD);
+        }
+        // R18: el cambio obligatorio tiene que reemplazar de verdad la temporal
+        if (user.isMustChangePassword() && passwordHasher.matches(newPassword, user.getPasswordHash())) {
+            log.warn("Actualizacion de perfil fallida: userId={} motivo=password_nueva_igual_a_temporal", user.getId());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
+        }
+        user.changePasswordHash(passwordHasher.hash(newPassword));
+    }
+
+    private User loadActiveUser(Long userId) {
+        User user = userRepo.findById(userId).orElse(null);
+        if (user == null || !user.isEnabled()) {
+            log.warn("Acceso a perfil rechazado: userId={} motivo=usuario_inexistente_o_deshabilitado", userId);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED);
+        }
+        return user;
+    }
+
+    private void validate(UpdateProfileRequest request) {
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
+        }
+        if (request.newPassword() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NOTHING_TO_UPDATE);
+        }
+        Set<ConstraintViolation<UpdateProfileRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_REQUEST);
+        }
+    }
+}

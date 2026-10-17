@@ -16,7 +16,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     open-in-view: false
     show-sql: false
 
@@ -27,11 +27,22 @@ app:
     expiration-minutes:
       comprador: 60
       dueno: 15
+      admin: 15
+  # R18: datos de la cuenta de administrador que crea AdminSeeder la primera
+  # vez que arranca sin ningun admin. Despues se ignoran.
+  admin:
+    username: ${ADMIN_USERNAME:}
+    email: ${ADMIN_EMAIL:}
+    initial-password: ${ADMIN_INITIAL_PASSWORD:}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
 logging:
+  pattern:
+    # RS11: cada linea de log lleva el request y el consumidor que lo origino
+    # (MDC cargado por RequestIdentityMdcFilter).
+    level: "%5p [req=%X{requestId:-} user=%X{userId:-} role=%X{role:-}]"
   level:
     # Este resolver loguea en WARN el mensaje de Jackson ante JSON malformado,
     # que puede incluir el token invalido (por ejemplo una contrasena sin comillas).

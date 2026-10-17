@@ -1,0 +1,420 @@
+.my-library-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.my-library-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--booksaw-border);
+}
+
+/* Shrinks the shared 3D cover into a thumbnail */
+.my-library-cover {
+    flex: 0 0 72px;
+}
+
+.my-library-cover .book-3d-cover {
+    height: 100px;
+    margin-bottom: 0;
+}
+
+.my-library-cover .book-3d-body,
+.my-library-cover .book-3d-border {
+    padding: 4px;
+}
+
+.my-library-cover .book-3d-tag,
+.my-library-cover .book-3d-author {
+    display: none;
+}
+
+.my-library-cover .book-3d-title {
+    font-size: 8px;
+}
+
+.my-library-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.my-library-isbn {
+    font-size: 12px;
+    color: var(--booksaw-muted);
+    margin: 4px 0 0;
+}
+
+.my-library-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.my-library-actions .btn-submit-pill {
+    margin-top: 0;
+    padding: 10px 20px;
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: var(--color-on-danger);
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: var(--color-danger-hover);
+}
+
+.btn-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.my-library-dialog {
+    width: min(480px, calc(100vw - 32px));
+    /* the global "* { margin: 0 }" reset kills the native dialog centering */
+    margin: auto;
+    border: none;
+    border-radius: 10px;
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+.my-library-dialog::backdrop {
+    background: var(--overlay);
+}
+
+.my-library-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+@media (max-width: 640px) {
+    .my-library-row {
+        flex-wrap: wrap;
+    }
+
+    .my-library-actions {
+        width: 100%;
+    }
+}
+
+/* R17: CSV bulk upload */
+.csv-import {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--booksaw-border);
+}
+
+.csv-import-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.csv-import .btn-cancel {
+    padding: 0;
+    margin-left: auto;
+    text-decoration: underline;
+}
+
+.csv-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+    padding: 32px 16px;
+    border: 2px dashed var(--booksaw-input-border);
+    border-radius: 10px;
+    background: var(--booksaw-input-bg);
+    text-align: center;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.csv-dropzone.is-dragging {
+    border-color: var(--booksaw-gold-dark);
+    background: var(--booksaw-card-bg);
+}
+
+.csv-dropzone-text {
+    margin: 0;
+    color: var(--booksaw-dark);
+    word-break: break-all;
+}
+
+.csv-dropzone-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.csv-dropzone-actions .btn-submit-pill,
+.btn-outline-pill {
+    width: auto;
+    margin: 0;
+    padding: 12px 24px;
+    line-height: 1.2;
+}
+
+.btn-outline-pill {
+    display: inline-block;
+    border: 1px solid var(--booksaw-dark);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--booksaw-dark);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.btn-outline-pill:hover {
+    background: var(--booksaw-dark);
+    color: var(--booksaw-bg);
+}
+
+/* the hidden file input keeps keyboard focus, so show it on its label */
+.visually-hidden:focus-visible + .csv-dropzone-text + .csv-dropzone-actions .btn-outline-pill {
+    outline: 2px solid var(--booksaw-gold-dark);
+    outline-offset: 2px;
+}
+
+.csv-dropzone-hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--booksaw-muted);
+}
+
+.csv-columns {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--booksaw-muted);
+}
+
+.csv-column-chip {
+    padding: 2px 8px;
+    border: 1px solid var(--booksaw-border);
+    border-radius: 4px;
+    background: var(--booksaw-card-bg);
+    color: var(--booksaw-dark);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.csv-import .alert-box {
+    margin: 24px 0 0;
+}
+
+.csv-import-result {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.csv-import-result ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.alert-warning {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning-text);
+    border: 1px solid var(--color-warning-border);
+}
+
+/* R13: library metrics */
+.library-metrics {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--booksaw-border);
+}
+
+.library-metrics-grid {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 3fr;
+    gap: 24px;
+    align-items: start;
+    margin-top: 16px;
+}
+
+.metric-tile {
+    align-self: start;
+    padding: 20px 24px;
+    border: 1px solid var(--booksaw-border);
+    border-radius: 10px;
+    background: var(--booksaw-card-bg);
+}
+
+.metric-tile p {
+    margin: 0;
+}
+
+.metric-tile-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--booksaw-muted);
+}
+
+.metric-tile .metric-tile-value {
+    margin: 8px 0 4px;
+    font-family: var(--font-serif);
+    font-size: 44px;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--booksaw-dark);
+}
+
+.metric-tile-hint {
+    font-size: 13px;
+    color: var(--booksaw-muted);
+}
+
+.metric-ranking-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--booksaw-muted);
+    margin: 0 0 12px;
+}
+
+.metric-bars {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.metric-bar-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) 3fr;
+    gap: 16px;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.metric-bar-label {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.metric-bar-title,
+.metric-bar-author {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.metric-bar-title {
+    font-size: 14px;
+    color: var(--booksaw-dark);
+}
+
+.metric-bar-author {
+    font-size: 12px;
+    color: var(--booksaw-muted);
+}
+
+.metric-bar-track {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.metric-bar {
+    height: 14px;
+    min-width: 2px;
+    border-radius: 0 4px 4px 0;
+    background: var(--booksaw-gold-dark);
+}
+
+.metric-bar-row:hover .metric-bar {
+    background: var(--booksaw-dark);
+}
+
+.metric-bar-value {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--booksaw-dark);
+}
+
+@media (max-width: 640px) {
+    .library-metrics-grid,
+    .metric-bar-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* R14: library removal and removed state */
+.remove-library {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--booksaw-border);
+}
+
+.remove-library p {
+    margin: 0;
+}
+
+.btn-danger-outline {
+    padding: 10px 20px;
+    border: 1px solid var(--color-danger-text);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--color-danger-text);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.btn-danger-outline:hover {
+    background: var(--color-danger);
+    color: var(--color-on-danger);
+}
+
+.library-removed {
+    padding: 24px;
+    border: 1px solid var(--booksaw-border);
+    border-radius: 10px;
+    background: var(--booksaw-card-bg);
+}
+
+.library-removed-title {
+    margin: 0 0 8px;
+    font-family: var(--font-serif);
+    font-size: 22px;
+    color: var(--booksaw-dark);
+}

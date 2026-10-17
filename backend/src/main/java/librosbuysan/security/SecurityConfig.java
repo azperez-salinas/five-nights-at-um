@@ -13,22 +13,38 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import librosbuysan.auth.JwtService;
+import librosbuysan.auth.service.TokenRevocationService;
+import librosbuysan.user.repository.UserRepo;
+
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final String PWD_CHANGE = JwtAuthenticationFilter.PASSWORD_CHANGE_ROLE;
+    // java:S1192: los nombres de rol se repetian como literal muchas veces
+    // (DUENO x9, COMPRADOR x4) en las reglas de abajo. Centralizarlos en una
+    // constante evita que un typo en una de las nueve apariciones de "DUENO"
+    // quede sin detectar (el compilador no avisa de un string mal escrito).
+    private static final String ROLE_DUENO = "DUENO";
+    private static final String ROLE_COMPRADOR = "COMPRADOR";
+
     private final JwtService jwtService;
+    private final TokenRevocationService revocationService;
+    private final UserRepo userRepo;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
     private final List<String> allowedOrigins;
 
     public SecurityConfig(JwtService jwtService,
+                          TokenRevocationService revocationService,
+                          UserRepo userRepo,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
                           @Value("${cors.allowed-origins}") List<String> allowedOrigins) {
         this.jwtService = jwtService;
+        this.revocationService = revocationService;
+        this.userRepo = userRepo;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.allowedOrigins = allowedOrigins;
@@ -57,33 +73,87 @@ public class SecurityConfig {
                         // tapa el codigo de error real (ej. un 405 real
                         // terminaba devolviendo 401 "No autenticado").
                         .requestMatchers("/error").permitAll()
+                        // R3: el logout exige sesion activa. Esta regla DEBE ir
+                        // antes de "/api/auth/**": Spring usa la primera que
+                        // coincide, y si quedara despues el logout seria publico
+                        // y el principal llegaria null al controller.
+                        // R18: el admin y el dueno con contrasena temporal
+                        // tambien pueden cerrar sesion (revocar su token).
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout")
+                                .hasAnyRole(ROLE_COMPRADOR, ROLE_DUENO, "ADMIN", PWD_CHANGE)
                         .requestMatchers("/api/auth/**").permitAll()
+                        // R18/F18: las dos unicas acciones del panel de admin.
+                        // Se declaran por metodo y ruta exactos: cualquier
+                        // otra cosa bajo /api/admin cae en el denyAll de abajo,
+                        // incluso para el admin. El rol ADMIN no aparece en
+                        // ninguna otra regla, asi que el resto de las
+                        // operaciones protegidas le responden 403.
+                        .requestMatchers(HttpMethod.POST, "/api/admin/owners").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/admin/password").hasRole("ADMIN")
                         // Catalogo (R7), busqueda (RF9) y detalle de libro son
                         // publicos: un visitante puede explorar sin cuenta y
                         // solo necesita registrarse para usar favoritos. El
                         // filtro de RS34 (libreria deshabilitada) se aplica en
                         // la query, no en la autorizacion. Solo GET: cualquier
                         // otro verbo cae en el deny-by-default de abajo.
-                        .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/books/import").hasRole(ROLE_DUENO)
+                        // R17: importación masiva exclusiva de dueños.
+                        // R18/F18: gestion de los libros propios, exclusiva
+                        // del DUENO. GET /mine tiene que declararse ANTES de
+                        // GET /api/books/{id} (permitAll de abajo): Spring
+                        // Security aplica la primera regla que matchea, y
+                        // {id} matchearia "mine" igual.
+                        // Que el libro pertenezca a la libreria del dueno lo
+                        // valida BookService, no esta regla.
+                        .requestMatchers(HttpMethod.GET, "/api/books/mine").hasRole(ROLE_DUENO)
+                        .requestMatchers(HttpMethod.PUT, "/api/books/*").hasRole(ROLE_DUENO)
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/*").hasRole(ROLE_DUENO)
+                        // RS30 (ex GAP-2): las rutas GET publicas se listan una
+                        // por una en lugar de usar el comodin /api/books/**.
+                        // Asi un GET nuevo bajo /api/books (ej. /{id}/reservas)
+                        // cae en el denyAll de abajo hasta que alguien decida
+                        // explicitamente quien puede usarlo.
+                        .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/search", "/api/books/{id}")
+                                .permitAll()
+                        // R10: el listado de librerias habilitadas alimenta el
+                        // filtro del catalogo, que es publico como el catalogo.
+                        .requestMatchers(HttpMethod.GET, "/api/librerias").permitAll()
                         // RF12/RS1/RS5/RS9/RS19: favoritos es una
                         // funcionalidad exclusiva del COMPRADOR en sus tres
                         // operaciones (listar, agregar, quitar) — no hay
                         // metodo publico ni accesible para DUENO, por eso se
                         // restringe el prefijo completo sin distinguir por
                         // verbo HTTP.
-                        .requestMatchers("/api/favorites/**").hasRole("COMPRADOR")
+                        .requestMatchers("/api/favorites/**").hasRole(ROLE_COMPRADOR)
                         // RS5: el perfil propio es la unica funcionalidad
                         // compartida por ambos roles; se declara con los
                         // roles explicitos en lugar de "cualquier autenticado".
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
+                        // R18: con la contrasena temporal (PWD_CHANGE) el dueno
+                        // solo puede ver su perfil y cambiarla.
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole(ROLE_COMPRADOR, ROLE_DUENO, PWD_CHANGE)
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole(ROLE_COMPRADOR, ROLE_DUENO, PWD_CHANGE)
+                        // R14/F14: ver y dar de baja la libreria propia es
+                        // exclusivo del DUENO. Que la libreria sea suya lo
+                        // valida LibraryService, no esta regla.
+                        .requestMatchers(HttpMethod.GET, "/api/users/libreria").hasRole(ROLE_DUENO)
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/libreria/*").hasRole(ROLE_DUENO)
+                        // R13/F13/RS1: panel de metricas, exclusivo del DUENO.
+                        // Un COMPRADOR cae en esta regla (no en el deny-by-default
+                        // de abajo) y recibe 403, no 404 ni 401 (RS1). Que la
+                        // libreria sea la propia lo resuelve LibraryService
+                        // (RS20/R6-IDOR), no esta regla.
+                        .requestMatchers(HttpMethod.GET, "/api/users/libreria/metricas").hasRole(ROLE_DUENO)
                         // RS5/RS19/RS27: deny-by-default real. Cualquier ruta
                         // o metodo sin regla explicita arriba se rechaza,
                         // aunque el usuario este autenticado: un endpoint
                         // nuevo queda inaccesible hasta que se le asigne un
                         // rol aca. Sin token responde 401; con token, 403.
                         .anyRequest().denyAll())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocationService, userRepo), UsernamePasswordAuthenticationFilter.class)
+                // RS11: justo despues del JWT, cuando el principal ya esta
+                // resuelto, para que la identidad quede en el MDC de los logs
+                // de todas las capas siguientes (incluidos los 401/403).
+                .addFilterAfter(new RequestIdentityMdcFilter(), JwtAuthenticationFilter.class);
         return http.build();
     }
 

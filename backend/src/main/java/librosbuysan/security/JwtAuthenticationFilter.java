@@ -15,8 +15,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-import librosbuysan.auth.JwtService;
-import librosbuysan.user.User;
+import librosbuysan.auth.service.TokenRevocationService;
+import librosbuysan.user.entity.User;
+import librosbuysan.user.repository.UserRepo;
 
 // Sin @Component a proposito: Spring Boot registraria este filtro dos veces
 // (una vez solo en el contenedor servlet, otra via addFilterBefore en
@@ -26,10 +27,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private final JwtService jwtService;
+    // R18: rol de los tokens emitidos mientras la contrasena es temporal
+    public static final String PASSWORD_CHANGE_ROLE = "PWD_CHANGE";
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    private final JwtService jwtService;
+    private final TokenRevocationService revocationService;
+    private final UserRepo userRepo;
+
+    public JwtAuthenticationFilter(JwtService jwtService, TokenRevocationService revocationService,
+                                   UserRepo userRepo) {
         this.jwtService = jwtService;
+        this.revocationService = revocationService;
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -50,11 +59,46 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void authenticate(String token) {
         Claims claims = jwtService.parseAndValidate(token);
+
+        // R3: un token con firma y expiracion validas puede haber sido revocado
+        // por un logout. Sin jti no se puede verificar, y sin exp no se sabe
+        // hasta cuando guardar la revocacion: en ambos casos se rechaza.
+        String tokenId = claims.getId();
+        if (tokenId == null || claims.getExpiration() == null || revocationService.isRevoked(tokenId)) {
+            log.warn("Token revocado o incompleto (sin jti/exp) rechazado");
+            return;
+        }
+
         Long userId = Long.valueOf(claims.getSubject());
         User.Role role = User.Role.valueOf(claims.get(JwtService.ROLE_CLAIM, String.class));
 
-        AuthenticatedUser principal = new AuthenticatedUser(userId, role);
-        var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        // R10/R22/RS28: el token es stateless y solo "recuerda" el rol, el
+        // estado de la cuenta y la version de las credenciales al momento de
+        // emitirse. Si el rol cambio (R10), la cuenta se deshabilito (R22), o
+        // la contrasena cambio despues (RS28), la firma y la expiracion siguen
+        // siendo validas, asi que hay que consultar el estado actual. Va
+        // despues de las validaciones baratas (firma, revocacion, claims) para
+        // que un token invalido nunca llegue a la base de datos. Los tokens
+        // sin el claim de version (emitidos antes de RS28) cuentan como
+        // version 0.
+        Integer tokenVersion = claims.get(JwtService.TOKEN_VERSION_CLAIM, Integer.class);
+        int version = tokenVersion == null ? 0 : tokenVersion;
+        if (!userRepo.existsByIdAndEnabledTrueAndTokenVersionAndRole(userId, version, role)) {
+            log.warn("Token de cuenta deshabilitada, inexistente, con credenciales o rol ya no vigentes rechazado: "
+                    + "userId={}", userId);
+            return;
+        }
+
+        // R18: con la contrasena temporal todavia vigente, el token NO lleva el
+        // rol real sino uno acotado que SecurityConfig solo deja usar para
+        // cambiarla. Asi el cambio obligatorio no depende del frontend.
+        boolean passwordChangeRequired = Boolean.TRUE.equals(
+                claims.get(JwtService.PASSWORD_CHANGE_CLAIM, Boolean.class));
+        String authority = passwordChangeRequired ? PASSWORD_CHANGE_ROLE : role.name();
+
+        AuthenticatedUser principal = new AuthenticatedUser(userId, role, tokenId,
+                claims.getExpiration().toInstant(), passwordChangeRequired);
+        var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + authority));
         var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

@@ -1,0 +1,21 @@
+# Perfil "test": se SUMA a application.yml (no lo reemplaza) y pisa solo lo
+# necesario para correr sin Docker ni Postgres.
+spring:
+  datasource:
+    # Un nombre de base distinto por contexto de Spring evita que dos
+    # contextos cacheados compartan (y se pisen) las mismas tablas.
+    url: jdbc:h2:mem:librosbuysan-${random.uuid};DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+app:
+  jwt:
+    # Secreto SOLO para tests (base64, 48 bytes). No es el de ningun ambiente real.
+    secret: 3lUtaKKge+7QIgFk1Eu14/A+tu565F1MPkKwxtACGVTZxOwm1hodh0DA9axYA0I5
+
+cors:
+  allowed-origins: http://localhost:5173

@@ -1,0 +1,405 @@
+package librosbuysan.integration;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.stream.Stream;
+import javax.crypto.SecretKey;
+import librosbuysan.security.JwtService;
+import librosbuysan.support.IntegrationTestBase;
+import librosbuysan.user.entity.User;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+/**
+ * R37: matriz completa de autorizacion.
+ *
+ * Cada fila declara, para UNA operacion del backend, que debe pasar cuando la
+ * llama un anonimo, un COMPRADOR, un DUENO, un DUENO que todavia tiene la
+ * contrasena temporal (R18) y un ADMIN (R18). La politica esperada queda
+ * escrita en un solo lugar y se ejecuta contra la cadena de seguridad real.
+ *
+ * Hay dos tipos de filas:
+ *  - ENDPOINTS_DE_LA_APP: los endpoints que existen de verdad.
+ *  - RUTAS_SIN_REGLA: rutas/verbos que NO deben existir para nadie; prueban el
+ *    deny-by-default (anyRequest().denyAll()) de SecurityConfig.
+ *
+ * El test "todaRutaDeLaAplicacionEstaEnLaMatriz" es la pieza clave de la
+ * ultima oracion de R37 ("detectar que una operacion protegida quede
+ * accesible sin verificacion"): lee los controllers reales y falla si alguien
+ * agrega un endpoint sin escribir aca su politica esperada.
+ *
+ * RS30: "unTokenInvalidoEsRechazadoEnCadaEndpointProtegido" recorre todos los
+ * endpoints protegidos con tokens mal formados, mal firmados, sin firma,
+ * expirados, revocados por logout y emitidos antes de un cambio de contrasena,
+ * y exige 401 en todos.
+ *
+ * RX40: esta matriz es la base de las pruebas de control de acceso (roles,
+ * rechazo sin autorizacion valida y completitud de rutas). Los intentos de
+ * esquivar el control con variantes de la ruta o del verbo estan en
+ * AccessControlBypassIntegrationTest.
+ */
+class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
+
+    enum Quien { ANONIMO, COMPRADOR, DUENO, DUENO_PENDIENTE, ADMIN }
+
+    enum Resultado {
+        /** Pasa la autorizacion (despues el controller puede dar 200, 201, 400, 404...). */
+        PERMITIDO,
+        NO_AUTENTICADO_401,
+        PROHIBIDO_403
+    }
+
+    record Caso(String metodo, String patron, String ruta, String body,
+                Resultado anonimo, Resultado comprador, Resultado dueno,
+                Resultado duenoPendiente, Resultado admin) {
+
+        Resultado para(Quien quien) {
+            return switch (quien) {
+                case ANONIMO -> anonimo;
+                case COMPRADOR -> comprador;
+                case DUENO -> dueno;
+                case DUENO_PENDIENTE -> duenoPendiente;
+                case ADMIN -> admin;
+            };
+        }
+
+        @Override
+        public String toString() {
+            return metodo + " " + ruta;
+        }
+    }
+
+    private static final Resultado OK = Resultado.PERMITIDO;
+    private static final Resultado NO_AUTH = Resultado.NO_AUTENTICADO_401;
+    private static final Resultado PROHIBIDO = Resultado.PROHIBIDO_403;
+
+    // {id} / {bookId} se reemplazan en runtime por el id real de un libro de prueba.
+    // Columnas: anonimo, comprador, dueno, dueno con contrasena temporal, admin.
+    static final List<Caso> ENDPOINTS_DE_LA_APP = List.of(
+            // Catalogo: publico para todos (R7, RF9, RS34 se filtra en la query, no aca).
+            // R18: se decidio dejarlo abierto tambien para el admin (es publico)
+            new Caso("GET", "/api/books", "/api/books", null, OK, OK, OK, OK, OK),
+            new Caso("GET", "/api/books/search", "/api/books/search?q=quijote", null, OK, OK, OK, OK, OK),
+            new Caso("GET", "/api/books/{id}", "/api/books/{id}", null, OK, OK, OK, OK, OK),
+
+            // Importación masiva: exclusiva del DUENO (R17)
+            new Caso("POST", "/api/books/import", "/api/books/import", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+
+            // R18/F18: catalogo propio, editar y borrar libros de la propia
+            // libreria — exclusivo del DUENO. Que el libro sea de SU libreria
+            // lo verifica BookService (ver BookOwnershipIntegrationTest), no
+            // esta matriz: aca solo se prueba la politica por ROL.
+            new Caso("GET", "/api/books/mine", "/api/books/mine", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+            new Caso("PUT", "/api/books/{id}", "/api/books/{id}", "{}",
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/books/{id}", "/api/books/{id}", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+
+            // Favoritos: exclusivo del COMPRADOR (RF12, RS1, RS19)
+            new Caso("GET", "/api/favorites", "/api/favorites", null, NO_AUTH, OK, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null,
+                    NO_AUTH, OK, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/favorites/{bookId}", "/api/favorites/{bookId}", null,
+                    NO_AUTH, OK, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+
+            // Librerias: el listado es publico (R10); ver/dar de baja la propia es solo del DUENO (R14/R15)
+            new Caso("GET", "/api/librerias", "/api/librerias", null, OK, OK, OK, OK, OK),
+            new Caso("GET", "/api/users/libreria", "/api/users/libreria", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/users/libreria/{id}", "/api/users/libreria/{id}", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+            // R13/F13/RS1: panel de metricas, exclusivo del DUENO. Que solo
+            // cuente favoritos de la propia libreria (RS20) se prueba en
+            // LibraryMetricsIntegrationTest, no aca: esta matriz solo cubre
+            // la politica por ROL.
+            new Caso("GET", "/api/users/libreria/metricas", "/api/users/libreria/metricas", null,
+                    NO_AUTH, PROHIBIDO, OK, PROHIBIDO, PROHIBIDO),
+
+            // Perfil propio: compartido por comprador y dueno (RS5). El dueno con
+            // contrasena temporal solo puede usarlo para cambiarla (R18). El admin
+            // cambia su contrasena desde /api/admin/password.
+            new Caso("GET", "/api/users/me", "/api/users/me", null, NO_AUTH, OK, OK, OK, PROHIBIDO),
+            new Caso("PUT", "/api/users/me", "/api/users/me", "{}", NO_AUTH, OK, OK, OK, PROHIBIDO),
+
+            // Autenticacion: publica por definicion (no se puede exigir token para obtener un token)
+            new Caso("POST", "/api/auth/register", "/api/auth/register", "{}", OK, OK, OK, OK, OK),
+            new Caso("POST", "/api/auth/login", "/api/auth/login", "{}", OK, OK, OK, OK, OK),
+            // R3: cerrar sesion exige estar autenticado (cualquier rol). Debe estar
+            // declarado ANTES de permitAll("/api/auth/**") en SecurityConfig.
+            new Caso("POST", "/api/auth/logout", "/api/auth/logout", null, NO_AUTH, OK, OK, OK, OK),
+
+            // R18/F18: las dos unicas acciones del admin, y exclusivas de el
+            new Caso("POST", "/api/admin/owners", "/api/admin/owners", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, OK),
+            new Caso("PUT", "/api/admin/password", "/api/admin/password", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, OK));
+
+    // Operaciones que hoy NO existen y por lo tanto nadie debe poder ejecutar.
+    // Si manana alguien crea un POST /api/books sin tocar SecurityConfig, el
+    // deny-by-default lo bloquea; si ademas agrega una regla permisiva, este
+    // test falla y obliga a decidir el rol de forma explicita.
+    static final List<Caso> RUTAS_SIN_REGLA = List.of(
+            // Escritura sobre el catalogo general (solo GET es publico; PUT
+            // y DELETE sobre /api/books/{id} ahora SI existen, ver R18 en
+            // ENDPOINTS_DE_LA_APP, pero POST y PATCH siguen sin existir)
+            new Caso("POST", "/api/books", "/api/books", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("PATCH", "/api/books/{id}", "/api/books/{id}", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            // RS30 (ex GAP-2): solo los GET publicos declarados uno por uno son
+            // publicos. Un GET nuevo bajo /api/books no hereda el permitAll.
+            new Caso("GET", "/api/books/{id}/reservas", "/api/books/{id}/reservas", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/books/search/avanzada", "/api/books/search/avanzada", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/books/mine/exportar", "/api/books/mine/exportar", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            // Acceso a cuentas AJENAS: solo existe /me (ni siquiera el admin puede listar usuarios)
+            new Caso("GET", "/api/users/{id}", "/api/users/1", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/users", "/api/users", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/users/me", "/api/users/me", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/users/me", "/api/users/me", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            // Funcionalidades que podrian crearse y nacen cerradas
+            new Caso("GET", "/api/libraries", "/api/libraries", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/actuator/health", "/actuator/health", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            // R18: bajo /api/admin solo existen las dos acciones del panel. Cualquier
+            // otra ruta o verbo se rechaza, incluso para el admin (no puede listar,
+            // editar ni borrar duenos, ni crear otros admins)
+            new Caso("GET", "/api/admin", "/api/admin", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/admin/owners", "/api/admin/owners", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("PUT", "/api/admin/owners", "/api/admin/owners", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("DELETE", "/api/admin/owners/{id}", "/api/admin/owners/1", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/admin/admins", "/api/admin/admins", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/admin/password", "/api/admin/password", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO));
+
+    static Stream<Arguments> todosLosCasos() {
+        return Stream.concat(ENDPOINTS_DE_LA_APP.stream(), RUTAS_SIN_REGLA.stream())
+                .flatMap(caso -> Stream.of(Quien.values()).map(quien -> Arguments.of(caso, quien)));
+    }
+
+    @ParameterizedTest(name = "{0} como {1}")
+    @MethodSource("todosLosCasos")
+    void aplicaLaPoliticaDeAutorizacionEsperada(Caso caso, Quien quien) throws Exception {
+        String idLibro = String.valueOf(libroCentral.getId());
+        String ruta = caso.ruta().replace("{id}", idLibro).replace("{bookId}", idLibro);
+
+        MockHttpServletRequestBuilder req = request(HttpMethod.valueOf(caso.metodo()), ruta);
+        if (caso.body() != null) {
+            req.contentType(MediaType.APPLICATION_JSON).content(caso.body());
+        }
+        switch (quien) {
+            case COMPRADOR -> req.header(AUTHORIZATION, bearer(compradorA));
+            case DUENO -> req.header(AUTHORIZATION, bearer(duenoCentral));
+            case DUENO_PENDIENTE -> req.header(AUTHORIZATION, bearer(duenoPendiente));
+            case ADMIN -> req.header(AUTHORIZATION, bearer(admin));
+            case ANONIMO -> {
+                // sin header Authorization
+            }
+        }
+
+        int status = mvc.perform(req).andReturn().getResponse().getStatus();
+        String contexto = caso + " como " + quien + " devolvio " + status;
+
+        switch (caso.para(quien)) {
+            case PERMITIDO -> assertThat(status).as(contexto + " (esperaba que pasara la autorizacion)")
+                    .isNotIn(401, 403);
+            case NO_AUTENTICADO_401 -> assertThat(status).as(contexto + " (esperaba 401)").isEqualTo(401);
+            case PROHIBIDO_403 -> assertThat(status).as(contexto + " (esperaba 403)").isEqualTo(403);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // RS30: token invalido en CADA endpoint protegido
+    // ------------------------------------------------------------------
+
+    /**
+     * Formas de presentar un token que NO debe autorizar nada. VALIDO es el
+     * control positivo: el mismo token armado a mano pero sin ataque tiene que
+     * pasar la autorizacion; si no, los demas casos no probarian nada.
+     */
+    enum TokenPresentado {
+        VALIDO, MAL_FORMADO, FIRMADO_CON_OTRA_CLAVE, SIN_FIRMA_ALG_NONE, EXPIRADO,
+        REVOCADO_POR_LOGOUT, EMITIDO_ANTES_DE_CAMBIAR_LA_PASSWORD
+    }
+
+    @Value("${app.jwt.secret}")
+    private String secret;
+
+    // Endpoints protegidos = los que rechazan al anonimo. Para cada uno se usa
+    // un usuario cuyo ROL si tiene permiso: asi el 401 se debe solo al token.
+    static Stream<Arguments> endpointsProtegidosPorToken() {
+        return ENDPOINTS_DE_LA_APP.stream()
+                .filter(caso -> caso.anonimo() == NO_AUTH)
+                .flatMap(caso -> Stream.of(TokenPresentado.values()).map(token -> Arguments.of(caso, token)));
+    }
+
+    @ParameterizedTest(name = "{0} con token {1}")
+    @MethodSource("endpointsProtegidosPorToken")
+    void unTokenInvalidoEsRechazadoEnCadaEndpointProtegido(Caso caso, TokenPresentado tipo) throws Exception {
+        Quien quien = Stream.of(Quien.COMPRADOR, Quien.DUENO, Quien.DUENO_PENDIENTE, Quien.ADMIN)
+                .filter(q -> caso.para(q) == OK).findFirst().orElseThrow();
+        User usuario = switch (quien) {
+            case COMPRADOR -> compradorA;
+            case DUENO -> duenoCentral;
+            case DUENO_PENDIENTE -> duenoPendiente;
+            default -> admin;
+        };
+        Instant ahora = Instant.now();
+        String token = switch (tipo) {
+            case VALIDO, REVOCADO_POR_LOGOUT, EMITIDO_ANTES_DE_CAMBIAR_LA_PASSWORD ->
+                    tokenFirmado(usuario, claveReal(), ahora.plusSeconds(600));
+            case MAL_FORMADO -> "esto.no.es-un-jwt";
+            case FIRMADO_CON_OTRA_CLAVE -> tokenFirmado(usuario, Keys.hmacShaKeyFor(new byte[48]), ahora.plusSeconds(600));
+            case SIN_FIRMA_ALG_NONE -> b64("{\"alg\":\"none\"}") + "." + b64("{\"sub\":\"" + usuario.getId()
+                    + "\",\"role\":\"" + usuario.getRole() + "\",\"jti\":\"x\",\"exp\":"
+                    + ahora.plusSeconds(600).getEpochSecond() + "}") + ".";
+            case EXPIRADO -> tokenFirmado(usuario, claveReal(), ahora.minusSeconds(60));
+        };
+        if (tipo == TokenPresentado.REVOCADO_POR_LOGOUT) {
+            int logout = mvc.perform(request(HttpMethod.POST, "/api/auth/logout")
+                    .header(AUTHORIZATION, "Bearer " + token)).andReturn().getResponse().getStatus();
+            assertThat(logout).as("el logout previo debe funcionar").isEqualTo(204);
+        }
+        if (tipo == TokenPresentado.EMITIDO_ANTES_DE_CAMBIAR_LA_PASSWORD) {
+            // Mismo efecto que User.changePasswordHash: la version vigente avanza (RS28)
+            ReflectionTestUtils.setField(usuario, "tokenVersion", usuario.getTokenVersion() + 1);
+            userRepo.saveAndFlush(usuario);
+        }
+
+        String idLibro = String.valueOf(libroCentral.getId());
+        MockHttpServletRequestBuilder req = request(HttpMethod.valueOf(caso.metodo()),
+                caso.ruta().replace("{id}", idLibro).replace("{bookId}", idLibro))
+                .header(AUTHORIZATION, "Bearer " + token);
+        if (caso.body() != null) {
+            req.contentType(MediaType.APPLICATION_JSON).content(caso.body());
+        }
+
+        int status = mvc.perform(req).andReturn().getResponse().getStatus();
+        String contexto = caso + " como " + quien + " con token " + tipo + " devolvio " + status;
+        if (tipo == TokenPresentado.VALIDO) {
+            assertThat(status).as(contexto + " (control positivo: esperaba pasar la autorizacion)")
+                    .isNotIn(401, 403);
+        } else {
+            assertThat(status).as(contexto + " (esperaba 401)").isEqualTo(401);
+        }
+    }
+
+    private SecretKey claveReal() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    }
+
+    // Mismos claims que JwtService.generateToken, con clave y expiracion a eleccion
+    private static String tokenFirmado(User usuario, SecretKey clave, Instant expiracion) {
+        var builder = Jwts.builder()
+                .subject(String.valueOf(usuario.getId()))
+                .claim(JwtService.ROLE_CLAIM, usuario.getRole().name())
+                .claim(JwtService.TOKEN_VERSION_CLAIM, usuario.getTokenVersion())
+                .id(UUID.randomUUID().toString())
+                .issuedAt(Date.from(expiracion.minusSeconds(900)))
+                .expiration(Date.from(expiracion));
+        if (usuario.isMustChangePassword()) {
+            builder.claim(JwtService.PASSWORD_CHANGE_CLAIM, true);
+        }
+        return builder.signWith(clave, Jwts.SIG.HS256).compact();
+    }
+
+    private static String b64(String json) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+    }
+
+    // ------------------------------------------------------------------
+    // Guardian de completitud
+    // ------------------------------------------------------------------
+
+    @Autowired
+    @Qualifier("requestMappingHandlerMapping")
+    private RequestMappingHandlerMapping handlerMapping;
+
+    @Test
+    void todaRutaDeLaAplicacionEstaEnLaMatriz() {
+        Set<String> reales = new TreeSet<>();
+        for (var entry : handlerMapping.getHandlerMethods().entrySet()) {
+            RequestMappingInfo info = entry.getKey();
+            // Solo controllers propios: se ignora, por ejemplo, el /error de Spring Boot
+            if (!entry.getValue().getBeanType().getName().startsWith("librosbuysan")) {
+                continue;
+            }
+            assertThat(info.getPathPatternsCondition()).isNotNull();
+            Set<String> patrones = info.getPathPatternsCondition().getPatternValues();
+            Set<RequestMethod> metodos = info.getMethodsCondition().getMethods();
+            for (String patron : patrones) {
+                if (metodos.isEmpty()) {
+                    reales.add("CUALQUIER_METODO " + patron);
+                }
+                for (RequestMethod metodo : metodos) {
+                    reales.add(metodo.name() + " " + patron);
+                }
+            }
+        }
+
+        Set<String> declarados = new TreeSet<>();
+        ENDPOINTS_DE_LA_APP.forEach(c -> declarados.add(c.metodo() + " " + c.patron()));
+
+        assertThat(reales)
+                .as("Los endpoints reales de los controllers y los de ENDPOINTS_DE_LA_APP deben coincidir. "
+                        + "Si agregaste un endpoint nuevo, declara aca (y en SecurityConfig) que roles pueden usarlo; "
+                        + "si lo quitaste, borra su fila.")
+                .containsExactlyInAnyOrderElementsOf(declarados);
+    }
+
+    // ------------------------------------------------------------------
+    // Verbos no soportados sobre rutas protegidas
+    // ------------------------------------------------------------------
+
+    @Test
+    void verboNoSoportadoSobreFavoritosNoSePermiteAUnDueno() throws Exception {
+        // Un DUENO jamas debe llegar al controller de favoritos, ni siquiera con un verbo sin handler
+        int status = mvc.perform(request(HttpMethod.PUT, "/api/favorites/" + libroCentral.getId())
+                        .header(AUTHORIZATION, bearer(duenoCentral)))
+                .andReturn().getResponse().getStatus();
+        assertThat(status).isEqualTo(403);
+    }
+
+    @Test
+    void verboNoSoportadoSobreFavoritosDeUnCompradorRecibe405() throws Exception {
+        // La autorizacion pasa (es COMPRADOR) y Spring MVC responde que no hay handler para ese verbo (RS33)
+        int status = mvc.perform(request(HttpMethod.PUT, "/api/favorites/" + libroCentral.getId())
+                        .header(AUTHORIZATION, bearer(compradorA)))
+                .andReturn().getResponse().getStatus();
+        assertThat(status).isEqualTo(405);
+    }
+}

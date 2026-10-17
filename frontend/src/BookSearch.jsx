@@ -1,38 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useEffectEvent } from 'react';
 import BookCover from './BookCover';
 import Nav from './Nav';
+import { useLanguage } from './language';
 import './BookSearch.css';
 
 export default function BookSearch({ session, onLogout, initialQuery = '', onQueryChange }) {
+    const { t } = useLanguage();
     const token = session?.token;
     const [searchTerm, setSearchTerm] = useState(initialQuery);
     const [books, setBooks] = useState([]);
     const [allCatalog, setAllCatalog] = useState([]);
     const [favorites, setFavorites] = useState([]);
-    const [loading, setLoading] = useState(false);
+    // Arranca en true: el catálogo inicial se pide apenas se monta
+    const [loading, setLoading] = useState(true);
     const [toastMsg, setToastMsg] = useState('');
 
     const showToast = (msg) => {
         setToastMsg(msg);
         setTimeout(() => setToastMsg(''), 3000);
-    };
-
-    // Carga lista de favoritos del comprador
-    const fetchFavorites = async () => {
-        if (!token) return;
-        try {
-            const res = await fetch('http://localhost:8080/api/favorites', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setFavorites(data);
-            } else if (res.status === 401) {
-                onLogout();
-            }
-        } catch (err) {
-            console.error(err);
-        }
     };
 
     // Ejecutar búsqueda por texto libre contra el endpoint real del backend
@@ -72,30 +57,51 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
         }
     };
 
-    // Carga catálogo inicial
-    const fetchInitialCatalog = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch('http://localhost:8080/api/books?page=1');
-            if (res.ok) {
-                const data = await res.json();
+    // Volviendo del detalle de un libro se restaura la búsqueda anterior.
+    // useEffectEvent: usa initialQuery/executeSearch actuales sin que vuelvan a disparar la carga
+    const showInitialResults = useEffectEvent((items) => {
+        if (initialQuery.trim()) executeSearch(initialQuery);
+        else setBooks(items);
+    });
+
+    // Carga catálogo inicial y favoritos del comprador. El estado se actualiza
+    // solo en los callbacks del fetch, y los requests se cancelan si cambia el token
+    useEffect(() => {
+        const controller = new AbortController();
+        const logError = (err) => {
+            if (err.name !== 'AbortError') console.error(err);
+        };
+
+        fetch('http://localhost:8080/api/books?page=1', { signal: controller.signal })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (!data) return;
                 const items = data.items || data || [];
                 setAllCatalog(items);
-                // Coming back from a book detail: restore the previous search results
-                if (initialQuery.trim()) executeSearch(initialQuery);
-                else setBooks(items);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+                showInitialResults(items);
+            })
+            .catch(logError)
+            // Un request cancelado (desmontaje o StrictMode) no debe apagar el loading del siguiente
+            .finally(() => {
+                if (!controller.signal.aborted) setLoading(false);
+            });
 
-    useEffect(() => {
-        fetchInitialCatalog();
-        fetchFavorites();
-    }, [token]);
+        if (token) {
+            fetch('http://localhost:8080/api/favorites', {
+                headers: { 'Authorization': `Bearer ${token}` },
+                signal: controller.signal,
+            })
+                .then((res) => {
+                    if (res.ok) return res.json();
+                    if (res.status === 401) onLogout();
+                    return null;
+                })
+                .then((data) => data && setFavorites(data))
+                .catch(logError);
+        }
+
+        return () => controller.abort();
+    }, [token, onLogout]);
 
     const handleInputChange = (e) => {
         const val = e.target.value;
@@ -150,7 +156,7 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
 
     return (
         <div className="booksaw-page">
-            <Nav active="buscar" session={session} />
+            <Nav active="buscar" session={session} onLogout={onLogout} />
 
             {/* Toast flotante */}
             {toastMsg && (
@@ -164,14 +170,14 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                 <div className="search-container">
 
                     <div className="search-header-box">
-                        <h1 className="search-main-headline">Búsqueda en Catálogo</h1>
+                        <h1 className="search-main-headline">{t('search_main_title')}</h1>
                         <p className="search-lead-desc">
-                            Encontrá obras de nuestra colección ingresando título, nombre de autor o número de ISBN.
+                            {t('search_subtitle')}
                         </p>
 
                         {/* Barra de Búsqueda */}
                         <div className="search-input-wrapper">
-                            <svg className="search-input-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#8C827A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg className="search-input-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" style={{ stroke: 'var(--booksaw-muted)' }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
@@ -179,7 +185,7 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                                 id="search-input-field"
                                 type="text"
                                 className="search-input-field"
-                                placeholder="Buscar por título, autor o ISBN..."
+                                placeholder={t('search_placeholder')}
                                 value={searchTerm}
                                 onChange={handleInputChange}
                                 maxLength={100}
@@ -190,8 +196,8 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                                     type="button"
                                     className="search-clear-btn"
                                     onClick={handleClearSearch}
-                                    title="Limpiar búsqueda"
-                                    aria-label="Limpiar búsqueda"
+                                    title={t('search_clear')}
+                                    aria-label={t('search_clear')}
                                 >
                                     ✕
                                 </button>
@@ -202,10 +208,10 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                         <div className="search-status-bar">
                             {searchTerm.trim() ? (
                                 <span>
-                                    Resultados para <strong>"{searchTerm}"</strong>: {books.length} {books.length === 1 ? 'libro encontrado' : 'libros encontrados'}
+                                    {t('search_results_for')} <strong>"{searchTerm}"</strong>: {books.length} {books.length === 1 ? t('search_book_found') : t('search_books_found')}
                                 </span>
                             ) : (
-                                <span>Explorando catálogo editorial ({books.length} títulos disponibles)</span>
+                                <span>{t('search_exploring')} ({books.length} {t('search_titles_available')})</span>
                             )}
                         </div>
                     </div>
@@ -214,19 +220,19 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                     {loading && (
                         <div className="search-loading-state">
                             <div className="editorial-spinner"></div>
-                            <p>Buscando en los registros editoriales...</p>
+                            <p>{t('search_loading')}</p>
                         </div>
                     )}
 
                     {/* Sin resultados */}
                     {!loading && books.length === 0 && (
                         <div className="search-empty-box">
-                            <h3 className="empty-title">Sin coincidencias</h3>
+                            <h3 className="empty-title">{t('search_no_matches')}</h3>
                             <p className="empty-desc">
                                 No encontramos libros que coincidan con <strong>"{searchTerm}"</strong>. Probá verificando la ortografía, buscando solo el apellido del autor o limpiando el filtro.
                             </p>
                             <button className="editorial-action-btn" onClick={handleClearSearch}>
-                                VER TODO EL CATÁLOGO
+                                {t('search_view_all')}
                             </button>
                         </div>
                     )}
@@ -253,7 +259,7 @@ export default function BookSearch({ session, onLogout, initialQuery = '', onQue
                                                 title={fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                                                 aria-label={fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                                             >
-                                                <svg viewBox="0 0 24 24" width="19" height="19" fill={fav ? "#A68658" : "none"} stroke={fav ? "#A68658" : "#8C827A"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                                <svg viewBox="0 0 24 24" width="19" height="19" style={{ fill: fav ? "var(--booksaw-gold-dark)" : "none", stroke: fav ? "var(--booksaw-gold-dark)" : "var(--booksaw-muted)" }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                                     <path d="M12 6.8 C10.8 4.2 7.8 2.6 4.8 3.6 C1.8 4.6 1.2 8.8 3 12.2 C5 16 11.2 20.8 12 21.4 C12.8 20.8 19 16 21 12.2 C22.8 8.8 22.2 4.6 19.2 3.6 C16.2 2.6 13.2 4.2 12 6.8 Z" />
                                                 </svg>
                                             </button>

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import Nav from './Nav';
+import { useLanguage } from './language';
 import './Register.css';
 
 const API_URL = 'http://localhost:8080/api/users/me';
+const ADMIN_PASSWORD_URL = 'http://localhost:8080/api/admin/password';
 
-export default function Profile({ session, onUnauthorized }) {
+export default function Profile({ session, onUnauthorized, onLogout }) {
+    const { t } = useLanguage();
     const [profile, setProfile] = useState(null);
     const [loadFailed, setLoadFailed] = useState(false);
     const [editing, setEditing] = useState(false);
@@ -20,6 +23,14 @@ export default function Profile({ session, onUnauthorized }) {
 
     useEffect(() => {
         if (!token) return;
+
+        // R18: el administrador no tiene endpoint /api/users/me (403 por matriz de seguridad);
+        // sus datos se toman directamente de la sesion activa.
+        if (session?.role === 'ADMIN') {
+            setProfile({ username: session.username });
+            return;
+        }
+
         const controller = new AbortController();
 
         fetch(API_URL, {
@@ -40,7 +51,7 @@ export default function Profile({ session, onUnauthorized }) {
             });
 
         return () => controller.abort();
-    }, [token, onUnauthorized]);
+    }, [token, session?.role, session?.username, onUnauthorized]);
 
     const clearPasswords = () => {
         setCurrentPassword('');
@@ -67,24 +78,25 @@ export default function Profile({ session, onUnauthorized }) {
         setSuccessMsg('');
 
         if (!currentPassword || !newPassword || !confirmPassword) {
-            setErrorMsg('Por favor, completá todos los campos.');
+            setErrorMsg(t('profile_err_required'));
             return;
         }
         if (newPassword.length < 8) {
-            setErrorMsg('La nueva contraseña debe tener al menos 8 caracteres.');
+            setErrorMsg(t('profile_err_min'));
             return;
         }
         if (newPassword !== confirmPassword) {
-            setErrorMsg('Las contraseñas nuevas no coinciden.');
+            setErrorMsg(t('profile_err_mismatch'));
             return;
         }
 
         // Username is not editable: only the password fields are sent
         const body = { currentPassword, newPassword };
+        const targetUrl = session?.role === 'ADMIN' ? ADMIN_PASSWORD_URL : API_URL;
 
         setSaving(true);
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(targetUrl, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -94,21 +106,23 @@ export default function Profile({ session, onUnauthorized }) {
             });
 
             if (response.ok) {
-                const updated = await response.json();
-                setProfile(updated);
+                if (session?.role !== 'ADMIN') {
+                    const updated = await response.json();
+                    setProfile(updated);
+                }
                 clearPasswords();
                 setEditing(false);
-                setSuccessMsg('Tu contraseña se actualizó correctamente.');
+                setSuccessMsg(t('profile_success'));
             } else if (response.status === 401) {
                 onUnauthorized();
             } else if (response.status === 400) {
                 // The backend does not say which field failed (RS31)
-                setErrorMsg('No pudimos cambiar la contraseña. Verificá que la contraseña actual sea correcta.');
+                setErrorMsg(t('profile_err_bad_request'));
             } else {
-                setErrorMsg('Ocurrió un error al guardar los cambios. Intentalo de nuevo.');
+                setErrorMsg(t('profile_err_generic'));
             }
         } catch {
-            setErrorMsg('No pudimos conectar con el servicio. Por favor, intentá nuevamente en unos momentos.');
+            setErrorMsg(t('profile_err_network'));
         } finally {
             setSaving(false);
         }
@@ -116,27 +130,30 @@ export default function Profile({ session, onUnauthorized }) {
 
     return (
         <div className="booksaw-page">
-            <Nav active="perfil" session={session} />
+            <Nav active="perfil" session={session} onLogout={onLogout} />
 
             <main className="booksaw-main">
                 <div className="register-card">
                     <div className="card-header">
-                        <h2 className="card-title">Mi perfil</h2>
+                        <h2 className="card-title">{t('profile_title')}</h2>
                     </div>
 
                     {!session && (
                         <p className="card-subtitle">
-                            Tenés que iniciar sesión para ver tu perfil. <a href="#registro" className="login-link">Crear cuenta</a>
+                            {t('profile_need_login')}{' '}
+                            <a href="#registro" className="login-link">
+                                {t('profile_create_account')}
+                            </a>
                         </p>
                     )}
 
                     {session && loadFailed && (
                         <div className="alert-box alert-error" role="alert">
-                            <span>No pudimos cargar tu perfil. Por favor, intentá nuevamente en unos momentos.</span>
+                            <span>{t('profile_load_failed')}</span>
                         </div>
                     )}
 
-                    {session && !profile && !loadFailed && <p className="card-subtitle">Cargando perfil...</p>}
+                    {session && !profile && !loadFailed && <p className="card-subtitle">{t('profile_loading')}</p>}
 
                     {errorMsg && (
                         <div className="alert-box alert-error" role="alert">
@@ -153,10 +170,10 @@ export default function Profile({ session, onUnauthorized }) {
 
                     {profile && !editing && (
                         <div className="register-form">
-                            <p><strong>Usuario:</strong> {profile.username}</p>
-                            <p><strong>Correo electrónico:</strong> {profile.email}</p>
+                            <p><strong>{t('profile_user')}</strong> {profile.username}</p>
+                            {profile.email && <p><strong>{t('profile_email')}</strong> {profile.email}</p>}
                             <button type="button" className="btn-submit-pill" onClick={startEditing}>
-                                CAMBIAR CONTRASEÑA
+                                {t('profile_change_pass')}
                             </button>
                         </div>
                     )}
@@ -164,7 +181,7 @@ export default function Profile({ session, onUnauthorized }) {
                     {profile && editing && (
                         <form onSubmit={handleSubmit} className="register-form" noValidate>
                             <div className="input-group">
-                                <label htmlFor="currentPassword">Contraseña actual</label>
+                                <label htmlFor="currentPassword">{t('profile_current_pass')}</label>
                                 <input
                                     id="currentPassword"
                                     type="password"
@@ -175,11 +192,11 @@ export default function Profile({ session, onUnauthorized }) {
                             </div>
 
                             <div className="input-group">
-                                <label htmlFor="newPassword">Nueva contraseña</label>
+                                <label htmlFor="newPassword">{t('profile_new_pass')}</label>
                                 <input
                                     id="newPassword"
                                     type="password"
-                                    placeholder="Mínimo 8 caracteres"
+                                    placeholder={t('profile_min_chars')}
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     autoComplete="new-password"
@@ -187,7 +204,7 @@ export default function Profile({ session, onUnauthorized }) {
                             </div>
 
                             <div className="input-group">
-                                <label htmlFor="confirmPassword">Confirmar nueva contraseña</label>
+                                <label htmlFor="confirmPassword">{t('profile_confirm_pass')}</label>
                                 <input
                                     id="confirmPassword"
                                     type="password"
@@ -198,10 +215,10 @@ export default function Profile({ session, onUnauthorized }) {
                             </div>
 
                             <button type="submit" className="btn-submit-pill" disabled={saving}>
-                                {saving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                                {saving ? t('profile_saving') : t('profile_save_btn')}
                             </button>
                             <button type="button" className="btn-cancel" onClick={cancelEditing} disabled={saving}>
-                                Cancelar
+                                {t('profile_cancel')}
                             </button>
                         </form>
                     )}

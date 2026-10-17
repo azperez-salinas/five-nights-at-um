@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import BookCover from './BookCover';
 import Nav from './Nav';
+import { useLanguage } from './language';
 import './Favorites.css';
 
 export default function Favorites({ session, onLogout, onNavigate }) {
+    const { t } = useLanguage();
     const token = session.token;
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,32 +16,31 @@ export default function Favorites({ session, onLogout, onNavigate }) {
         setTimeout(() => setToastMsg(''), 3000);
     };
 
-    const fetchFavorites = async () => {
-        try {
-            const res = await fetch('http://localhost:8080/api/favorites', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setFavorites(data);
-            } else if (res.status === 401) {
-                onLogout();
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
+    // El estado se actualiza solo en los callbacks del fetch (nunca de forma
+    // sincrona en el efecto) y el request se cancela si cambia el token
     useEffect(() => {
-        const init = async () => {
-            setLoading(true);
-            await fetchFavorites();
-            setLoading(false);
-        };
-        init();
-    }, [token]);
+        const controller = new AbortController();
+
+        fetch('http://localhost:8080/api/favorites', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            signal: controller.signal,
+        })
+            .then((res) => {
+                if (res.ok) return res.json();
+                if (res.status === 401) onLogout();
+                return null;
+            })
+            .then((data) => data && setFavorites(data))
+            .catch((err) => {
+                if (err.name !== 'AbortError') console.error(err);
+            })
+            // Un request cancelado (desmontaje o StrictMode) no debe apagar el loading del siguiente
+            .finally(() => {
+                if (!controller.signal.aborted) setLoading(false);
+            });
+
+        return () => controller.abort();
+    }, [token, onLogout]);
 
     const handleToggleFavorite = async (book) => {
         const isFav = favorites.some((f) => f.id === book.id);
@@ -84,7 +85,7 @@ export default function Favorites({ session, onLogout, onNavigate }) {
 
     return (
         <div className="booksaw-page">
-            <Nav active="favoritos" session={session} />
+            <Nav active="favoritos" session={session} onLogout={onLogout} />
 
             {toastMsg && (
                 <div className="booksaw-toast">
@@ -96,9 +97,9 @@ export default function Favorites({ session, onLogout, onNavigate }) {
                 <div className="favorites-editorial-wrapper">
 
                     <div className="favorites-header-section">
-                        <h1 className="favorites-main-headline">Mis Libros Favoritos</h1>
+                        <h1 className="favorites-main-headline">{t('fav_title')}</h1>
                         <p className="favorites-lead-desc">
-                            Tus obras seleccionadas y lecturas pendientes guardadas en tu cuenta.
+                            {t('fav_desc')}
                         </p>
 
                     </div>
@@ -106,7 +107,7 @@ export default function Favorites({ session, onLogout, onNavigate }) {
                     {loading && (
                         <div className="favorites-loading-state">
                             <div className="editorial-spinner"></div>
-                            <p>Consultando catálogo editorial...</p>
+                            <p>{t('fav_loading')}</p>
                         </div>
                     )}
 
@@ -114,15 +115,15 @@ export default function Favorites({ session, onLogout, onNavigate }) {
                         <div>
                             {favorites.length === 0 ? (
                                 <div className="favorites-empty-card">
-                                    <h3 className="empty-title">Aún no tenés libros guardados</h3>
+                                    <h3 className="empty-title">{t('fav_empty_title')}</h3>
                                     <p className="empty-desc">
-                                        Mirá los destacados y tocá el corazón para armar tu lista de lecturas preferidas.
+                                        {t('fav_empty_desc')}
                                     </p>
                                     <button
                                         className="editorial-action-btn"
                                         onClick={() => onNavigate('catalogo')}
                                     >
-                                        VER DESTACADOS
+                                        {t('fav_btn_catalog')}
                                     </button>
                                 </div>
                             ) : (
@@ -145,7 +146,7 @@ export default function Favorites({ session, onLogout, onNavigate }) {
                                                     title="Quitar de favoritos"
                                                     aria-label="Quitar de favoritos"
                                                 >
-                                                    <svg viewBox="0 0 24 24" width="19" height="19" fill="#A68658" stroke="#A68658" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                                    <svg viewBox="0 0 24 24" width="19" height="19" style={{ fill: 'var(--booksaw-gold-dark)', stroke: 'var(--booksaw-gold-dark)' }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                                         <path d="M12 6.8 C10.8 4.2 7.8 2.6 4.8 3.6 C1.8 4.6 1.2 8.8 3 12.2 C5 16 11.2 20.8 12 21.4 C12.8 20.8 19 16 21 12.2 C22.8 8.8 22.2 4.6 19.2 3.6 C16.2 2.6 13.2 4.2 12 6.8 Z" />
                                                     </svg>
 

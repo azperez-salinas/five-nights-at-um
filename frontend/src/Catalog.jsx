@@ -1,31 +1,51 @@
 import { useEffect, useState } from 'react';
 import BookCover from './BookCover';
+import CatalogFilters from './CatalogFilters';
 import Nav from './Nav';
+import { useLanguage } from './language';
 import './Catalog.css';
 
 const FAVORITES_URL = 'http://localhost:8080/api/favorites';
 
-// The page lives in the URL (#catalogo/N) so returning from a book detail keeps it
-export default function Catalog({ page, session }) {
+// R10: only the filters with a value are sent; the backend builds the WHERE from those
+const buildCatalogQuery = (page, filters) => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (filters.libreria) params.set('libreria', filters.libreria);
+    if (filters.autor) params.set('autor', filters.autor);
+    return params.toString();
+};
+
+// The page lives in the URL (#catalogo/N) so returning from a book detail keeps it.
+// Filters live in App for the same reason.
+export default function Catalog({ page, session, filters, onFiltersChange, onLogout }) {
+    const { t } = useLanguage();
+    const query = buildCatalogQuery(page, filters);
+    // { query, result } so a response is only shown for the request that produced it
     const [data, setData] = useState(null);
-    // Page number whose request failed; the error only shows for that page
-    const [failedPage, setFailedPage] = useState(null);
+    // Query whose request failed; the error only shows for that query
+    const [failedQuery, setFailedQuery] = useState(null);
 
     useEffect(() => {
         const controller = new AbortController();
 
-        fetch(`http://localhost:8080/api/books?page=${page}`, { signal: controller.signal })
+        fetch(`http://localhost:8080/api/books?${query}`, { signal: controller.signal })
             .then((response) => {
                 if (!response.ok) throw new Error();
                 return response.json();
             })
-            .then(setData)
+            .then((result) => setData({ query, result }))
             .catch((err) => {
-                if (err.name !== 'AbortError') setFailedPage(page);
+                if (err.name !== 'AbortError') setFailedQuery(query);
             });
 
         return () => controller.abort();
-    }, [page]);
+    }, [query]);
+
+    // New filters always start from the first page
+    const applyFilters = (next) => {
+        onFiltersChange(next);
+        if (page !== 1) window.location.hash = '#catalogo';
+    };
 
     // Favorites are a COMPRADOR-only feature (the backend answers 403 to DUENO)
     const token = session?.token;
@@ -80,18 +100,22 @@ export default function Catalog({ page, session }) {
         }
     };
 
-    const errorMsg = failedPage === page
+    const errorMsg = failedQuery === query
         ? 'No pudimos cargar el catálogo. Por favor, intentá nuevamente en unos momentos.'
         : favError;
-    const loading = data?.page !== page && !errorMsg;
-    const totalPages = data?.totalPages ?? 1;
+    const loading = data?.query !== query && !errorMsg;
+    const books = data?.result;
+    const totalPages = books?.totalPages ?? 1;
+    const filtered = filters.libreria !== '' || filters.autor !== '';
 
     return (
         <div className="booksaw-page">
-            <Nav active="catalogo" session={session} />
+            <Nav active="catalogo" session={session} onLogout={onLogout} />
 
             <main className="catalog-main">
-                <h1 className="catalog-title">Destacados</h1>
+                <h1 className="catalog-title">{t('catalog_title')}</h1>
+
+                <CatalogFilters filters={filters} onApply={applyFilters} loading={loading} />
 
                 {errorMsg && (
                     <div className="alert-box alert-error" role="alert">
@@ -99,15 +123,27 @@ export default function Catalog({ page, session }) {
                     </div>
                 )}
 
-                {loading && !data && <p className="catalog-status">Cargando libros...</p>}
-
-                {data && data.items.length === 0 && (
-                    <p className="catalog-status">No hay libros disponibles por el momento.</p>
+                {filtered && books && books.items.length > 0 && !loading && (
+                    <p className="catalog-results-count">
+                        {books.totalItems === 1
+                            ? `1 ${t('catalog_found_single')}`
+                            : `${books.totalItems} ${t('catalog_found_plural')}`}
+                    </p>
                 )}
 
-                {data && (
+                {loading && <p className="catalog-status">{t('catalog_loading')}</p>}
+
+                {!loading && books && books.items.length === 0 && (
+                    <p className="catalog-status">
+                        {filtered
+                            ? t('catalog_empty_filtered')
+                            : t('catalog_empty')}
+                    </p>
+                )}
+
+                {books && (
                     <div className="editorial-books-grid" aria-busy={loading}>
-                        {data.items.map((book) => {
+                        {books.items.map((book) => {
                             const fav = favoriteIds.has(book.id);
                             return (
                                 <article key={book.id} className="book-card-item">
@@ -121,15 +157,15 @@ export default function Catalog({ page, session }) {
                                         </a>
                                         {showHeart && (
                                             <button
-                                                type="button"
-                                                className="caption-heart-btn"
-                                                onClick={() => toggleFavorite(book)}
-                                                disabled={pendingId === book.id}
-                                                aria-pressed={fav}
-                                                title={fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                                                aria-label={fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                                            >
-                                                <svg viewBox="0 0 24 24" width="19" height="19" fill={fav ? '#A68658' : 'none'} stroke={fav ? '#A68658' : '#8C827A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                                 type="button"
+                                                 className="caption-heart-btn"
+                                                 onClick={() => toggleFavorite(book)}
+                                                 disabled={pendingId === book.id}
+                                                 aria-pressed={fav}
+                                                 title={fav ? t('fav_remove') : t('fav_add')}
+                                                 aria-label={fav ? t('fav_remove') : t('fav_add')}
+                                             >
+                                                <svg viewBox="0 0 24 24" width="19" height="19" style={{ fill: fav ? 'var(--booksaw-gold-dark)' : 'none', stroke: fav ? 'var(--booksaw-gold-dark)' : 'var(--booksaw-muted)' }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                                     <path d="M12 6.8 C10.8 4.2 7.8 2.6 4.8 3.6 C1.8 4.6 1.2 8.8 3 12.2 C5 16 11.2 20.8 12 21.4 C12.8 20.8 19 16 21 12.2 C22.8 8.8 22.2 4.6 19.2 3.6 C16.2 2.6 13.2 4.2 12 6.8 Z" />
                                                 </svg>
                                             </button>
@@ -141,7 +177,7 @@ export default function Catalog({ page, session }) {
                     </div>
                 )}
 
-                {data && totalPages > 1 && (
+                {books && totalPages > 1 && (
                     <nav className="catalog-pagination" aria-label="Paginación del catálogo">
                         <button
                             type="button"
@@ -149,16 +185,16 @@ export default function Catalog({ page, session }) {
                             onClick={() => { window.location.hash = `#catalogo/${page - 1}`; }}
                             disabled={loading || page <= 1}
                         >
-                            ANTERIOR
+                            {t('catalog_prev')}
                         </button>
-                        <span>Página {page} de {totalPages}</span>
+                        <span>{t('catalog_page')} {page} {t('catalog_of')} {totalPages}</span>
                         <button
                             type="button"
                             className="btn-submit-pill"
                             onClick={() => { window.location.hash = `#catalogo/${page + 1}`; }}
                             disabled={loading || page >= totalPages}
                         >
-                            SIGUIENTE
+                            {t('catalog_next')}
                         </button>
                     </nav>
                 )}

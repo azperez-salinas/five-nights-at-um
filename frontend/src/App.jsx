@@ -128,12 +128,20 @@ function App() {
     );
   }
   if (session?.role === 'ADMIN') {
+    if (hash === '#perfil') {
+      return (
+        <Profile
+          session={session}
+          onUnauthorized={handleUnauthorized}
+          onLogout={handleLogout}
+        />
+      );
+    }
     return (
       <AdminPanel
         session={session}
         onUnauthorized={handleUnauthorized}
         onLogout={handleLogout}
-        onPasswordChanged={handlePasswordChanged}
       />
     );
   }

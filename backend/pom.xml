@@ -21,6 +21,9 @@
         <java.version>21</java.version>
         <jjwt.version>0.12.7</jjwt.version>
         <bouncycastle.version>1.86</bouncycastle.version>
+        <!-- spring-boot-starter-parent:3.5.16 trae 10.1.55; se fija la ultima
+             version 10.1.x publicada para cubrir los CVEs posteriores. -->
+        <tomcat.version>10.1.61</tomcat.version>
     </properties>
 
     <dependencies>

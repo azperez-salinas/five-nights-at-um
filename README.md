@@ -121,3 +121,68 @@ Debe considerar el resultado final, no se "deja llevar" por los comentarios que 
 
 _Ejemplo de resultado de la ejecución:_
 ![img_3.png](img_3.png)
+
+## ¿Cómo ejecutar el Dependency-Check?
+
+[OWASP Dependency-Check](https://owasp.org/www-project-dependency-check/) analiza las dependencias del proyecto y genera un reporte con las vulnerabilidades conocidas (CVE).
+
+> Dependency-Check **no descarga dependencias por sí solo**: analiza lo que hay físicamente en las carpetas que se le indican. Por eso, antes de escanear hay que dejar las dependencias del backend en una carpeta del proyecto (paso 2). Si no, el reporte sale vacío aunque haya vulnerabilidades.
+
+### Requisitos
+
+- **Java** instalado (`java -version`).
+- **Maven** instalado y agregado al `PATH` (`mvn -v`). Si no lo reconoce, descárguelo de https://maven.apache.org/download.cgi, descomprímalo y agregue su carpeta `bin` al `PATH` (por ejemplo `C:\apache-maven-3.10.0\bin`). Abra una consola nueva para que tome el cambio.
+- **Dependency-Check** descargado y descomprimido (por ejemplo en `C:\dependency-check`), desde https://owasp.org/www-project-dependency-check/.
+- Una **API key de NVD** (gratuita, se solicita en https://nvd.nist.gov/developers/request-an-api-key). Sin ella la primera ejecución es muy lenta. **No suba la key al repositorio ni la comparta en capturas.**
+- Dependencias del frontend instaladas (`npm install` en `frontend/`), para que exista `node_modules`.
+
+### 1. Ubicarse en el backend
+
+```bat
+cd <ruta-del-repo>\backend
+```
+
+### 2. Descargar las dependencias del backend
+
+```bat
+mvn dependency:copy-dependencies -DoutputDirectory=target\deps
+```
+
+Este comando copia todos los `.jar` del backend (incluidas las dependencias transitivas) a `backend\target\deps`. Espere a que termine con `BUILD SUCCESS` y verifique que la carpeta tenga archivos `.jar`:
+
+```bat
+dir target\deps
+```
+
+En PowerShell las comillas son necesarias: `mvn dependency:copy-dependencies "-DoutputDirectory=target\deps"`.
+
+### 3. Generar el reporte
+
+Desde la carpeta `bin` de Dependency-Check:
+
+```bat
+cd C:\dependency-check\bin
+dependency-check.bat --project "Libreria Buysan" --scan "C:\Desarrollo\DS\five-nights-at-um" --format ALL --out "C:\Desarrollo\DS\reporte-dc" --disableYarnAudit --disableCentral --nvdApiKey <SU_API_KEY>
+```
+
+| Parámetro | Qué hace |
+|---|---|
+| `--project` | Nombre que aparece en el reporte. |
+| `--scan` | Carpeta a analizar: la raíz del repo (incluye `frontend/node_modules` y `backend/target/deps`). |
+| `--format ALL` | Genera el reporte en todos los formatos (HTML, JSON, XML, CSV, etc.). |
+| `--out` | Carpeta donde se guardan los reportes. |
+| `--disableYarnAudit` | Evita un error: el analizador de Yarn se activa porque hay un `yarn.lock` dentro de `node_modules`, pero el proyecto usa npm. |
+| `--disableCentral` | Evita el error de conexión a Maven Central (timeout). |
+| `--nvdApiKey` | API key de NVD. |
+
+> **Las rutas de `--scan` y `--out` son de ejemplo:** reemplácelas por la ubicación del proyecto y la carpeta de salida en su máquina. Pueden ser diferentes a las del ejemplo.
+
+La primera ejecución descarga la base de datos NVD y puede tardar bastante: espere a que vuelva el prompt, no la corte.
+
+### 4. Validar el reporte
+
+Abra `dependency-check-report.html` (en la carpeta indicada en `--out`) y verifique:
+
+- En **Scan Information**, **Report Generated On** corresponde a la ejecución reciente.
+- **Dependencies Scanned** es alto (miles de archivos) y aparecen los `.jar` del backend (por ejemplo `spring-core-x.x.x.jar`). Si no aparecen, revise el paso 2.
+- No aparece la sección **Analysis Exceptions**. Si aparece, el análisis quedó incompleto.

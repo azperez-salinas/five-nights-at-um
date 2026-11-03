@@ -4,6 +4,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -26,6 +29,20 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        // R33: la ruta existe pero no admite ese verbo (lo marca
+        // MethodNotAllowedAuthorizationManager) -> 405 con los metodos admitidos
+        Object allowed = request.getAttribute(MethodNotAllowedAuthorizationManager.ALLOWED_METHODS_ATTRIBUTE);
+        if (allowed instanceof Set<?> methods && !methods.isEmpty()) {
+            auditLogger.denied(request, "METHOD_NOT_ALLOWED", HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            response.setHeader(HttpHeaders.ALLOW, methods.stream()
+                    .map(Object::toString)
+                    .sorted()
+                    .collect(Collectors.joining(", ")));
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write("{\"message\":\"Metodo no permitido\"}");
+            return;
+        }
         // RS23: rol sin permiso para la ruta (o ruta bloqueada por denyAll)
         auditLogger.denied(request, "FORBIDDEN_ROLE", HttpServletResponse.SC_FORBIDDEN);
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);

@@ -34,6 +34,7 @@ public class SecurityConfig {
     private final UserRepo userRepo;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
+    private final MethodNotAllowedAuthorizationManager methodNotAllowedAuthorizationManager;
     private final List<String> allowedOrigins;
 
     public SecurityConfig(JwtService jwtService,
@@ -41,12 +42,14 @@ public class SecurityConfig {
                           UserRepo userRepo,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
+                          MethodNotAllowedAuthorizationManager methodNotAllowedAuthorizationManager,
                           @Value("${cors.allowed-origins}") List<String> allowedOrigins) {
         this.jwtService = jwtService;
         this.revocationService = revocationService;
         this.userRepo = userRepo;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.methodNotAllowedAuthorizationManager = methodNotAllowedAuthorizationManager;
         this.allowedOrigins = allowedOrigins;
     }
 
@@ -148,7 +151,11 @@ public class SecurityConfig {
                         // aunque el usuario este autenticado: un endpoint
                         // nuevo queda inaccesible hasta que se le asigne un
                         // rol aca. Sin token responde 401; con token, 403.
-                        .anyRequest().denyAll())
+                        // R33: si la ruta existe pero no con ese verbo, con
+                        // token responde 405 + Allow (ver
+                        // MethodNotAllowedAuthorizationManager); sigue
+                        // denegando siempre.
+                        .anyRequest().access(methodNotAllowedAuthorizationManager))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocationService, userRepo), UsernamePasswordAuthenticationFilter.class)
                 // RS11: justo despues del JWT, cuando el principal ya esta
                 // resuelto, para que la identidad quede en el MDC de los logs

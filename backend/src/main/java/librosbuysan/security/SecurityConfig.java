@@ -73,15 +73,15 @@ public class SecurityConfig {
                         // tapa el codigo de error real (ej. un 405 real
                         // terminaba devolviendo 401 "No autenticado").
                         .requestMatchers("/error").permitAll()
-                        // R3: el logout exige sesion activa. Esta regla DEBE ir
-                        // antes de "/api/auth/**": Spring usa la primera que
-                        // coincide, y si quedara despues el logout seria publico
-                        // y el principal llegaria null al controller.
+                        // R3: el logout exige sesion activa.
                         // R18: el admin y el dueno con contrasena temporal
                         // tambien pueden cerrar sesion (revocar su token).
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout")
                                 .hasAnyRole(ROLE_COMPRADOR, ROLE_DUENO, "ADMIN", PWD_CHANGE)
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // Solo login y registro son publicos, por metodo y ruta
+                        // exactos. Toda nueva ruta de auth queda denegada hasta
+                        // que se declare explicitamente su politica de acceso.
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         // R18/F18: las dos unicas acciones del panel de admin.
                         // Se declaran por metodo y ruta exactos: cualquier
                         // otra cosa bajo /api/admin cae en el denyAll de abajo,

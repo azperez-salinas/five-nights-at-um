@@ -2,7 +2,6 @@ package librosbuysan.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Set;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,13 +16,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 403 de esas reglas no llegan aca: los registran RestAuthenticationEntryPoint
  * y RestAccessDeniedHandler.
  *
- * - Solo requests autenticados: login/registro y el catalogo publico no son
- *   decisiones de autorizacion.
- * - Solo operaciones que cambian estado (POST/PUT/DELETE...). Los GET
- *   protegidos (/mine, /me, /libreria, /metricas, /favorites) leen datos
- *   propios resueltos desde el token, sin ids del cliente; su unica decision
- *   es la de rol, que ya queda registrada si se rechaza. Registrar cada GET
- *   permitido solo llenaria el log.
+ * - Solo requests autenticados: login/registro y el catalogo consultado sin
+ *   sesion no son decisiones de autorizacion sobre un consumidor.
+ * - Se registran TODOS los metodos, incluidas las lecturas (GET/HEAD).
+ *   fix/R23 (DS-75): antes se omitian los GET protegidos (/api/users/me,
+ *   /mine, /libreria, /metricas, /favorites) y un acceso permitido al perfil
+ *   no dejaba rastro en la auditoria. R23 pide poder identificar las
+ *   operaciones de acceso permitidas y rechazadas, y leer datos propios
+ *   (por ejemplo el perfil) es un acceso permitido que tiene que quedar
+ *   registrado con usuario, operacion, recurso, resultado y fecha.
+ * - Solo se excluye OPTIONS: es el preflight de CORS que arma el navegador,
+ *   no una operacion del consumidor.
  * - RS20/R6: el 404 de un recurso ajeno es una denegacion real (se responde
  *   igual que "no existe" para no revelar nada); aca se registra como DENIED.
  *   El cliente recibe exactamente la misma respuesta que antes.
@@ -34,7 +37,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Component
 public class AuthorizationAuditInterceptor implements HandlerInterceptor, WebMvcConfigurer {
 
-    private static final Set<String> READ_METHODS = Set.of("GET", "HEAD", "OPTIONS");
+    private static final String PREFLIGHT_METHOD = "OPTIONS";
 
     private final AuthorizationAuditLogger auditLogger;
 
@@ -50,7 +53,7 @@ public class AuthorizationAuditInterceptor implements HandlerInterceptor, WebMvc
     @Override
     public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                                 @NonNull Object handler, Exception ex) {
-        if (READ_METHODS.contains(request.getMethod()) || !isAuthenticated()) {
+        if (PREFLIGHT_METHOD.equals(request.getMethod()) || !isAuthenticated()) {
             return;
         }
         int status = ex != null ? HttpServletResponse.SC_INTERNAL_SERVER_ERROR : response.getStatus();

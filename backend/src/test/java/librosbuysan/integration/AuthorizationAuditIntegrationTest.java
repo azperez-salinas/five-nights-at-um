@@ -31,7 +31,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
  *   401 sin token / token invalido   -> RestAuthenticationEntryPoint
  *   403 rol sin permiso               -> RestAccessDeniedHandler
  *   404 recurso ajeno (RS20/R6)       -> AuthorizationAuditInterceptor (DENIED)
- *   2xx operacion propia permitida    -> AuthorizationAuditInterceptor (ALLOWED)
+ *   2xx operacion propia permitida    -> AuthorizationAuditInterceptor (ALLOWED),
+ *                                        incluidas las lecturas como GET /api/users/me (fix/R23, DS-75)
  */
 class AuthorizationAuditIntegrationTest extends IntegrationTestBase {
 
@@ -120,17 +121,47 @@ class AuthorizationAuditIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    void losGetPublicosYLosGetProtegidosPermitidosNoLlenanElLog() throws Exception {
+    void losGetPublicosSinSesionYElLoginNoGeneranEventosDeAutorizacion() throws Exception {
         mvc.perform(get("/api/books")).andExpect(status().isOk());
         mvc.perform(get("/api/books/{id}", libroCentral.getId())).andExpect(status().isOk());
-        mvc.perform(get("/api/books/mine").header(AUTHORIZATION, bearer(duenoCentral))).andExpect(status().isOk());
         // Login: autenticacion (RS32 registra event=AUTHN), no una decision de autorizacion (event=AUTHZ)
         mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"comprador_a\",\"password\":\"" + PASSWORD + "\"}"))
                 .andExpect(status().isOk());
 
-        // No debe haberse registrado ninguna decision de autorizacion (AUTHZ)
+        // Sin consumidor autenticado no hay decision de autorizacion que registrar
         assertThat(lineas()).noneMatch(l -> l.contains("event=AUTHZ"));
+    }
+
+    /**
+     * fix/R23 (DS-75): reproduce los pasos de la incidencia. Un COMPRADOR
+     * consulta su perfil con un token valido y un X-Request-Id; el acceso se
+     * permite (200) y DEBE quedar un evento AUTHZ con el usuario, la
+     * operacion, el recurso, el resultado y el mismo requestId.
+     */
+    @Test
+    void laConsultaDelPerfilQuedaRegistradaComoAccesoPermitido() throws Exception {
+        mvc.perform(get("/api/users/me").header(AUTHORIZATION, bearer(compradorA))
+                        .header("X-Request-Id", "ds75-perfil"))
+                .andExpect(status().isOk());
+
+        assertThat(unicaLinea()).contains("event=AUTHZ outcome=ALLOWED reason=- status=200",
+                        "user=" + compradorA.getId() + " role=COMPRADOR", "method=GET",
+                        "resource=/api/users/me", "requestId=ds75-perfil")
+                .matches(TS_ISO_UTC);
+        assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.INFO);
+    }
+
+    @Test
+    void lasLecturasProtegidasPermitidasQuedanRegistradasConElConsumidor() throws Exception {
+        mvc.perform(get("/api/books/mine").header(AUTHORIZATION, bearer(duenoCentral))).andExpect(status().isOk());
+        mvc.perform(get("/api/favorites").header(AUTHORIZATION, bearer(compradorA))).andExpect(status().isOk());
+
+        assertThat(lineas()).hasSize(2);
+        assertThat(lineas().get(0)).contains("outcome=ALLOWED", "status=200", "method=GET",
+                "user=" + duenoCentral.getId() + " role=DUENO", "resource=/api/books/mine");
+        assertThat(lineas().get(1)).contains("outcome=ALLOWED", "status=200", "method=GET",
+                "user=" + compradorA.getId() + " role=COMPRADOR", "resource=/api/favorites");
     }
 
     @Test

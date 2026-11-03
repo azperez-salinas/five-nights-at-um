@@ -49,13 +49,13 @@ GRANT CONNECT ON DATABASE :"db_name" TO :"app_user";
 GRANT USAGE   ON SCHEMA public TO :"app_user";
 
 -- 4. Permisos por tabla, segun la matriz de arriba.
-GRANT SELECT, INSERT ON users, librarys, books, favorites TO :"app_user";
+GRANT SELECT, INSERT ON users, librarys, books, favorites, revoked_tokens TO :"app_user";
 
 GRANT UPDATE (password_hash, must_change_password, token_version) ON users    TO :"app_user";
 GRANT UPDATE (enabled)                                            ON librarys TO :"app_user";
 GRANT UPDATE (isbn, titulo, autor, portada_url, enabled)          ON books    TO :"app_user";
 
-GRANT DELETE ON favorites TO :"app_user";
+GRANT DELETE ON favorites, revoked_tokens TO :"app_user";
 
 -- Los ids son GENERATED ... AS IDENTITY: el INSERT alcanza, no hace falta
 -- ningun permiso sobre secuencias.

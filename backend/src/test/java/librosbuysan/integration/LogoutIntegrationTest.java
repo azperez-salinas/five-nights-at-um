@@ -103,8 +103,8 @@ class LogoutIntegrationTest extends IntegrationTestBase {
 
     @Test
     void logoutSinTokenEs401() throws Exception {
-        // Falla si la regla de logout queda DESPUES de permitAll("/api/auth/**"):
-        // el endpoint seria publico y el principal llegaria null al controller
+        // El logout debe exigir token: un permiso publico dejaria llegar
+        // un principal null al controller.
         mvc.perform(post(LOGOUT)).andExpect(status().isUnauthorized());
     }
 

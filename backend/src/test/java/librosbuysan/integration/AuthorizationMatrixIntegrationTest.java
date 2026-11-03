@@ -151,8 +151,7 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             // Autenticacion: publica por definicion (no se puede exigir token para obtener un token)
             new Caso("POST", "/api/auth/register", "/api/auth/register", "{}", OK, OK, OK, OK, OK),
             new Caso("POST", "/api/auth/login", "/api/auth/login", "{}", OK, OK, OK, OK, OK),
-            // R3: cerrar sesion exige estar autenticado (cualquier rol). Debe estar
-            // declarado ANTES de permitAll("/api/auth/**") en SecurityConfig.
+            // R3: cerrar sesion exige estar autenticado (cualquier rol).
             new Caso("POST", "/api/auth/logout", "/api/auth/logout", null, NO_AUTH, OK, OK, OK, OK),
 
             // R18/F18: las dos unicas acciones del admin, y exclusivas de el
@@ -166,6 +165,13 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
     // deny-by-default lo bloquea; si ademas agrega una regla permisiva, este
     // test falla y obliga a decidir el rol de forma explicita.
     static final List<Caso> RUTAS_SIN_REGLA = List.of(
+            // Las rutas nuevas de auth y otros verbos no heredan acceso publico.
+            new Caso("POST", "/api/auth/enable2fa", "/api/auth/enable2fa", "{}",
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/auth/login", "/api/auth/login", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("GET", "/api/auth/register", "/api/auth/register", null,
+                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             // Escritura sobre el catalogo general (solo GET es publico; PUT
             // y DELETE sobre /api/books/{id} ahora SI existen, ver R18 en
             // ENDPOINTS_DE_LA_APP, pero POST y PATCH siguen sin existir)

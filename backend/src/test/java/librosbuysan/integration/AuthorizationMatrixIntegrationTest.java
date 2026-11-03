@@ -71,7 +71,9 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
         /** Pasa la autorizacion (despues el controller puede dar 200, 201, 400, 404...). */
         PERMITIDO,
         NO_AUTENTICADO_401,
-        PROHIBIDO_403
+        PROHIBIDO_403,
+        /** R33: la ruta existe pero no con ese verbo -> 405 con cabecera Allow. */
+        METODO_NO_PERMITIDO_405
     }
 
     record Caso(String metodo, String patron, String ruta, String body,
@@ -97,6 +99,7 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
     private static final Resultado OK = Resultado.PERMITIDO;
     private static final Resultado NO_AUTH = Resultado.NO_AUTENTICADO_401;
     private static final Resultado PROHIBIDO = Resultado.PROHIBIDO_403;
+    private static final Resultado NO_PERMITIDO = Resultado.METODO_NO_PERMITIDO_405;
 
     // {id} / {bookId} se reemplazan en runtime por el id real de un libro de prueba.
     // Columnas: anonimo, comprador, dueno, dueno con contrasena temporal, admin.
@@ -169,15 +172,15 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             new Caso("POST", "/api/auth/enable2fa", "/api/auth/enable2fa", "{}",
                     NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("GET", "/api/auth/login", "/api/auth/login", null,
-                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+                    NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO),
             new Caso("GET", "/api/auth/register", "/api/auth/register", null,
-                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+                    NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO),
             // Escritura sobre el catalogo general (solo GET es publico; PUT
             // y DELETE sobre /api/books/{id} ahora SI existen, ver R18 en
             // ENDPOINTS_DE_LA_APP, pero POST y PATCH siguen sin existir)
-            new Caso("POST", "/api/books", "/api/books", "{}", NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+            new Caso("POST", "/api/books", "/api/books", "{}", NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO),
             new Caso("PATCH", "/api/books/{id}", "/api/books/{id}", "{}",
-                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+                    NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO),
             // RS30 (ex GAP-2): solo los GET publicos declarados uno por uno son
             // publicos. Un GET nuevo bajo /api/books no hereda el permitAll.
             new Caso("GET", "/api/books/{id}/reservas", "/api/books/{id}/reservas", null,
@@ -190,9 +193,9 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             new Caso("GET", "/api/users/{id}", "/api/users/1", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("GET", "/api/users", "/api/users", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("DELETE", "/api/users/me", "/api/users/me", null,
-                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+                    NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO),
             new Caso("POST", "/api/users/me", "/api/users/me", "{}",
-                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+                    NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO),
             // Funcionalidades que podrian crearse y nacen cerradas
             new Caso("GET", "/api/libraries", "/api/libraries", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("GET", "/actuator/health", "/actuator/health", null,
@@ -202,15 +205,15 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
             // editar ni borrar duenos, ni crear otros admins)
             new Caso("GET", "/api/admin", "/api/admin", null, NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("GET", "/api/admin/owners", "/api/admin/owners", null,
-                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+                    NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO),
             new Caso("PUT", "/api/admin/owners", "/api/admin/owners", "{}",
-                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
+                    NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO),
             new Caso("DELETE", "/api/admin/owners/{id}", "/api/admin/owners/1", null,
                     NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("POST", "/api/admin/admins", "/api/admin/admins", "{}",
                     NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO),
             new Caso("POST", "/api/admin/password", "/api/admin/password", "{}",
-                    NO_AUTH, PROHIBIDO, PROHIBIDO, PROHIBIDO, PROHIBIDO));
+                    NO_AUTH, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO, NO_PERMITIDO));
 
     static Stream<Arguments> todosLosCasos() {
         return Stream.concat(ENDPOINTS_DE_LA_APP.stream(), RUTAS_SIN_REGLA.stream())
@@ -245,6 +248,7 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
                     .isNotIn(401, 403);
             case NO_AUTENTICADO_401 -> assertThat(status).as(contexto + " (esperaba 401)").isEqualTo(401);
             case PROHIBIDO_403 -> assertThat(status).as(contexto + " (esperaba 403)").isEqualTo(403);
+            case METODO_NO_PERMITIDO_405 -> assertThat(status).as(contexto + " (esperaba 405)").isEqualTo(405);
         }
     }
 
@@ -407,5 +411,33 @@ class AuthorizationMatrixIntegrationTest extends IntegrationTestBase {
                         .header(AUTHORIZATION, bearer(compradorA)))
                 .andReturn().getResponse().getStatus();
         assertThat(status).isEqualTo(405);
+    }
+
+    static Stream<Arguments> verbosNoSoportadosSobreLibros() {
+        return Stream.of(
+                Arguments.of(HttpMethod.PUT, "comprador"),
+                Arguments.of(HttpMethod.DELETE, "comprador"),
+                Arguments.of(HttpMethod.POST, "comprador"),
+                Arguments.of(HttpMethod.PUT, "dueno"));
+    }
+
+    @ParameterizedTest(name = "{0} /api/books como {1} -> 405 + Allow")
+    @MethodSource("verbosNoSoportadosSobreLibros")
+    void verboNoSoportadoSobreLibrosRecibe405ConAllow(HttpMethod method, String rol) throws Exception {
+        // R33 (DS-69): /api/books solo admite GET; antes el denyAll respondia 403 sin Allow
+        User usuario = "dueno".equals(rol) ? duenoCentral : compradorA;
+        var response = mvc.perform(request(method, "/api/books")
+                        .header(AUTHORIZATION, bearer(usuario)))
+                .andReturn().getResponse();
+        assertThat(response.getStatus()).isEqualTo(405);
+        assertThat(response.getHeader("Allow")).isEqualTo("GET");
+    }
+
+    @Test
+    void verboNoSoportadoSobreLibrosSinTokenSigueRecibiendo401() throws Exception {
+        // El 405 solo se informa con sesion: un anonimo no aprende que metodos existen
+        int status = mvc.perform(request(HttpMethod.PUT, "/api/books"))
+                .andReturn().getResponse().getStatus();
+        assertThat(status).isEqualTo(401);
     }
 }

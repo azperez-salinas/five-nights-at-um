@@ -38,12 +38,10 @@
     font-size: 18px;
     letter-spacing: 2px;
     word-break: break-all;
+    /* One click selects the whole password to copy it by hand (no clipboard API, DS-87) */
+    user-select: all;
 }
 
-.temp-password-box .btn-toggle-pass {
-    position: static;
-    transform: none;
-}
 
 .temp-password-warning {
     color: var(--color-danger-text);

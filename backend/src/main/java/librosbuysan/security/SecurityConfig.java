@@ -75,6 +75,8 @@ public class SecurityConfig {
                         // RS5: el perfil propio es la unica funcionalidad
                         // compartida por ambos roles; se declara con los
                         // roles explicitos en lugar de "cualquier autenticado".
+                        .requestMatchers(HttpMethod.GET, "/api/users/prueba2").hasRole("INEXISTENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/users/prueba3").hasRole("COMPRADOR")
                         .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
                         .requestMatchers(HttpMethod.PUT, "/api/users/me").hasAnyRole("COMPRADOR", "DUENO")
                         // RS5/RS19/RS27: deny-by-default real. Cualquier ruta

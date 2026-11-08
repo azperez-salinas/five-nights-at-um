@@ -4,10 +4,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import librosbuysan.auth.AuthDtos.AuthResponse;
 import librosbuysan.auth.AuthDtos.LoginRequest;
 import librosbuysan.auth.AuthDtos.RegisterDuenoRequest;
@@ -40,6 +37,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return withNoStore(HttpStatus.OK, authService.login(request));
+    }
+
+    @GetMapping("/prueba")
+    public String prueba(){
+        return "Esto es una prueba";
     }
 
     // Las respuestas contienen el token: no deben quedar en caches

@@ -23,5 +23,10 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write("{\"message\":\"Acceso denegado\"}");
+        boolean pruebas = false;
+        if (pruebas) {
+            String letras ="abc";
+            int a = Integer.parseInt(letras);
+        }
     }
 }

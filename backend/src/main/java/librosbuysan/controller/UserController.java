@@ -36,6 +36,21 @@ public class UserController {
         return withNoStore(HttpStatus.OK, userService.updateProfile(principal.id(), request));
     }
 
+    @GetMapping("/prueba")
+    public String prueba(){
+        return "Esto es una prueba";
+    }
+
+    @GetMapping("/prueba2")
+    public String prueba2(){
+        return "Esto es una prueba2";
+    }
+
+    @GetMapping("/prueba3")
+    public String prueba3(){
+        return "Esto es una prueba3";
+    }
+
     private static ResponseEntity<ProfileResponse> withNoStore(HttpStatus status, ProfileResponse body) {
         return ResponseEntity.status(status)
                 .cacheControl(CacheControl.noStore())

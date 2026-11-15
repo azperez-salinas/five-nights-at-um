@@ -34,6 +34,7 @@ public class SecurityConfig {
     private final UserRepo userRepo;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
+    private final MethodNotAllowedAuthorizationManager methodNotAllowedAuthorizationManager;
     private final List<String> allowedOrigins;
 
     public SecurityConfig(JwtService jwtService,
@@ -41,12 +42,14 @@ public class SecurityConfig {
                           UserRepo userRepo,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
+                          MethodNotAllowedAuthorizationManager methodNotAllowedAuthorizationManager,
                           @Value("${cors.allowed-origins}") List<String> allowedOrigins) {
         this.jwtService = jwtService;
         this.revocationService = revocationService;
         this.userRepo = userRepo;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.methodNotAllowedAuthorizationManager = methodNotAllowedAuthorizationManager;
         this.allowedOrigins = allowedOrigins;
     }
 
@@ -73,15 +76,15 @@ public class SecurityConfig {
                         // tapa el codigo de error real (ej. un 405 real
                         // terminaba devolviendo 401 "No autenticado").
                         .requestMatchers("/error").permitAll()
-                        // R3: el logout exige sesion activa. Esta regla DEBE ir
-                        // antes de "/api/auth/**": Spring usa la primera que
-                        // coincide, y si quedara despues el logout seria publico
-                        // y el principal llegaria null al controller.
+                        // R3: el logout exige sesion activa.
                         // R18: el admin y el dueno con contrasena temporal
                         // tambien pueden cerrar sesion (revocar su token).
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout")
                                 .hasAnyRole(ROLE_COMPRADOR, ROLE_DUENO, "ADMIN", PWD_CHANGE)
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // Solo login y registro son publicos, por metodo y ruta
+                        // exactos. Toda nueva ruta de auth queda denegada hasta
+                        // que se declare explicitamente su politica de acceso.
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         // R18/F18: las dos unicas acciones del panel de admin.
                         // Se declaran por metodo y ruta exactos: cualquier
                         // otra cosa bajo /api/admin cae en el denyAll de abajo,
@@ -148,7 +151,11 @@ public class SecurityConfig {
                         // aunque el usuario este autenticado: un endpoint
                         // nuevo queda inaccesible hasta que se le asigne un
                         // rol aca. Sin token responde 401; con token, 403.
-                        .anyRequest().denyAll())
+                        // R33: si la ruta existe pero no con ese verbo, con
+                        // token responde 405 + Allow (ver
+                        // MethodNotAllowedAuthorizationManager); sigue
+                        // denegando siempre.
+                        .anyRequest().access(methodNotAllowedAuthorizationManager))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocationService, userRepo), UsernamePasswordAuthenticationFilter.class)
                 // RS11: justo despues del JWT, cuando el principal ya esta
                 // resuelto, para que la identidad quede en el MDC de los logs

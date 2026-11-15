@@ -3,6 +3,7 @@ import BookCover from './BookCover';
 import Nav from './Nav';
 import { useLanguage } from './language';
 import './Favorites.css';
+import { pathId } from './pathId';
 
 export default function Favorites({ session, onLogout, onNavigate }) {
     const { t } = useLanguage();
@@ -47,7 +48,7 @@ export default function Favorites({ session, onLogout, onNavigate }) {
 
         if (isFav) {
             try {
-                const res = await fetch(`http://localhost:8080/api/favorites/${book.id}`, {
+                const res = await fetch(`http://localhost:8080/api/favorites/${pathId(book.id)}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -64,7 +65,7 @@ export default function Favorites({ session, onLogout, onNavigate }) {
             }
         } else {
             try {
-                const res = await fetch(`http://localhost:8080/api/favorites/${book.id}`, {
+                const res = await fetch(`http://localhost:8080/api/favorites/${pathId(book.id)}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`

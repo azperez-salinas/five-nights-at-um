@@ -4,6 +4,7 @@ import CatalogFilters from './CatalogFilters';
 import Nav from './Nav';
 import { useLanguage } from './language';
 import './Catalog.css';
+import { pathId } from './pathId';
 
 const FAVORITES_URL = 'http://localhost:8080/api/favorites';
 
@@ -80,7 +81,7 @@ export default function Catalog({ page, session, filters, onFiltersChange, onLog
         setFavError('');
         setPendingId(book.id);
         try {
-            const response = await fetch(`${FAVORITES_URL}/${book.id}`, {
+            const response = await fetch(`${FAVORITES_URL}/${pathId(book.id)}`, {
                 method: isFav ? 'DELETE' : 'POST',
                 headers: { Authorization: `Bearer ${token}` },
             });

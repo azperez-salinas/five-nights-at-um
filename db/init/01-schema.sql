@@ -50,5 +50,10 @@ CREATE TABLE IF NOT EXISTS favorites (
     CONSTRAINT uk_favorites_user_book UNIQUE (user_id, book_id)
 );
 
+CREATE TABLE IF NOT EXISTS revoked_tokens (
+    token_id   VARCHAR(64)                  PRIMARY KEY,
+    expires_at TIMESTAMP(6) WITH TIME ZONE  NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_books_library   ON books (library_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_book  ON favorites (book_id);

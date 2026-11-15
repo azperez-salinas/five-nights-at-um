@@ -43,7 +43,9 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal AuthenticatedUser principal) {
         authService.logout(principal);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent()
+                .header("Clear-Site-Data", "\"cache\",\"cookies\",\"storage\"")
+                .build();
     }
 
     // Las respuestas contienen el token: no deben quedar en caches

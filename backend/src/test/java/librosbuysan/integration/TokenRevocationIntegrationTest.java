@@ -1,5 +1,6 @@
 package librosbuysan.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -7,8 +8,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import librosbuysan.auth.repository.RevokedTokenRepo;
+import librosbuysan.auth.service.TokenRevocationService;
 import librosbuysan.support.IntegrationTestBase;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -36,6 +40,9 @@ class TokenRevocationIntegrationTest extends IntegrationTestBase {
     private static final String OWNERS = "/api/admin/owners";
     private static final String NUEVA_PASSWORD = "NuevaClave456!";
 
+    @Autowired
+    private RevokedTokenRepo revokedTokenRepo;
+
     // ---------- 1. logout ----------
 
     @Test
@@ -48,6 +55,22 @@ class TokenRevocationIntegrationTest extends IntegrationTestBase {
         mvc.perform(get(PERFIL).header(AUTHORIZATION, viejo)).andExpect(status().isUnauthorized());
         String nuevo = "Bearer " + login("comprador_a", PASSWORD);
         mvc.perform(get(PERFIL).header(AUTHORIZATION, nuevo)).andExpect(status().isOk());
+    }
+
+    @Test
+    void elTokenCerradoSigueRevocadoEnBaseDeDatosDespuesDeReiniciarElServicio() throws Exception {
+        // DS-74 (R28): al reiniciar el backend (nueva instancia sin estado en RAM),
+        // el token cerrado con logout debe seguir revocado gracias a la persistencia en BD
+        String rawToken = login("comprador_a", PASSWORD);
+        String bearerToken = "Bearer " + rawToken;
+        String jti = jwtService.parseAndValidate(rawToken).getId();
+
+        mvc.perform(get(PERFIL).header(AUTHORIZATION, bearerToken)).andExpect(status().isOk());
+        mvc.perform(post(LOGOUT).header(AUTHORIZATION, bearerToken)).andExpect(status().isNoContent());
+        mvc.perform(get(PERFIL).header(AUTHORIZATION, bearerToken)).andExpect(status().isUnauthorized());
+
+        TokenRevocationService servicioTrasReinicio = new TokenRevocationService(revokedTokenRepo);
+        assertThat(servicioTrasReinicio.isRevoked(jti)).isTrue();
     }
 
     // ---------- 2. cuenta deshabilitada ----------

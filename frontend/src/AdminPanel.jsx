@@ -30,7 +30,6 @@ function CreateOwnerCard({ token, onUnauthorized }) {
     const [errorMsg, setErrorMsg] = useState('');
     // The temporary password lives only in this state: it is shown once and dropped on "Listo"
     const [created, setCreated] = useState(null);
-    const [copied, setCopied] = useState(false);
 
     const updateField = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
@@ -67,7 +66,6 @@ function CreateOwnerCard({ token, onUnauthorized }) {
             if (response.status === 201) {
                 const data = await response.json();
                 setCreated(data);
-                setCopied(false);
                 setForm(EMPTY_OWNER);
             } else if (response.status === 401) {
                 onUnauthorized();
@@ -82,15 +80,6 @@ function CreateOwnerCard({ token, onUnauthorized }) {
             setErrorMsg(t('admin_err_network'));
         } finally {
             setSaving(false);
-        }
-    };
-
-    const copyPassword = async () => {
-        try {
-            await navigator.clipboard.writeText(created.passwordTemporal);
-            setCopied(true);
-        } catch {
-            setCopied(false);
         }
     };
 
@@ -119,9 +108,6 @@ function CreateOwnerCard({ token, onUnauthorized }) {
                     <p className="temp-password-label">{t('admin_temp_pass_label')}</p>
                     <div className="temp-password-box">
                         <code>{created.passwordTemporal}</code>
-                        <button type="button" className="btn-toggle-pass" onClick={copyPassword}>
-                            {copied ? t('admin_copied') : t('admin_copy')}
-                        </button>
                     </div>
                     <p className="temp-password-warning">
                         {t('admin_temp_pass_warning')}
